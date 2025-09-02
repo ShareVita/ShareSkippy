@@ -15,5 +15,8 @@ export async function GET(req) {
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(requestUrl.origin + config.auth.callbackUrl);
+  // Use the config domain to ensure consistent redirects
+  const origin = `https://${config.domainName}`;
+  
+  return NextResponse.redirect(origin + config.auth.callbackUrl);
 }
