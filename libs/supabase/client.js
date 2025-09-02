@@ -1,5 +1,8 @@
-import { createHybridBrowserClient } from "./hybrid";
+import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
-  return createHybridBrowserClient();
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
 }
