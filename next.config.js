@@ -6,7 +6,6 @@ const nextConfig = {
   },
   // Performance optimizations
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['@supabase/supabase-js', 'react-hot-toast'],
   },
   // Reduce bundle size

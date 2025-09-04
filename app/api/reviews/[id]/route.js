@@ -1,6 +1,8 @@
 import { createClient } from '@/libs/supabase/server';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/reviews/[id] - Get a specific review
 export async function GET(request, { params }) {
   try {

@@ -41,9 +41,15 @@ export default function UserReviews({ userId, showAll = false }) {
 
       if (response.ok) {
         setStats(data);
+      } else {
+        console.error('Error fetching review stats:', data.error);
+        // Set default stats if API fails
+        setStats({ averageRating: 0, reviewCount: 0, ratingDistribution: {} });
       }
     } catch (error) {
       console.error('Error fetching review stats:', error);
+      // Set default stats if API fails
+      setStats({ averageRating: 0, reviewCount: 0, ratingDistribution: {} });
     }
   };
 
@@ -98,7 +104,7 @@ export default function UserReviews({ userId, showAll = false }) {
     );
   }
 
-  if (stats.reviewCount === 0) {
+  if (reviews.length === 0 && stats.reviewCount === 0) {
     return (
       <div className="text-gray-500 text-sm">
         No reviews yet

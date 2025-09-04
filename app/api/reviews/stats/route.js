@@ -18,15 +18,34 @@ export async function GET(request) {
     const userId = searchParams.get('userId') || user.id;
 
     // Get average rating and review count using database functions
-    const { data: avgRating, error: avgError } = await supabase
-      .rpc('get_user_average_rating', { user_id: userId });
+    let avgRating = 0;
+    let reviewCount = 0;
+    
+    try {
+      const { data: avgRatingData, error: avgError } = await supabase
+        .rpc('get_user_average_rating', { user_id: userId });
+      
+      if (!avgError) {
+        avgRating = avgRatingData || 0;
+      } else {
+        console.warn('get_user_average_rating function failed:', avgError.message);
+      }
+    } catch (error) {
+      console.warn('get_user_average_rating function not available:', error.message);
+    }
 
-    if (avgError) throw avgError;
-
-    const { data: reviewCount, error: countError } = await supabase
-      .rpc('get_user_review_count', { user_id: userId });
-
-    if (countError) throw countError;
+    try {
+      const { data: reviewCountData, error: countError } = await supabase
+        .rpc('get_user_review_count', { user_id: userId });
+      
+      if (!countError) {
+        reviewCount = reviewCountData || 0;
+      } else {
+        console.warn('get_user_review_count function failed:', countError.message);
+      }
+    } catch (error) {
+      console.warn('get_user_review_count function not available:', error.message);
+    }
 
     // Get rating distribution
     const { data: ratingDistribution, error: distError } = await supabase
@@ -43,8 +62,8 @@ export async function GET(request) {
     });
 
     return NextResponse.json({
-      averageRating: avgRating || 0,
-      reviewCount: reviewCount || 0,
+      averageRating: avgRating,
+      reviewCount: reviewCount,
       ratingDistribution: distribution
     });
   } catch (error) {
