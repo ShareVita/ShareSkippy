@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/libs/supabase/hooks';
+import ReviewModal from '@/components/ReviewModal';
 
 export default function MeetingsPage() {
   const { user, loading: authLoading } = useSupabaseAuth();
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState(null);
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -108,8 +111,6 @@ export default function MeetingsPage() {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'accepted': return 'bg-blue-100 text-blue-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
       case 'scheduled': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-gray-100 text-gray-800';
       case 'completed': return 'bg-purple-100 text-purple-800';
@@ -138,8 +139,36 @@ export default function MeetingsPage() {
     return meeting.status === 'scheduled' && new Date(meeting.start_datetime) > new Date();
   };
 
-  const canAcceptReject = (meeting) => {
+  const canSchedule = (meeting) => {
     return meeting.status === 'pending' && meeting.recipient_id === user?.id;
+  };
+
+  const canReview = (meeting) => {
+    return meeting.status === 'completed' && 
+           new Date(meeting.end_datetime) < new Date() &&
+           !meeting.has_reviewed; // We'll need to check this in the API
+  };
+
+  const handleReviewClick = (meeting) => {
+    const otherPerson = meeting.requester_id === user.id ? meeting.recipient : meeting.requester;
+    setSelectedReview({
+      meeting_id: meeting.id,
+      meeting_title: meeting.title,
+      other_participant_name: `${otherPerson.first_name} ${otherPerson.last_name}`
+    });
+    setIsReviewModalOpen(true);
+  };
+
+  const handleReviewSubmitted = (review) => {
+    // Refresh meetings to update the review status
+    fetchMeetings();
+    setIsReviewModalOpen(false);
+    setSelectedReview(null);
+  };
+
+  const handleCloseReviewModal = () => {
+    setIsReviewModalOpen(false);
+    setSelectedReview(null);
   };
 
   if (authLoading) {
@@ -258,32 +287,13 @@ export default function MeetingsPage() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col space-y-2 ml-4">
-                      {canAcceptReject(meeting) && (
-                        <>
-                          <button
-                            onClick={() => updateMeetingStatus(meeting.id, 'accepted', 'I have accepted your meeting request!')}
-                            disabled={actionLoading === meeting.id}
-                            className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
-                          >
-                            {actionLoading === meeting.id ? 'Processing...' : 'Accept'}
-                          </button>
-                          <button
-                            onClick={() => updateMeetingStatus(meeting.id, 'rejected', 'I have declined your meeting request.')}
-                            disabled={actionLoading === meeting.id}
-                            className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-                          >
-                            {actionLoading === meeting.id ? 'Processing...' : 'Reject'}
-                          </button>
-                        </>
-                      )}
-                      
-                      {meeting.status === 'accepted' && isRequester && (
+                      {canSchedule(meeting) && (
                         <button
-                          onClick={() => updateMeetingStatus(meeting.id, 'scheduled', 'Meeting confirmed! Looking forward to seeing you.')}
+                          onClick={() => updateMeetingStatus(meeting.id, 'scheduled', 'I have accepted your meeting request! Looking forward to seeing you.')}
                           disabled={actionLoading === meeting.id}
-                          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
                         >
-                          {actionLoading === meeting.id ? 'Processing...' : 'Confirm Meeting'}
+                          {actionLoading === meeting.id ? 'Processing...' : 'Accept Meeting'}
                         </button>
                       )}
 
@@ -296,6 +306,15 @@ export default function MeetingsPage() {
                           {actionLoading === meeting.id ? 'Processing...' : 'Cancel'}
                         </button>
                       )}
+
+                      {canReview(meeting) && (
+                        <button
+                          onClick={() => handleReviewClick(meeting)}
+                          className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
+                        >
+                          Leave Review
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -304,6 +323,14 @@ export default function MeetingsPage() {
           </div>
         )}
       </div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={handleCloseReviewModal}
+        pendingReview={selectedReview}
+        onReviewSubmitted={handleReviewSubmitted}
+      />
     </div>
   );
 }

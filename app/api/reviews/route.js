@@ -68,7 +68,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Rating must be between 1 and 5' }, { status: 400 });
     }
 
-    if (comment.trim().length < 5) {
+    const wordCount = comment.trim().split(/\s+/).filter(word => word.length > 0).length;
+    if (wordCount < 5) {
       return NextResponse.json({ error: 'Comment must be at least 5 words' }, { status: 400 });
     }
 
@@ -103,14 +104,15 @@ export async function POST(request) {
     const revieweeId = meeting.requester_id === user.id ? meeting.recipient_id : meeting.requester_id;
 
     // Check if user has already reviewed this meeting
-    const { data: existingReview, error: existingError } = await supabase
+    const { data: existingReviews, error: existingError } = await supabase
       .from('reviews')
       .select('id')
       .eq('meeting_id', meetingId)
-      .eq('reviewer_id', user.id)
-      .single();
+      .eq('reviewer_id', user.id);
 
-    if (existingReview) {
+    if (existingError) throw existingError;
+
+    if (existingReviews && existingReviews.length > 0) {
       return NextResponse.json({ error: 'You have already reviewed this meeting' }, { status: 400 });
     }
 
@@ -137,6 +139,16 @@ export async function POST(request) {
     return NextResponse.json({ review });
   } catch (error) {
     console.error('Error creating review:', error);
-    return NextResponse.json({ error: 'Failed to create review' }, { status: 500 });
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint
+    });
+    return NextResponse.json({ 
+      error: 'Failed to create review', 
+      details: error.message,
+      code: error.code 
+    }, { status: 500 });
   }
 }

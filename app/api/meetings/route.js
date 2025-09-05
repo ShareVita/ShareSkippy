@@ -39,7 +39,25 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ meetings });
+    // Check which meetings the user has already reviewed
+    const meetingIds = meetings.map(m => m.id);
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('reviews')
+      .select('meeting_id')
+      .eq('reviewer_id', user.id)
+      .in('meeting_id', meetingIds);
+
+    if (reviewsError) throw reviewsError;
+
+    const reviewedMeetingIds = new Set(reviews.map(r => r.meeting_id));
+
+    // Add review status to each meeting
+    const meetingsWithReviewStatus = meetings.map(meeting => ({
+      ...meeting,
+      has_reviewed: reviewedMeetingIds.has(meeting.id)
+    }));
+
+    return NextResponse.json({ meetings: meetingsWithReviewStatus });
 
   } catch (error) {
     console.error('Error fetching meetings:', error);

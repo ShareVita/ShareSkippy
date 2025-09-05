@@ -68,7 +68,7 @@ export async function PATCH(request, { params }) {
     const { status, message } = await request.json();
 
     // Validate status
-    const validStatuses = ['accepted', 'rejected', 'scheduled', 'cancelled'];
+    const validStatuses = ['scheduled', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
@@ -88,16 +88,11 @@ export async function PATCH(request, { params }) {
     }
 
     // Validate status transitions
-    if (status === 'accepted' && currentMeeting.status !== 'pending') {
-      return NextResponse.json({ error: 'Can only accept pending meetings' }, { status: 400 });
-    }
-    
-    if (status === 'rejected' && currentMeeting.status !== 'pending') {
-      return NextResponse.json({ error: 'Can only reject pending meetings' }, { status: 400 });
-    }
-    
-    if (status === 'scheduled' && currentMeeting.status !== 'accepted') {
-      return NextResponse.json({ error: 'Can only schedule accepted meetings' }, { status: 400 });
+    console.log('Current meeting status:', currentMeeting.status, 'Trying to set to:', status);
+    if (status === 'scheduled' && currentMeeting.status !== 'pending') {
+      return NextResponse.json({ 
+        error: `Can only schedule pending meetings. Current status: ${currentMeeting.status}` 
+      }, { status: 400 });
     }
     
     if (status === 'cancelled' && ['completed'].includes(currentMeeting.status)) {
@@ -129,7 +124,10 @@ export async function PATCH(request, { params }) {
       `)
       .single();
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      console.error('Database update error:', updateError);
+      throw updateError;
+    }
 
     // Send a message in the chat about the status change
     if (message) {

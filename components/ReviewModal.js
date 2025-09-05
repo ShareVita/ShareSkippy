@@ -43,7 +43,8 @@ export default function ReviewModal({ isOpen, onClose, pendingReview, onReviewSu
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit review');
+        const errorMessage = data.details || data.error || 'Failed to submit review';
+        throw new Error(errorMessage);
       }
 
       // Reset form

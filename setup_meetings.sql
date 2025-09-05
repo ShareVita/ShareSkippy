@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS meetings (
   end_datetime TIMESTAMP WITH TIME ZONE NOT NULL,
   
   -- Status tracking
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected', 'scheduled', 'cancelled', 'completed')),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'scheduled', 'cancelled', 'completed')),
   
   -- Timestamps
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -61,12 +61,17 @@ RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
   
-  IF NEW.status = 'scheduled' AND OLD.status != 'accepted' THEN
-    RAISE EXCEPTION 'Meeting can only be scheduled if it was previously accepted';
+  IF NEW.status = 'scheduled' AND OLD.status != 'pending' THEN
+    RAISE EXCEPTION 'Meeting can only be scheduled if it was previously pending';
   END IF;
   
   IF NEW.status = 'completed' AND OLD.status != 'scheduled' THEN
     RAISE EXCEPTION 'Meeting can only be completed if it was previously scheduled';
+  END IF;
+  
+  -- Allow cancellation from any status except completed
+  IF NEW.status = 'cancelled' AND OLD.status = 'completed' THEN
+    RAISE EXCEPTION 'Cannot cancel completed meetings';
   END IF;
   
   RETURN NEW;
