@@ -95,3 +95,4 @@ SELECT id, true, false
 FROM profiles
 WHERE id NOT IN (SELECT user_id FROM user_settings)
 ON CONFLICT (user_id) DO NOTHING;
+

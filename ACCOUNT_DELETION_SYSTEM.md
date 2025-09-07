@@ -19,12 +19,14 @@ The system replaces immediate account deletion with a request-based approach:
 - **Cancel Anytime**: Users can cancel deletion requests before the 30-day period
 - **Status Display**: Clear indication of deletion status on profile page
 - **Urgency Warnings**: Visual warnings as deletion date approaches
+- **Account Recreation Prevention**: Users cannot recreate accounts with the same email after deletion
 
 ### Admin Features
 - **Manual Processing**: Admin endpoint to process deletion requests
 - **Automated Processing**: Cron job for automatic processing after 30 days
 - **Monitoring**: Status endpoint to check pending deletions
 - **Audit Trail**: Complete history of deletion requests and processing
+- **Email Tracking**: Deleted email addresses are tracked to prevent recreation
 
 ## Database Schema
 
@@ -41,6 +43,18 @@ CREATE TABLE account_deletion_requests (
   processed_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+### `deleted_emails` Table
+```sql
+CREATE TABLE deleted_emails (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+  original_user_id UUID,
+  deletion_reason TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
@@ -164,10 +178,27 @@ Ensure admin users have `role: 'admin'` in their profile:
 UPDATE profiles SET role = 'admin' WHERE email = 'admin@yourdomain.com';
 ```
 
+## Account Recreation Prevention
+
+### How It Works
+When a user's account is deleted, their email address is permanently recorded in the `deleted_emails` table. The system prevents anyone from creating a new account with that same email address, even after the original account is completely removed from Supabase Auth.
+
+### Technical Implementation
+1. **Email Recording**: Before account deletion, the user's email is stored in `deleted_emails` table
+2. **Database Trigger**: The `handle_new_user()` function checks if an email was previously deleted
+3. **Blocking**: If a deleted email is detected, account creation is blocked with an error message
+4. **Case Insensitive**: Email matching is case-insensitive and trims whitespace
+
+### User Experience
+- **Clear Warnings**: Users see prominent warnings about not being able to recreate accounts
+- **Multiple Reminders**: Warnings appear in deletion modal, status display, and success message
+- **Error Messages**: Clear error messages if someone tries to recreate with a deleted email
+
 ## Security Considerations
 
 ### Fraud Prevention
 - **30-day waiting period** prevents immediate account deletion
+- **Account recreation prevention** stops users from avoiding bad reviews by creating new accounts
 - **Audit trail** tracks all deletion requests and processing
 - **Admin oversight** allows manual review of suspicious requests
 

@@ -50,6 +50,9 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
             <p className="text-sm mt-2">
               Your account will be permanently deleted in 30 days. You can cancel this request at any time before the deletion date.
             </p>
+            <p className="text-sm mt-2 font-semibold">
+              Remember: You will not be able to recreate an account with the same email address after deletion.
+            </p>
           </div>
 
           <button
@@ -73,6 +76,14 @@ export default function DeleteAccountModal({ isOpen, onClose }) {
           <p className="text-sm mt-1">
             To prevent fraud and protect our community, account deletions require a 30-day waiting period. 
             You can cancel this request at any time before the deletion date.
+          </p>
+        </div>
+
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
+          <p className="font-semibold">⚠️ Account Recreation Prevention</p>
+          <p className="text-sm mt-1">
+            <strong>Deleting your account will prevent you from recreating an account with the same email address.</strong> 
+            This policy helps maintain community trust and prevents users from avoiding negative reviews by creating new accounts.
           </p>
         </div>
 

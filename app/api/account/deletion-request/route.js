@@ -148,12 +148,16 @@ export async function DELETE() {
 
     console.log(`User authenticated: ${user.id}`);
 
-    // Use a more efficient approach - direct update with error handling
+    // When cancelling, we need to start a new 30-day countdown
+    // So we update the scheduled_deletion_date to 30 days from now
+    const newScheduledDate = new Date();
+    newScheduledDate.setDate(newScheduledDate.getDate() + 30);
+    
     const { data: updatedRequest, error: updateError } = await supabase
       .from('account_deletion_requests')
       .update({ 
-        status: 'cancelled',
-        processed_at: new Date().toISOString()
+        scheduled_deletion_date: newScheduledDate.toISOString(),
+        processed_at: null // Reset processed_at since we're starting fresh
       })
       .eq('user_id', user.id)
       .eq('status', 'pending')
@@ -195,8 +199,9 @@ export async function DELETE() {
 
     return NextResponse.json({ 
       success: true,
-      message: 'Account deletion request cancelled successfully',
-      duration: duration
+      message: 'Account deletion request cancelled successfully. A new 30-day countdown has started.',
+      duration: duration,
+      newScheduledDate: newScheduledDate.toISOString()
     });
 
   } catch (error) {

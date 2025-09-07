@@ -136,6 +136,24 @@ export default function DeletionRequestStatus({ userId }) {
                 <strong>Reason:</strong> {reason}
               </p>
             )}
+            
+            <div className={`mt-3 p-2 rounded border ${
+              isVeryUrgent 
+                ? 'bg-red-100 border-red-300' 
+                : isUrgent 
+                ? 'bg-orange-100 border-orange-300' 
+                : 'bg-yellow-100 border-yellow-300'
+            }`}>
+              <p className={`text-xs font-medium ${
+                isVeryUrgent 
+                  ? 'text-red-800' 
+                  : isUrgent 
+                  ? 'text-orange-800' 
+                  : 'text-yellow-800'
+              }`}>
+                ⚠️ <strong>Important:</strong> After deletion, you will not be able to recreate an account with the same email address.
+              </p>
+            </div>
           </div>
         </div>
       </div>

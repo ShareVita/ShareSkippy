@@ -5,16 +5,16 @@ import { useState, useEffect } from 'react';
 
 // Carousel messages for the hero section
 const carouselMessages = [
-  "Going on a date? Grab a pup first — it's the perfect wingman. If it flops, at least someone&apos;s happy to see you. 🐾",
+  "Going on a date? Grab a pup first — it's the perfect wingman. If it flops, at least someone's happy to see you. 🐾",
   "Need an instant mood booster? A wagging tail beats meditation apps, trust us. 🐶",
   "Owners get reliable walkers. Dog-lovers get their canine fix. Everyone swipes right on more belly rubs.",
   "Love dogs but don't love vet bills, pet insurance, and 5AM potty breaks? Borrow one instead. 100% joy, 0% pee stains.",
   "Think of us as Tinder for dogs… but without the awkward small talk.",
   "Have a dog desperate for a friend? Set up a puppy playdate. Warning: your dog might end up with a better social life than you.",
-  "Some owners can't give their dogs enough walks — maybe they&apos;re elderly, disabled, or working 80-hour tech weeks. Meanwhile, plenty of dog lovers are dying to hike, run, or cuddle. We make the match.",
+  "Some owners can't give their dogs enough walks — maybe they're elderly, disabled, or working 80-hour tech weeks. Meanwhile, plenty of dog lovers are dying to hike, run, or cuddle. We make the match.",
   "Some pups need more play, some humans need more pup. Put them together and boom — happy dogs, happy people, fewer chewed remotes.",
   "Your dog wants a marathon. You want a burrito. No shame — this is where ShareSkippy saves the day.",
-  "When dogs get more love, humans get more joy. It&apos;s science. (Okay, maybe not peer-reviewed, but just look at their faces.)"
+  "When dogs get more love, humans get more joy. It's science. (Okay, maybe not peer-reviewed, but just look at their faces.)"
 ];
 
 // Community stories

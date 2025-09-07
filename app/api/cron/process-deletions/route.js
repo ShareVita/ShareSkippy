@@ -55,6 +55,26 @@ export async function POST(request) {
           })
           .eq('id', deletionRequest.id);
 
+        // Get user's email before deletion for tracking
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', deletionRequest.user_id)
+          .single();
+
+        // Record the email as deleted to prevent recreation
+        if (userProfile?.email) {
+          await supabase
+            .from('deleted_emails')
+            .insert({
+              email: userProfile.email.toLowerCase().trim(),
+              original_user_id: deletionRequest.user_id,
+              deletion_reason: deletionRequest.reason
+            })
+            .onConflict('email')
+            .ignoreDuplicates(); // Don't error if email already exists
+        }
+
         // Delete user profile and related data
         // Note: This will cascade delete due to ON DELETE CASCADE constraints
         const { error: profileError } = await supabase

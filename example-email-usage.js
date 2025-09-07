@@ -336,3 +336,4 @@ async function getUserFirstDog(userId) {
   // Your dog retrieval logic
   return { name: 'Buddy' };
 }
+

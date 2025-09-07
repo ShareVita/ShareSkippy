@@ -71,3 +71,4 @@ async function testAllAPIEndpoints() {
 
 // Run the tests
 testAPIEndpoints();
+
