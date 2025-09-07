@@ -43,17 +43,11 @@ export async function GET(req) {
   }
 
   // URL to redirect to after sign in process completes
-  // Automatically detect environment and use appropriate domain
-  const host = requestUrl.host;
-  let origin;
+  // Always use the production domain for consistency
+  const origin = `https://${config.domainName}`;
+  const redirectUrl = origin + config.auth.callbackUrl;
   
-  if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('192.168.')) {
-    // Development environment - use current origin (including network IP)
-    origin = requestUrl.origin;
-  } else {
-    // Production environment - use config domain
-    origin = `https://${config.domainName}`;
-  }
+  console.log("Redirecting to:", redirectUrl);
   
-  return NextResponse.redirect(origin + config.auth.callbackUrl);
+  return NextResponse.redirect(redirectUrl);
 }

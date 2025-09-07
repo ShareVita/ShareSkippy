@@ -12,5 +12,15 @@
     "app/api/cron/process-deletions/route.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/auth/callback",
+      "destination": "/api/auth/callback"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/"
+    }
+  ]
 }
