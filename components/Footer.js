@@ -3,7 +3,7 @@ import Image from "next/image";
 import config from "@/config";
 import logo from "@/app/icon.png";
 
-// Footer component matching the ShareSkippy design
+// Footer component matching the ShareSkippy design - updated
 const Footer = () => {
   return (
     <footer className="bg-indigo-600 text-white">
