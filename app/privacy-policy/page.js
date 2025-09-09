@@ -57,7 +57,7 @@ const PrivacyPolicy = () => {
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: December 19, 2024
+          {`Last Updated: September 8, 2025
 
 Thank you for visiting ShareSkippy ("we," "us," or "our"). This Privacy Policy outlines how we collect, use, and protect your personal and non-personal information when you use our website located at https://shareskippy.com (the "Website").
 
