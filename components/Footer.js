@@ -37,6 +37,9 @@ const Footer = () => {
               <Link href="/messages" className="text-white hover:text-gray-300 transition-colors">
                 Messages
               </Link>
+              <Link href="/how-to-use" className="text-white hover:text-gray-300 transition-colors">
+                How to Use
+              </Link>
             </div>
           </div>
 
