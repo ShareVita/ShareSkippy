@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ShareSkippy Email Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #2563eb;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+        }
+        .email-info {
+            background: #e0f2fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #0ea5e9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐕 ShareSkippy Email Test</h1>
+        
+        <div class="email-info">
+            <strong>📧 Target Email:</strong> kcolban@gmail.com<br>
+            <strong>📋 Email Types:</strong> Welcome, New Message, Meeting Confirmation, Meeting Reminder, Follow-up
+        </div>
+        
+        <button onclick="sendEmails()" id="sendButton">Send All Email Types</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function sendEmails() {
+            const resultDiv = document.getElementById('result');
+            const sendButton = document.getElementById('sendButton');
+            
+            // Disable button and show loading
+            sendButton.disabled = true;
+            sendButton.textContent = 'Sending emails...';
+            resultDiv.innerHTML = '🔄 Sending all email types to kcolban@gmail.com...';
+            resultDiv.className = '';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/send-review-emails', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'success';
+                    resultDiv.innerHTML = `✅ SUCCESS!\n\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = `❌ ERROR!\n\n${JSON.stringify(result, null, 2)}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.innerHTML = `❌ NETWORK ERROR!\n\n${error.message}\n\nMake sure your development server is running:\nnpm run dev`;
+            } finally {
+                // Re-enable button
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send All Email Types';
+            }
+        }
+    </script>
+</body>
+</html>

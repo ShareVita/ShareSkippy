@@ -8,37 +8,49 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
+            color: #374151;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
         }
         .container {
-            background-color: white;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
             border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .header {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        .logo {
+        .header h1 {
+            margin: 0;
             font-size: 28px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
         }
         .content {
-            margin-bottom: 30px;
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1f2937;
         }
         .message-preview {
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 20px;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         .sender-info {
             display: flex;
@@ -48,120 +60,136 @@
         .sender-avatar {
             width: 40px;
             height: 40px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
             border-radius: 50%;
-            background-color: #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
             margin-right: 12px;
-            font-size: 18px;
         }
-        .sender-details h4 {
+        .sender-details h3 {
             margin: 0;
             color: #1f2937;
             font-size: 16px;
         }
         .sender-details p {
-            margin: 0;
+            margin: 4px 0 0 0;
             color: #6b7280;
             font-size: 14px;
         }
-        .message-text {
-            background-color: white;
+        .message-content {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
             padding: 16px;
-            border-radius: 6px;
-            border-left: 3px solid #2563eb;
+            margin: 12px 0;
             font-style: italic;
             color: #374151;
         }
         .cta-button {
             display: inline-block;
-            background-color: #2563eb;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
             color: white;
-            padding: 16px 32px;
             text-decoration: none;
+            padding: 14px 28px;
             border-radius: 8px;
             font-weight: 600;
             font-size: 16px;
-            text-align: center;
             margin: 20px 0;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
         }
         .cta-button:hover {
-            background-color: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .secondary-button {
+            background: #f8fafc;
+            color: #374151;
+            border: 1px solid #e2e8f0;
+        }
+        .secondary-button:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
         }
         .footer {
+            background-color: #f8fafc;
+            padding: 30px;
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
             border-top: 1px solid #e5e7eb;
+        }
+        .footer p {
+            margin: 0;
             color: #6b7280;
             font-size: 14px;
         }
-        .notification-badge {
-            background-color: #ef4444;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 8px;
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .header, .content, .footer {
+                padding: 20px;
+            }
+            .cta-button {
+                display: block;
+                text-align: center;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🐕 ShareSkippy</div>
-            <div style="color: #6b7280; font-size: 16px;">
-                You have a new message! <span class="notification-badge">1</span>
-            </div>
+            <h1>💬 New Message</h1>
+            <p>You have a new message on ShareSkippy!</p>
         </div>
         
         <div class="content">
-            <h2>New message from {{senderName}}! 💬</h2>
-            
-            <p>Hi {{recipientName}},</p>
-            
-            <p>You've received a new message on ShareSkippy. Here's a preview:</p>
+            <div class="greeting">
+                <p>Hi {{recipientName}}!</p>
+                <p>You've received a new message on ShareSkippy from {{senderName}}.</p>
+            </div>
             
             <div class="message-preview">
                 <div class="sender-info">
-                    <div class="sender-avatar">
-                        {{senderInitial}}
-                    </div>
+                    <div class="sender-avatar">{{senderInitial}}</div>
                     <div class="sender-details">
-                        <h4>{{senderName}}</h4>
+                        <h3>{{senderName}}</h3>
                         <p>{{messageTime}}</p>
                     </div>
                 </div>
                 
-                <div class="message-text">
+                <div class="message-content">
                     "{{messagePreview}}"
                 </div>
             </div>
             
             <div style="text-align: center;">
-                <a href="{{messageUrl}}" class="cta-button">View & Reply to Message</a>
+                <a href="{{messageUrl}}" class="cta-button">View & Reply</a>
+                <a href="{{appUrl}}/messages" class="cta-button secondary">All Messages</a>
             </div>
             
-            <p><strong>Quick tip:</strong> The faster you respond, the better your chances of building a great connection! Most successful dog playdates happen when people respond within a few hours.</p>
-            
-            <p>Don't forget to check out their profile to learn more about their dog and see if you'd be a good match for a playdate!</p>
+            <p><strong>Quick tip:</strong> Responding quickly helps build great connections in our community. The faster you reply, the more likely you are to schedule that perfect playdate!</p>
         </div>
         
         <div class="footer">
             <p>Happy chatting,<br>The ShareSkippy Team 🐕</p>
             <p style="margin-top: 20px; font-size: 12px;">
-                <a href="{{appUrl}}/messages" style="color: #2563eb;">View all messages</a> | 
-                <a href="{{appUrl}}/profile/edit" style="color: #2563eb;">Update notification settings</a>
+                <a href="{{appUrl}}/messages">View all messages</a> | 
+                <a href="{{appUrl}}/safety">Safety guidelines</a>
             </p>
         </div>
     </div>
 </body>
 </html>
-

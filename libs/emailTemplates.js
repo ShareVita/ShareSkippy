@@ -10,6 +10,8 @@ const TEMPLATE_PATHS = {
   meetingScheduled: path.join(process.cwd(), 'email-templates', 'meeting-scheduled-confirmation.html'),
   meetingReminder: path.join(process.cwd(), 'email-templates', 'meeting-reminder-1day.html'),
   followUp: path.join(process.cwd(), 'email-templates', 'follow-up-1week.html'),
+  followUp3Days: path.join(process.cwd(), 'email-templates', 'follow-up-3days.html'),
+  reviewRequest: path.join(process.cwd(), 'email-templates', 'review-request.html'),
 };
 
 /**
@@ -45,7 +47,7 @@ function loadTemplate(templatePath, variables = {}) {
 export async function sendWelcomeEmail({ to, userName, appUrl = config.domainName }) {
   const html = loadTemplate(TEMPLATE_PATHS.welcome, {
     userName,
-    appUrl: `https://${appUrl}`,
+    appUrl: `https://www.${appUrl}/community`,
   });
 
   const text = `Welcome to ShareSkippy, ${userName}!
@@ -59,7 +61,7 @@ Here's what you can do on ShareSkippy:
 - Discover Places: Find dog-friendly spots and share your favorites
 - Share Availability: Let others know when you're available for dog activities
 
-Start exploring: https://${appUrl}
+Start exploring: https://www.${appUrl}/community
 
 Happy tails and wagging adventures,
 The ShareSkippy Team 🐕`;
@@ -268,6 +270,50 @@ The ShareSkippy Team 🐕`;
 }
 
 /**
+ * Send 3-day follow-up email to encourage users to share availability
+ * @param {Object} params
+ * @param {string} params.to - Recipient email
+ * @param {string} params.userName - User's name
+ * @param {string} params.appUrl - App URL
+ */
+export async function sendFollowUp3DaysEmail({
+  to,
+  userName,
+  appUrl = config.domainName,
+}) {
+  const html = loadTemplate(TEMPLATE_PATHS.followUp3Days, {
+    userName,
+    appUrl: `https://${appUrl}`,
+  });
+
+  const text = `Ready to connect with your neighbors? - ShareSkippy
+
+Hi ${userName},
+
+It's been a couple weeks since you joined ShareSkippy — welcome again! 🎉
+
+Right now, neighbors (and their dogs) are waiting to connect. To get started, all you need to do is share your availability:
+
+- Borrow a dog for a walk or playdate 🐾
+- Find a petpal for your pup 🐕
+- Meet new neighbors who love dogs as much as you do 🌟
+
+Share your availability: https://${appUrl}/share-availability
+
+It only takes a minute, and it's the easiest way to start getting belly rubs, tail wags, and new connections.
+
+See you (and your future dog buddies) soon,
+— The ShareSkippy Team 🐶✨`;
+
+  return await sendEmail({
+    to,
+    subject: `Ready to connect with your neighbors? 🐕`,
+    html,
+    text,
+  });
+}
+
+/**
  * Send follow-up email (1 week after signup)
  * @param {Object} params
  * @param {string} params.to - Recipient email
@@ -326,11 +372,78 @@ The ShareSkippy Team 🐕`;
   });
 }
 
+/**
+ * Send review request email after a playdate
+ * @param {Object} params
+ * @param {string} params.to - Recipient email
+ * @param {string} params.userName - User's name
+ * @param {string} params.userDogName - User's dog name
+ * @param {string} params.otherUserName - Other user's name
+ * @param {string} params.otherUserDogName - Other user's dog name
+ * @param {string} params.meetingDate - Meeting date
+ * @param {string} params.meetingLocation - Meeting location
+ * @param {string} params.reviewUrl - URL to leave a review
+ * @param {string} params.messageUrl - URL to message the other user
+ * @param {string} params.appUrl - App URL
+ */
+export async function sendReviewEmail({
+  to,
+  userName,
+  userDogName,
+  otherUserName,
+  otherUserDogName,
+  meetingDate,
+  meetingLocation,
+  reviewUrl,
+  messageUrl,
+  appUrl = config.domainName,
+}) {
+  const html = loadTemplate(TEMPLATE_PATHS.reviewRequest, {
+    userName,
+    userDogName,
+    otherUserName,
+    otherUserDogName,
+    meetingDate,
+    meetingLocation,
+    reviewUrl,
+    messageUrl,
+    appUrl: `https://${appUrl}`,
+  });
+
+  const text = `How was your playdate? - ShareSkippy
+
+Hey ${userName}!
+
+We hope you had a great time meeting ${otherUserName} at your recent pup playdate. Please take some time to review ${otherUserName}.
+
+Playdate Details:
+- With: ${otherUserName} & ${otherUserDogName}
+- Date: ${meetingDate}
+- Location: ${meetingLocation}
+
+Leave a review: ${reviewUrl}
+Message ${otherUserName}: ${messageUrl}
+
+Your feedback helps our community grow! Reviews help other dog owners make informed decisions about potential playmates and build a safer, more connected community.
+
+Happy tails and wagging adventures,
+The ShareSkippy Team 🐕`;
+
+  return await sendEmail({
+    to,
+    subject: `How was your playdate with ${otherUserName}? 🐕`,
+    html,
+    text,
+  });
+}
+
 // Export all email functions
 export const emailTemplates = {
   sendWelcomeEmail,
   sendNewMessageNotification,
   sendMeetingScheduledConfirmation,
   sendMeetingReminder,
+  sendFollowUp3DaysEmail,
   sendFollowUpEmail,
+  sendReviewEmail,
 };

@@ -1,0 +1,21 @@
+Hello {{first_name}}!
+
+We hope you and your furry friend are doing well! We wanted to reach out with some exciting updates from the ShareSkippy community.
+
+📢 Important Announcement
+[Your announcement content will go here]
+
+Thank you for being part of our growing community of dog lovers. Together, we're making it easier for pet parents to support each other and ensure our dogs get the care they need.
+
+If you have any questions or need help with anything, don't hesitate to reach out to our support team.
+
+Visit ShareSkippy: https://shareskippy.com
+
+Best regards,
+The ShareSkippy Team
+
+Website: https://shareskippy.com
+Support: support@shareskippy.com
+
+You're receiving this email because you're a member of ShareSkippy.
+If you'd like to unsubscribe from these announcements, you can update your email preferences in your account settings.
