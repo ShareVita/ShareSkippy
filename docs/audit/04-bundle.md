@@ -29,3 +29,5 @@ Warnings observed (informational):
 ## Manual QA note
 
 - No code paths changed. Analyzer is gated behind `ANALYZE=true` and only affects build reporting.
+
+

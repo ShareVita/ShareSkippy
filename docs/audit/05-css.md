@@ -30,3 +30,5 @@ Note: Consider updating content paths to reflect actual files (`app/globals.css`
 ## Manual QA note
 
 - No CSS changes made; documentation only.
+
+
