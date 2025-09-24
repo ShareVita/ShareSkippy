@@ -7,14 +7,26 @@ import { createClient } from '@/libs/supabase/client';
 export default function AdminLayout({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error getting user:', error);
+          setError(error.message);
+        } else {
+          setUser(user);
+        }
+      } catch (err) {
+        console.error('Error in getUser:', err);
+        setError('Failed to load user data');
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUser();
@@ -31,13 +43,40 @@ export default function AdminLayout({ children }) {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     router.push('/signin');
     return null;
   }
 
   // Check if user is admin (you can customize this logic)
-  const isAdmin = user.email === 'admin@shareskippy.com' || user.user_metadata?.role === 'admin';
+  // Add your email address here to make yourself an admin
+  const adminEmails = [
+    'admin@shareskippy.com',
+    'kcolban@gmail.com', // Admin email
+    // Add more admin emails as needed
+  ];
+  
+  const isAdmin = user?.email && (
+    adminEmails.includes(user.email) || 
+    user.user_metadata?.role === 'admin'
+  );
 
   if (!isAdmin) {
     return (

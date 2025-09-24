@@ -8,33 +8,45 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
+            color: #374151;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 0;
         }
         .container {
-            background-color: white;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
             border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .header {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        .logo {
+        .header h1 {
+            margin: 0;
             font-size: 28px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
         }
         .content {
-            margin-bottom: 30px;
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1f2937;
         }
         .week-badge {
-            background-color: #8b5cf6;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -68,78 +80,100 @@
         }
         .cta-button {
             display: inline-block;
-            background-color: #2563eb;
-            color: white;
-            padding: 16px 32px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: white !important;
             text-decoration: none;
+            padding: 14px 28px;
             border-radius: 8px;
             font-weight: 600;
             font-size: 16px;
-            text-align: center;
-            margin: 20px 0;
-            transition: background-color 0.2s;
+            margin: 20px 10px 20px 0;
+            transition: all 0.2s ease;
         }
         .cta-button:hover {
-            background-color: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
-        .cta-button.secondary {
-            background-color: #10b981;
-            margin-left: 12px;
+        .secondary-button {
+            background: #f8fafc;
+            color: #374151;
+            border: 1px solid #e2e8f0;
         }
-        .cta-button.secondary:hover {
-            background-color: #059669;
+        .secondary-button:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+        .tips {
+            background-color: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .tips h4 {
+            margin-top: 0;
+            color: #1e40af;
+            font-size: 16px;
+        }
+        .tips ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+        .tips li {
+            margin-bottom: 5px;
+            color: #1e40af;
         }
         .footer {
+            background-color: #f8fafc;
+            padding: 30px;
             text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
             border-top: 1px solid #e5e7eb;
+        }
+        .footer p {
+            margin: 0;
             color: #6b7280;
             font-size: 14px;
         }
-        .tips-section {
-            background-color: #f0f9ff;
-            border-left: 4px solid #0ea5e9;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 24px 0;
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
         }
-        .tips-section h4 {
-            margin-top: 0;
-            color: #0c4a6e;
+        .footer a:hover {
+            text-decoration: underline;
         }
-        .success-story {
-            background-color: #f0fdf4;
-            border-left: 4px solid #10b981;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 24px 0;
-        }
-        .success-story h4 {
-            margin-top: 0;
-            color: #065f46;
-        }
-        .feedback-section {
-            background-color: #fef3c7;
-            border: 2px solid #f59e0b;
-            border-radius: 12px;
-            padding: 24px;
-            margin: 24px 0;
-            text-align: center;
+        @media (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .header, .content, .footer {
+                padding: 20px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .cta-button {
+                display: block;
+                text-align: center;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🐕 ShareSkippy</div>
-            <div class="week-badge">📅 1 Week Check-in</div>
+            <h1>📅 1 Week Check-in</h1>
+            <p>How's ShareSkippy going?</p>
         </div>
         
         <div class="content">
-            <h2>Hey {{userName}}, how's ShareSkippy treating you? 😊</h2>
+            <div class="week-badge">1 Week Anniversary!</div>
             
-            <p>It's been a week since you joined our community, and we're curious to know how your ShareSkippy journey is going! We hope you and {{userDogName}} are having a great time connecting with fellow dog lovers.</p>
+            <div class="greeting">
+                <p>Hey {{userName}}!</p>
+                <p>It's been a week since you joined our community! Here's how you're doing:</p>
+            </div>
             
             <div class="stats-grid">
                 <div class="stat-card">
@@ -165,42 +199,29 @@
                 <a href="{{appUrl}}/profile/edit" class="cta-button secondary">Update Profile</a>
             </div>
             
-            <div class="tips-section">
-                <h4>💡 Tips to get the most out of ShareSkippy:</h4>
+            <div class="tips">
+                <h4>💡 Tips to get more connections:</h4>
                 <ul>
-                    <li><strong>Complete your profile:</strong> Add more photos and details about {{userDogName}} to attract better matches</li>
-                    <li><strong>Be active:</strong> Check the app regularly and respond to messages quickly</li>
-                    <li><strong>Share your availability:</strong> Let others know when you're free for playdates</li>
-                    <li><strong>Be specific:</strong> Mention what kind of activities you and {{userDogName}} enjoy</li>
-                    <li><strong>Leave reviews:</strong> Help other dog owners by sharing your experiences</li>
+                    <li>Add more photos of {{userDogName}} to your profile</li>
+                    <li>Share your availability regularly</li>
+                    <li>Be active in the community</li>
+                    <li>Respond to messages quickly</li>
+                    <li>Leave reviews after meetings</li>
                 </ul>
             </div>
             
-            <div class="success-story">
-                <h4>🌟 Success story from our community:</h4>
-                <p><em>"I was skeptical at first, but ShareSkippy helped me find the perfect playmate for my energetic Golden Retriever, Max. We've been meeting up with Sarah and her Border Collie, Luna, every week for the past month. Max is so much happier and more social now!"</em> - <strong>Mike from Seattle</strong></p>
-            </div>
+            <p><strong>We'd love to hear from you!</strong> Reply to this email and let us know how your first week has been. Your feedback helps us improve ShareSkippy for everyone.</p>
             
-            <div class="feedback-section">
-                <h4 style="margin-top: 0; color: #92400e;">We'd love to hear from you!</h4>
-                <p>How has your first week on ShareSkippy been? Have you made any connections? Any feedback or suggestions for us?</p>
-                <p style="margin-bottom: 0;"><strong>Reply to this email</strong> and let us know - we read every message and love hearing from our community!</p>
-            </div>
-            
-            <p>Remember, building connections takes time, but the best dog friendships often start with just one great playdate. Keep exploring, stay active, and don't hesitate to reach out to other dog owners who seem like a good match!</p>
-            
-            <p>If you haven't had much luck yet, try updating your profile with more photos of {{userDogName}} or reaching out to a few people first. Sometimes the best connections happen when you take the initiative!</p>
+            <p>Keep exploring, keep connecting, and most importantly - keep having fun with your furry friends!</p>
         </div>
         
         <div class="footer">
             <p>Wagging tails and happy adventures,<br>The ShareSkippy Team 🐕</p>
             <p style="margin-top: 20px; font-size: 12px;">
-                <a href="{{appUrl}}/faq" style="color: #2563eb;">Need help?</a> | 
-                <a href="{{appUrl}}/safety" style="color: #2563eb;">Safety tips</a> | 
-                <a href="{{appUrl}}/community" style="color: #2563eb;">Community guidelines</a>
+                <a href="{{appUrl}}/community">Join community</a> | 
+                <a href="{{appUrl}}/safety">Safety guidelines</a>
             </p>
         </div>
     </div>
 </body>
 </html>
-
