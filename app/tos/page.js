@@ -57,7 +57,7 @@ const TOS = () => {
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: September 26, 2025
+          {`Last Updated: September 26, 2025 (v2)
 
 Welcome to ShareSkippy!
 
