@@ -14,7 +14,7 @@ import config from "@/config";
 // I need your help to write a simple Terms & Services for my website. Here is some context:
 // - Website: https://shipfa.st
 // - Name: ShipFast
-// - Contact information: marc@shipfa.st
+// - Contact information: support@shareskippy.com
 // - Description: A JavaScript code boilerplate to help entrepreneurs launch their startups faster
 // - Ownership: when buying a package, users can download code to create apps. They own the code but they do not have the right to resell it. They can ask for a full refund within 7 day after the purchase.
 // - User data collected: name, email and payment information
@@ -114,7 +114,7 @@ We may update these Terms from time to time. Users will be notified of any chang
 
 10. Contact Information
 
-For any questions or concerns regarding these Terms of Service, please contact us at kcolban@gmail.com.
+For any questions or concerns regarding these Terms of Service, please contact us at support@shareskippy.com.
 
 Thank you for being part of the ShareSkippy community!`}
         </pre>

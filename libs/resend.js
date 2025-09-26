@@ -8,7 +8,45 @@ if (!process.env.RESEND_API_KEY) {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * Sends an email using the provided parameters.
+ * Validates email content to improve deliverability
+ */
+const validateEmailContent = (subject, text, html) => {
+  const spamTriggers = [
+    /free/gi, /urgent/gi, /act now/gi, /limited time/gi, 
+    /click here/gi, /guarantee/gi, /no obligation/gi,
+    /winner/gi, /congratulations/gi, /earn money/gi
+  ];
+  
+  let warnings = [];
+  
+  // Check subject line
+  if (subject.length > 50) {
+    warnings.push("Subject line is too long (>50 chars)");
+  }
+  
+  if (spamTriggers.some(trigger => trigger.test(subject))) {
+    warnings.push("Subject contains potential spam trigger words");
+  }
+  
+  // Check for excessive caps
+  if (subject.toUpperCase() === subject && subject.length > 5) {
+    warnings.push("Subject is all caps");
+  }
+  
+  // Check content
+  if (html && spamTriggers.some(trigger => trigger.test(html))) {
+    warnings.push("Email content contains potential spam trigger words");
+  }
+  
+  if (warnings.length > 0) {
+    console.warn("Email deliverability warnings:", warnings);
+  }
+  
+  return warnings;
+};
+
+/**
+ * Sends an email using the provided parameters with deliverability best practices.
  *
  * @async
  * @param {Object} params - The parameters for sending the email.
@@ -20,14 +58,30 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * @returns {Promise<Object>} A Promise that resolves with the email sending result data.
  */
 export const sendEmail = async ({ to, subject, text, html, replyTo }) => {
-  const { data, error } = await resend.emails.send({
+  // Validate content for deliverability
+  validateEmailContent(subject, text, html);
+  
+  // Ensure we have both text and HTML versions for better deliverability
+  if (!text && html) {
+    // Strip HTML tags for text version if not provided
+    text = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  }
+  
+  const emailData = {
     from: config.resend.fromAdmin,
     to,
     subject,
     text,
     html,
     ...(replyTo && { replyTo }),
-  });
+    // Add headers to improve deliverability
+    headers: {
+      'X-Entity-Ref-ID': `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      'List-Unsubscribe': `<mailto:${config.resend.supportEmail}?subject=Unsubscribe>`,
+    },
+  };
+
+  const { data, error } = await resend.emails.send(emailData);
 
   if (error) {
     console.error("Error sending email:", error.message);

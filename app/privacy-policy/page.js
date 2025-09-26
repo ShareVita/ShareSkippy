@@ -21,7 +21,7 @@ import config from "@/config";
 // - Data sharing: we do not share the data with any other parties
 // - Children's Privacy: we do not collect any data from children
 // - Updates to the Privacy Policy: users will be updated by email
-// - Contact information: marc@shipfa.st
+// - Contact information: support@shareskippy.com
 
 // Please write a simple privacy policy for my site. Add the current date.  Do not add or explain your reasoning. Answer:
 
@@ -139,7 +139,7 @@ We may update this Privacy Policy from time to time to reflect changes in our pr
 
 If you have any questions, concerns, or requests related to this Privacy Policy, you can contact us at:
 
-Email: kcolban@gmail.com
+Email: support@shareskippy.com
 
 For all other inquiries, please visit our Contact Us page on the Website.
 
