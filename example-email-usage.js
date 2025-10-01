@@ -78,8 +78,8 @@ export async function handleMeetingScheduled(meetingData) {
       userDogName: requesterDog.name,
       otherUserName: `${recipient.first_name} ${recipient.last_name}`.trim(),
       otherUserDogName: recipientDog.name,
-      meetingDate: new Date(meetingData.scheduled_date).toLocaleDateString(),
-      meetingTime: new Date(meetingData.scheduled_date).toLocaleTimeString([], { 
+      meetingDate: new Date(meetingData.start_datetime).toLocaleDateString(),
+      meetingTime: new Date(meetingData.start_datetime).toLocaleTimeString([], { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),
@@ -96,8 +96,8 @@ export async function handleMeetingScheduled(meetingData) {
       userDogName: recipientDog.name,
       otherUserName: `${requester.first_name} ${requester.last_name}`.trim(),
       otherUserDogName: requesterDog.name,
-      meetingDate: new Date(meetingData.scheduled_date).toLocaleDateString(),
-      meetingTime: new Date(meetingData.scheduled_date).toLocaleTimeString([], { 
+      meetingDate: new Date(meetingData.start_datetime).toLocaleDateString(),
+      meetingTime: new Date(meetingData.start_datetime).toLocaleTimeString([], { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),
@@ -134,8 +134,8 @@ export async function sendDailyMeetingReminders() {
         userDogName: meeting.requester_dog.name,
         otherUserName: `${meeting.recipient.first_name} ${meeting.recipient.last_name}`.trim(),
         otherUserDogName: meeting.recipient_dog.name,
-        meetingDate: new Date(meeting.scheduled_date).toLocaleDateString(),
-        meetingTime: new Date(meeting.scheduled_date).toLocaleTimeString([], { 
+        meetingDate: new Date(meeting.start_datetime).toLocaleDateString(),
+        meetingTime: new Date(meeting.start_datetime).toLocaleTimeString([], { 
           hour: '2-digit', 
           minute: '2-digit' 
         }),

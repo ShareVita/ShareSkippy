@@ -186,3 +186,100 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Failed to create meeting' }, { status: 500 });
   }
 }
+
+export async function PATCH(request) {
+  try {
+    const { meetingId, status } = await request.json();
+
+    if (!meetingId || !status) {
+      return NextResponse.json({ 
+        error: 'Meeting ID and status are required' 
+      }, { status: 400 });
+    }
+
+    const supabase = createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Update meeting status
+    const { data: meeting, error: meetingError } = await supabase
+      .from('meetings')
+      .update({ status })
+      .eq('id', meetingId)
+      .select(`
+        *,
+        requester:profiles!meetings_requester_id_fkey(first_name, last_name, email),
+        recipient:profiles!meetings_recipient_id_fkey(first_name, last_name, email)
+      `)
+      .single();
+
+    if (meetingError) {
+      return NextResponse.json({ error: 'Failed to update meeting' }, { status: 500 });
+    }
+
+    // If meeting is confirmed, send confirmation emails
+    if (status === 'confirmed') {
+      try {
+        // Send to requester
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emails/meeting-scheduled`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: meeting.id,
+            userId: meeting.requester_id
+          })
+        });
+
+        // Send to recipient
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emails/meeting-scheduled`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: meeting.id,
+            userId: meeting.recipient_id
+          })
+        });
+      } catch (emailError) {
+        console.error('Error sending meeting confirmation emails:', emailError);
+        // Don't fail the status update if email fails
+      }
+    }
+
+    // If meeting is completed, send review request emails
+    if (status === 'completed') {
+      try {
+        // Send to requester
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emails/review-request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: meeting.id,
+            userId: meeting.requester_id
+          })
+        });
+
+        // Send to recipient
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/emails/review-request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: meeting.id,
+            userId: meeting.recipient_id
+          })
+        });
+      } catch (emailError) {
+        console.error('Error sending review request emails:', emailError);
+        // Don't fail the status update if email fails
+      }
+    }
+
+    return NextResponse.json({ meeting });
+
+  } catch (error) {
+    console.error('Error updating meeting:', error);
+    return NextResponse.json({ error: 'Failed to update meeting' }, { status: 500 });
+  }
+}

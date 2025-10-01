@@ -1,4 +1,4 @@
-import { sendMeetingScheduledConfirmation } from '@/libs/emailTemplates';
+import { sendReviewEmail } from '@/libs/emailTemplates';
 import { createClient } from '@/libs/supabase/server';
 
 export async function POST(request) {
@@ -30,11 +30,26 @@ export async function POST(request) {
       return Response.json({ error: 'Meeting not found' }, { status: 404 });
     }
 
-    // Only send confirmation for confirmed meetings
-    if (meeting.status !== 'confirmed') {
+    // Only send review request for completed meetings
+    if (meeting.status !== 'completed') {
       return Response.json({ 
         success: true, 
-        message: 'Meeting not confirmed yet, skipping email' 
+        message: 'Meeting not completed yet, skipping review request' 
+      });
+    }
+
+    // Check if review request already sent for this meeting and user
+    const { data: existingReview } = await supabase
+      .from('meeting_review_requests')
+      .select('id')
+      .eq('meeting_id', meetingId)
+      .eq('user_id', userId)
+      .single();
+
+    if (existingReview) {
+      return Response.json({ 
+        success: true, 
+        message: 'Review request already sent for this meeting' 
       });
     }
 
@@ -59,36 +74,39 @@ export async function POST(request) {
       });
     }
 
-    // Send meeting scheduled confirmation
-    await sendMeetingScheduledConfirmation({
+    // Send review request email
+    await sendReviewEmail({
       to: user.email,
       userName: user.first_name || 'there',
       userDogName: userDog?.name || 'your dog',
       otherUserName: `${otherUser.first_name} ${otherUser.last_name}`.trim(),
       otherUserDogName: otherUserDog?.name || 'their dog',
       meetingDate: new Date(meeting.start_datetime).toLocaleDateString(),
-      meetingTime: new Date(meeting.start_datetime).toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }),
       meetingLocation: meeting.location,
-      meetingNotes: meeting.notes || '',
-      meetingUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com'}/meetings/${meetingId}`,
+      reviewUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com'}/reviews/${meetingId}`,
       messageUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com'}/messages`,
       userId: userId,
     });
 
+    // Mark that review request was sent
+    await supabase
+      .from('meeting_review_requests')
+      .insert({
+        meeting_id: meetingId,
+        user_id: userId,
+        sent_at: new Date().toISOString()
+      });
+
     return Response.json({ 
       success: true, 
-      message: 'Meeting scheduled confirmation sent successfully' 
+      message: 'Review request sent successfully' 
     });
 
   } catch (error) {
-    console.error('Error sending meeting scheduled confirmation:', error);
+    console.error('Error sending review request:', error);
     return Response.json(
-      { error: 'Failed to send meeting scheduled confirmation' }, 
+      { error: 'Failed to send review request' }, 
       { status: 500 }
     );
   }
 }
-

@@ -58,8 +58,8 @@ export async function POST(request) {
       userDogName: userDog?.name || 'your dog',
       otherUserName: `${otherUser.first_name} ${otherUser.last_name}`.trim(),
       otherUserDogName: otherUserDog?.name || 'their dog',
-      meetingDate: new Date(meeting.scheduled_date).toLocaleDateString(),
-      meetingTime: new Date(meeting.scheduled_date).toLocaleTimeString([], { 
+      meetingDate: new Date(meeting.start_datetime).toLocaleDateString(),
+      meetingTime: new Date(meeting.start_datetime).toLocaleTimeString([], { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),

@@ -56,9 +56,8 @@ export async function GET(req) {
           
           console.log('🔍 Debug: User created at:', userCreatedAt, 'Five minutes ago:', fiveMinutesAgo, 'Is new user:', userCreatedAt > fiveMinutesAgo);
           
-          // TEMPORARY: Send welcome email for all users to test
-          // TODO: Restore the timing check once we confirm it's working
-          if (true) { // userCreatedAt > fiveMinutesAgo) {
+          // Check if this is a new user (created within last 5 minutes)
+          if (userCreatedAt > fiveMinutesAgo) {
             console.log('📧 Debug: Attempting to send welcome email...');
             
             // Send welcome email

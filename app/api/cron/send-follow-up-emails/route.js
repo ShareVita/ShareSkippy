@@ -96,6 +96,7 @@ export async function GET() {
           messagesReceived: messagesReceived || 0,
           meetingsScheduled: meetingsScheduled || 0,
           connectionsMade: uniqueConnections.size,
+          userId: user.id,
         });
 
         emailsSent++;

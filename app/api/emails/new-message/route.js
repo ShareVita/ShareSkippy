@@ -63,6 +63,7 @@ export async function POST(request) {
       messagePreview: messagePreview.substring(0, 100) + (messagePreview.length > 100 ? '...' : ''),
       messageTime: new Date().toLocaleString(),
       messageUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com'}/messages/${messageId}`,
+      userId: recipientId,
     });
 
     return Response.json({ 

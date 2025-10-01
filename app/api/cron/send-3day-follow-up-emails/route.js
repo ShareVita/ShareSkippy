@@ -50,6 +50,7 @@ export async function GET() {
         await sendFollowUp3DaysEmail({
           to: user.email,
           userName: user.first_name || 'there',
+          userId: user.id,
         });
 
         emailsSent++;

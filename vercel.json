@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/send-3day-follow-up-emails",
       "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/send-email-reminders",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/send-follow-up-emails",
+      "schedule": "0 11 * * *"
     }
   ],
   "functions": {
@@ -17,6 +25,12 @@
       "maxDuration": 60
     },
     "app/api/cron/send-3day-follow-up-emails/route.js": {
+      "maxDuration": 60
+    },
+    "app/api/cron/send-email-reminders/route.js": {
+      "maxDuration": 60
+    },
+    "app/api/cron/send-follow-up-emails/route.js": {
       "maxDuration": 60
     }
   },

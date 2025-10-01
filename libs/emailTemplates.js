@@ -3,6 +3,27 @@ import path from 'path';
 import { sendEmail } from './resend.js';
 import config from '@/config';
 
+/**
+ * Structured logging for email operations
+ * @param {string} emailKey - Type of email being sent
+ * @param {string} userId - User ID receiving the email
+ * @param {string} trigger - What triggered the email
+ * @param {string} decision - 'sent' or 'skipped'
+ * @param {string} reason - Reason for the decision
+ */
+function logEmailOperation(emailKey, userId, trigger, decision, reason) {
+  if (process.env.EMAIL_DEBUG_LOG === '1') {
+    console.log(JSON.stringify({
+      email_key: emailKey,
+      user_id: userId,
+      trigger: trigger,
+      timestamp: new Date().toISOString(),
+      decision: decision,
+      reason: reason
+    }));
+  }
+}
+
 // Email template paths
 const TEMPLATE_PATHS = {
   welcome: path.join(process.cwd(), 'email-templates', 'welcome-email.html'),
@@ -44,7 +65,9 @@ function loadTemplate(templatePath, variables = {}) {
  * @param {string} params.userName - User's name
  * @param {string} params.appUrl - App URL
  */
-export async function sendWelcomeEmail({ to, userName, appUrl = config.domainName }) {
+export async function sendWelcomeEmail({ to, userName, appUrl = config.domainName, userId = null }) {
+  logEmailOperation('welcome', userId || 'unknown', 'user_signup', 'sent', 'New user signup');
+  
   const html = loadTemplate(TEMPLATE_PATHS.welcome, {
     userName,
     appUrl: `https://www.${appUrl}/community`,
@@ -95,7 +118,9 @@ export async function sendNewMessageNotification({
   messageTime,
   messageUrl,
   appUrl = config.domainName,
+  userId = null,
 }) {
+  logEmailOperation('new_message', userId || 'unknown', 'message_received', 'sent', 'New message notification');
   const html = loadTemplate(TEMPLATE_PATHS.newMessage, {
     recipientName,
     senderName,
@@ -156,7 +181,9 @@ export async function sendMeetingScheduledConfirmation({
   meetingUrl,
   messageUrl,
   appUrl = config.domainName,
+  userId = null,
 }) {
+  logEmailOperation('meeting_scheduled', userId || 'unknown', 'meeting_confirmed', 'sent', 'Meeting confirmation');
   const html = loadTemplate(TEMPLATE_PATHS.meetingScheduled, {
     userName,
     userDogName,
@@ -229,7 +256,9 @@ export async function sendMeetingReminder({
   messageUrl,
   appUrl = config.domainName,
   unsubscribeUrl,
+  userId = null,
 }) {
+  logEmailOperation('meeting_reminder', userId || 'unknown', 'cron_24h_before', 'sent', '24h meeting reminder');
   const html = loadTemplate(TEMPLATE_PATHS.meetingReminder, {
     userName,
     userDogName,
@@ -283,7 +312,9 @@ export async function sendFollowUp3DaysEmail({
   to,
   userName,
   appUrl = config.domainName,
+  userId = null,
 }) {
+  logEmailOperation('followup_3day', userId || 'unknown', 'cron_3days_after', 'sent', '3-day follow-up');
   const html = loadTemplate(TEMPLATE_PATHS.followUp3Days, {
     userName,
     appUrl: `https://${appUrl}`,
@@ -337,7 +368,9 @@ export async function sendFollowUpEmail({
   meetingsScheduled = 0,
   connectionsMade = 0,
   appUrl = config.domainName,
+  userId = null,
 }) {
+  logEmailOperation('followup_1week', userId || 'unknown', 'cron_1week_after', 'sent', '1-week follow-up');
   const html = loadTemplate(TEMPLATE_PATHS.followUp, {
     userName,
     userDogName,
@@ -401,7 +434,9 @@ export async function sendReviewEmail({
   reviewUrl,
   messageUrl,
   appUrl = config.domainName,
+  userId = null,
 }) {
+  logEmailOperation('review_request', userId || 'unknown', 'meeting_completed', 'sent', 'Post-meeting review request');
   const html = loadTemplate(TEMPLATE_PATHS.reviewRequest, {
     userName,
     userDogName,

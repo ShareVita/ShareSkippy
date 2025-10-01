@@ -69,7 +69,7 @@ export async function POST(request) {
           recipient_id: profile.id,
           title: 'Test Meeting for Email Review',
           description: 'This is a test meeting for email review purposes',
-          scheduled_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          start_datetime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           status: 'confirmed'
         })
         .select()
