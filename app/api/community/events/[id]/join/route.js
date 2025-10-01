@@ -38,7 +38,7 @@ export async function POST(request, { params }) {
     }
 
     // Check if user is already participating
-    const { data: existingParticipation, error: checkError } = await supabase
+    const { data: existingParticipation } = await supabase
       .from('event_participants')
       .select('*')
       .eq('event_id', eventId)

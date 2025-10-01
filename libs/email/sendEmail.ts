@@ -141,14 +141,14 @@ export async function sendEmail({
         emailType,
         userId,
         to,
-        externalMessageId: resendResult.id,
+        externalMessageId: (resendResult as any).id,
         subject: finalSubject
       });
 
       return {
         ...emailEvent,
         status: 'sent',
-        external_message_id: resendResult.id
+        external_message_id: (resendResult as any).id
       } as EmailEvent;
 
     } catch (sendError) {

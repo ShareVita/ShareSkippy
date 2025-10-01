@@ -1,5 +1,7 @@
 import { processScheduledEmails } from '@/libs/email';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     console.log('Starting scheduled email processing...');

@@ -41,7 +41,7 @@ export async function GET() {
     }
 
     // Check database constraints
-    const { data: constraints, error: constraintError } = await supabase
+    const { data: constraints } = await supabase
       .rpc('get_table_constraints', { table_name: 'account_deletion_requests' })
       .catch(() => ({ data: null, error: 'RPC not available' }));
 
@@ -134,7 +134,7 @@ export async function POST() {
     }
 
     // Step 3: Verify the change
-    const { data: afterState, error: afterError } = await supabase
+    const { data: afterState } = await supabase
       .from('account_deletion_requests')
       .select('*')
       .eq('user_id', user.id)

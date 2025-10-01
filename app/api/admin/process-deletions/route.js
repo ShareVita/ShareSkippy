@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/libs/supabase/server';
 
 // POST /api/admin/process-deletions - Process deletion requests that are ready
-export async function POST(request) {
+export async function POST() {
   try {
     const supabase = createClient();
     

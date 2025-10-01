@@ -19,6 +19,16 @@ export async function processReengageEmails(): Promise<ReengageResult> {
   let skipped = 0;
 
   try {
+    // Check if the user_activity table exists
+    const { error: tableCheckError } = await supabase
+      .from('user_activity')
+      .select('id')
+      .limit(1);
+
+    if (tableCheckError && tableCheckError.message.includes('Could not find the table')) {
+      console.log('User activity table does not exist yet. Skipping re-engagement processing.');
+      return { processed: 0, sent: 0, skipped: 0, errors: [] };
+    }
     // Get users who haven't logged in for 7+ days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);

@@ -23,6 +23,16 @@ export async function processScheduledEmails(): Promise<{
   let processed = 0;
 
   try {
+    // Check if the scheduled_emails table exists
+    const { error: tableCheckError } = await supabase
+      .from('scheduled_emails')
+      .select('id')
+      .limit(1);
+
+    if (tableCheckError && tableCheckError.message.includes('Could not find the table')) {
+      console.log('Scheduled emails table does not exist yet. Skipping processing.');
+      return { processed: 0, errors: [] };
+    }
     // Get due scheduled emails that haven't been picked up yet
     const { data: scheduledEmails, error: fetchError } = await supabase
       .from('scheduled_emails')
