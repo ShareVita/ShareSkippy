@@ -69,10 +69,8 @@ export default function CommunityPage() {
       // Always fetch availability data, regardless of login status
       fetchAvailabilityData(user);
       
-      // If user is logged in, default to "My Availability" tab
-      if (user) {
-        setActiveTab('my-availability');
-      }
+      // Default to "Dog Availability" tab for all users
+      // (removed the logic that switched to "My Availability" for logged-in users)
     };
     
     getUser();
