@@ -10,7 +10,7 @@ export interface EmailPayload {
 export interface SendEmailParams {
   userId: string;
   to: string;
-  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'reengage' | 'new_message';
+  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'meeting_scheduled' | 'reengage' | 'new_message';
   subject?: string;
   html?: string;
   text?: string;
@@ -192,7 +192,7 @@ export async function scheduleEmail({
   payload = {}
 }: {
   userId: string;
-  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'reengage' | 'new_message';
+  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'meeting_scheduled' | 'reengage' | 'new_message';
   runAfter: Date;
   payload?: EmailPayload;
 }): Promise<void> {

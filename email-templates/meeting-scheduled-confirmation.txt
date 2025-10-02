@@ -1,0 +1,32 @@
+Meeting Confirmed on ShareSkippy
+
+Hi {{userName}}!
+
+Great news! Your meeting has been confirmed on ShareSkippy.
+
+Meeting Details:
+- Title: {{meetingTitle}}
+- Date: {{meetingDate}}
+- Time: {{meetingTime}}
+- Location: {{meetingLocation}}
+- With: {{otherParticipantName}}
+
+View Meeting Details: {{meetingUrl}}
+
+Meeting Tips:
+- Arrive a few minutes early
+- Bring water for the dogs
+- Have fun and stay safe!
+
+If you need to make any changes, please contact {{otherParticipantName}} directly through the ShareSkippy messaging system.
+
+Happy meeting!
+The ShareSkippy Team 🐕
+
+---
+ShareSkippy LLC
+San Francisco, CA 94102
+United States
+
+You received this email because you have a meeting scheduled on ShareSkippy. 
+You can manage your notification preferences in your account settings or unsubscribe here: {{unsubscribeUrl}}

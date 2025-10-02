@@ -38,6 +38,11 @@ const TEMPLATE_REGISTRY = {
     html: 'new-message-notification.html',
     text: 'new-message-notification.txt',
     subject: (vars: TemplateVariables) => `New message from ${vars.senderName || 'someone'} on ShareSkippy 💬`
+  },
+  meeting_scheduled: {
+    html: 'meeting-scheduled-confirmation.html',
+    text: 'meeting-scheduled-confirmation.txt',
+    subject: (vars: TemplateVariables) => `Meeting confirmed: ${vars.meetingTitle || 'Dog Activity'} on ShareSkippy 🐕`
   }
 };
 
