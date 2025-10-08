@@ -60,8 +60,8 @@ export default function MessageModal({ isOpen, onClose, recipient, availabilityP
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 overflow-y-auto p-4" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 my-4 sm:my-0 max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Send Message</h2>
           <button
@@ -107,7 +107,7 @@ export default function MessageModal({ isOpen, onClose, recipient, availabilityP
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black resize-none"
               placeholder="Type your message here..."
               required
             />

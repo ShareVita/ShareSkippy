@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/libs/supabase/client';
 import MessageModal from '@/components/MessageModal';
+import ProfilesList from '@/components/ProfilesList';
 
 export default function CommunityPage() {
   const [user, setUser] = useState(null);
@@ -633,6 +634,18 @@ export default function CommunityPage() {
                 </div>
               )}
             </div>
+
+            {/* Dog Owner Profiles Section */}
+            <div className="mt-8">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span className="mr-2">🐕</span>
+                Dog Owners in the Community
+              </h3>
+              <ProfilesList 
+                role="dog_owner" 
+                onMessage={openMessageModal}
+              />
+            </div>
           </div>
         )}
 
@@ -770,6 +783,18 @@ export default function CommunityPage() {
                   </Link>
                 </div>
               )}
+            </div>
+
+            {/* PetPal Profiles Section */}
+            <div className="mt-8">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <span className="mr-2">🤝</span>
+                PetPals in the Community
+              </h3>
+              <ProfilesList 
+                role="petpal" 
+                onMessage={openMessageModal}
+              />
             </div>
           </div>
         )}
