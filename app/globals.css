@@ -27,6 +27,34 @@ body {
   padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
 }
 
+/* Message spacing improvements */
+.message-bubble {
+  max-width: 85%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 640px) {
+  .message-bubble {
+    max-width: 75%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .message-bubble {
+    max-width: 65%;
+  }
+}
+
+/* Improved message spacing */
+.message-container {
+  margin-bottom: 0.75rem;
+}
+
+.message-container:last-child {
+  margin-bottom: 0;
+}
+
 /* It makes the HTML progress bar filling smooth when value change. */
 progress::-webkit-progress-value {
   transition: 0.6s width ease-out;

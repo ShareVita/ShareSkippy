@@ -241,9 +241,9 @@ export default function MessagesPage() {
       "
     >
       {/* Header */}
-      <div className="flex-shrink-0 border-b px-4 py-3 bg-white">
-        <h1 className="text-base sm:text-lg font-semibold">💬 Messages</h1>
-        <p className="text-sm text-gray-600">Connect with other dog lovers in your community</p>
+      <div className="flex-shrink-0 border-b px-4 py-4 bg-white">
+        <h1 className="text-lg sm:text-xl font-semibold">💬 Messages</h1>
+        <p className="text-sm text-gray-600 mt-1">Connect with other dog lovers in your community</p>
       </div>
 
       {/* Body: Sidebar + Thread */}
@@ -262,11 +262,11 @@ export default function MessagesPage() {
           
           <div className="flex-1 min-h-0 overflow-y-auto ios-scroll">
                 {loading ? (
-                  <div className="p-4 text-center">
+                  <div className="p-6 text-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
                   </div>
                 ) : conversations.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
+                  <div className="p-6 text-center text-gray-500">
                     <p>No conversations yet</p>
                     <p className="text-sm mt-2">Start messaging someone from the community!</p>
                   </div>
@@ -295,13 +295,13 @@ export default function MessagesPage() {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-gray-900 truncate">
+                          <h3 className="font-semibold text-gray-900 truncate">
                             {conversation.displayName}
                           </h3>
-                          <p className="text-sm text-gray-500 truncate">
+                          <p className="text-sm text-gray-500 truncate mt-1">
                             {conversation.availability?.title || 'Availability Post'}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 mt-1">
                             {formatDate(conversation.last_message_at)}
                           </p>
                         </div>
@@ -317,7 +317,7 @@ export default function MessagesPage() {
           {selectedConversation ? (
             <>
               {/* Conversation Header */}
-              <div className="flex-shrink-0 border-b px-3 py-2 bg-white">
+              <div className="flex-shrink-0 border-b px-4 py-4 bg-white">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                       <div className="flex items-center space-x-3">
                         <button
@@ -330,15 +330,15 @@ export default function MessagesPage() {
                           <img
                             src={selectedConversation.profilePhoto}
                             alt={selectedConversation.displayName}
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
                             {selectedConversation.displayName?.[0] || '👤'}
                           </div>
                         )}
                         <div>
-                          <h3 className="font-medium text-gray-900">
+                          <h3 className="font-semibold text-gray-900 text-lg">
                             {selectedConversation.displayName}
                           </h3>
                           <p className="text-sm text-gray-500">
@@ -352,7 +352,7 @@ export default function MessagesPage() {
                         </div>
                         <button
                           onClick={openMeetingModal}
-                          className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors whitespace-nowrap"
+                          className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap font-medium"
                         >
                           📅 Schedule Meeting
                         </button>
@@ -366,25 +366,26 @@ export default function MessagesPage() {
                 className="
                   flex-1 min-h-0
                   overflow-y-auto ios-scroll
-                  px-3 py-2
+                  px-4 py-4
                   bg-gray-50
                   break-words
+                  space-y-3
                 "
               >
                     {messages.map((message) => (
                       <div
                         key={message.id}
-                        className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${message.sender_id === user.id ? 'justify-end' : 'justify-start'} message-container`}
                       >
                         <div
-                          className={`max-w-xs sm:max-w-sm lg:max-w-md px-4 py-2 rounded-lg break-words ${
+                          className={`message-bubble px-4 py-3 rounded-2xl break-words shadow-sm ${
                             message.sender_id === user.id
                               ? 'bg-blue-600 text-white'
-                              : 'bg-gray-200 text-gray-900'
+                              : 'bg-white text-gray-900 border border-gray-200'
                           }`}
                         >
-                          <p className="text-sm">{message.content}</p>
-                          <p className={`text-xs mt-1 ${
+                          <p className="text-sm leading-relaxed">{message.content}</p>
+                          <p className={`text-xs mt-2 ${
                             message.sender_id === user.id ? 'text-blue-100' : 'text-gray-500'
                           }`}>
                             {formatTime(message.created_at)}
@@ -396,20 +397,20 @@ export default function MessagesPage() {
               </div>
 
               {/* Message Input */}
-              <div className="flex-shrink-0 border-t bg-white p-3 p-safe">
-                    <form onSubmit={sendMessage} className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+              <div className="flex-shrink-0 border-t bg-white p-4 p-safe">
+                    <form onSubmit={sendMessage} className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                       <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type your message..."
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 text-sm"
                         disabled={sending}
                       />
                       <button
                         type="submit"
                         disabled={sending || !newMessage.trim()}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                        className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap font-medium text-sm"
                       >
                         {sending ? 'Sending...' : 'Send'}
                       </button>
