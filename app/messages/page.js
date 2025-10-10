@@ -60,15 +60,18 @@ export default function MessagesPage() {
     (async () => {
       try {
         const data = await fetchMessages(selectedConversation.id);
+        // Only update if not cancelled and not aborted
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
           setMessages(data || []);
         }
       } catch (e) {
+        // Only show error if not cancelled and not aborted
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
           console.error('load messages failed', e);
           setError('Failed to load messages. Please try again.');
         }
       } finally {
+        // Only update loading state if not cancelled and not aborted
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
           setLoading(false);
         }
@@ -77,9 +80,7 @@ export default function MessagesPage() {
 
     return () => {
       cancelled = true;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      // Don't call setState after unmount/switch
     };
   }, [selectedConversationKey]); // IMPORTANT: depend on the key
 
@@ -184,6 +185,14 @@ export default function MessagesPage() {
     try {
       const { participant1_id, participant2_id, availability_id } = selectedConversation;
       
+      // Log what we're querying
+      console.log('[fetchMessages] args', {
+        p1: participant1_id,
+        p2: participant2_id,
+        availability_id: availability_id ?? null,
+        conversationId
+      });
+      
       // Build the base query with participant filtering
       let query = supabase
         .from('messages')
@@ -199,18 +208,18 @@ export default function MessagesPage() {
         .or(`and(sender_id.eq.${participant1_id},recipient_id.eq.${participant2_id}),and(sender_id.eq.${participant2_id},recipient_id.eq.${participant1_id})`)
         .order('created_at', { ascending: true });
 
-      // Only filter by availability_id if it's not null/undefined
-      if (availability_id !== null && availability_id !== undefined) {
+      // ONLY add availability filter when it exists and is non-empty
+      if (availability_id) {
         query = query.eq('availability_id', availability_id);
-      } else {
-        // For general conversations, only include messages without availability_id
-        query = query.is('availability_id', null);
       }
+      // Don't filter by null availability_id for now - let all messages through
 
       const { data, error } = await query;
 
+      // Log result size/errors
+      console.log('[fetchMessages] rows', data?.length ?? 0);
       if (error) {
-        console.error('[fetchMessages] error', { error, conversationId, selectedConversation });
+        console.error('[fetchMessages] supabase error', error);
         throw error;
       }
       
