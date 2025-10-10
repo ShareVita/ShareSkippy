@@ -52,6 +52,8 @@ export default function MessagesPage() {
       return;
     }
 
+    console.log('[Messages] Starting fetch for conversation:', selectedConversation.id);
+
     // Cancel any ongoing request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -62,7 +64,7 @@ export default function MessagesPage() {
     let cancelled = false;
 
     setLoading(true);
-    setMessages([]); // Clear immediately to avoid showing previous thread
+    // Don't clear messages immediately - let the new data replace it
     setError(null);
 
     (async () => {
@@ -73,6 +75,10 @@ export default function MessagesPage() {
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
           console.log('[Messages] Setting messages in state...');
           setMessages(data || []);
+          // Add a small delay to see if messages persist
+          setTimeout(() => {
+            console.log('[Messages] Messages after 1 second:', data?.length ?? 0);
+          }, 1000);
         } else {
           console.log('[Messages] Request was cancelled or aborted, not updating state');
         }
