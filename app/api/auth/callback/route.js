@@ -181,11 +181,33 @@ export async function GET(req) {
   }
 
   // URL to redirect to after sign in process completes
-  // Always use the production domain for consistency
-  const origin = `https://${config.domainName}`;
-  const redirectUrl = origin + config.auth.callbackUrl;
+  // For new users, redirect to profile edit; for existing users, redirect to callback URL
+  const origin = requestUrl.origin;
   
-  console.log("Redirecting to:", redirectUrl);
+  // Check if this is a new user by checking if profile has required fields
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, role, phone_number')
+        .eq('id', user.id)
+        .single();
+      
+      // If profile is incomplete (missing role or phone), redirect to profile edit
+      const isIncomplete = !profile || !profile.role?.trim() || !profile.phone_number?.trim();
+      
+      if (isIncomplete) {
+        console.log("New/incomplete user - Redirecting to profile edit");
+        return NextResponse.redirect(origin + "/profile/edit");
+      }
+    }
+  } catch (err) {
+    console.error("Error checking profile completeness:", err);
+  }
   
-  return NextResponse.redirect(redirectUrl);
+  console.log("Existing user - Redirecting to:", config.auth.callbackUrl);
+  return NextResponse.redirect(origin + config.auth.callbackUrl);
 }
