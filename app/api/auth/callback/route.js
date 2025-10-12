@@ -36,6 +36,17 @@ export async function GET(req) {
       }
 
       console.log("Session created successfully for user:", data.user?.id);
+      console.log("User created at:", data.user?.created_at);
+      
+      // ==================================================================
+      // CHECK IF THIS IS A NEW USER
+      // Note: Database trigger auto-creates profile, so we check user creation time
+      // ==================================================================
+      const userCreatedAt = new Date(data.user.created_at);
+      const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
+      const isNewUser = userCreatedAt > thirtySecondsAgo;
+      
+      console.log(isNewUser ? '🆕 NEW USER DETECTED (created within last 30 seconds)' : '👤 EXISTING USER');
       
       // Extract Google user metadata for name pre-filling
       const userMetadata = data.user?.user_metadata || {};
@@ -43,77 +54,38 @@ export async function GET(req) {
       const googleFamilyName = userMetadata?.family_name || userMetadata?.last_name;
       const googlePicture = userMetadata?.picture || userMetadata?.avatar_url;
       
-      // Track if this is a new user
-      let isNewUser = false;
-      
-      // Check if profile exists
-      const { data: existingProfile, error: profileError } = await supabase
+      // Get existing profile (created by database trigger)
+      const { data: existingProfile } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', data.user.id)
         .single();
       
-      // If profile doesn't exist, create it with Google data
-      if (profileError && profileError.code === 'PGRST116') {
-        console.log('📝 NEW USER - Creating profile with Google data...');
-        isNewUser = true;
-        
-        const profileData = {
-          id: data.user.id,
-          email: data.user.email,
-          first_name: googleGivenName || '',
-          last_name: googleFamilyName || '',
-          profile_photo_url: googlePicture || null,
-          bio: null,
-          role: null,
-          phone_number: null
-        };
-        
-        await supabase
-          .from('profiles')
-          .insert(profileData);
-          
-        console.log('✅ New profile created - will need to complete profile');
-      } else if (existingProfile) {
-        console.log('🔍 EXISTING USER - Checking profile completeness...');
-        console.log('   Bio:', existingProfile.bio ? 'Has bio' : 'NO BIO');
-        console.log('   Role:', existingProfile.role ? existingProfile.role : 'NO ROLE');
-        console.log('   Phone:', existingProfile.phone_number ? 'Has phone' : 'NO PHONE');
-        
-        // Update existing profile with Google data if name fields are empty
-        const updateData = {};
-        
-        if (!existingProfile.first_name && googleGivenName) {
-          updateData.first_name = googleGivenName;
-        }
-        
-        if (!existingProfile.last_name && googleFamilyName) {
-          updateData.last_name = googleFamilyName;
-        }
-        
-        if (!existingProfile.profile_photo_url && googlePicture) {
-          updateData.profile_photo_url = googlePicture;
-        }
-        
-        if (Object.keys(updateData).length > 0) {
-          await supabase
-            .from('profiles')
-            .update(updateData)
-            .eq('id', data.user.id);
-        }
-      }
+      // Update profile with Google data
+      const updateData = {
+        first_name: googleGivenName || existingProfile?.first_name || '',
+        last_name: googleFamilyName || existingProfile?.last_name || '',
+        profile_photo_url: googlePicture || existingProfile?.profile_photo_url || null
+      };
       
-      // Send welcome email for new users (created within last 5 minutes)
-      const userCreatedAt = new Date(data.user.created_at);
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const { data: updatedProfile } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', data.user.id)
+        .select()
+        .single();
+        
+      console.log('✅ Profile updated with Google data');
       
-      if (userCreatedAt > fiveMinutesAgo) {
+      // Send welcome email for new users
+      if (isNewUser) {
         try {
           await fetch(`${requestUrl.origin}/api/emails/send-welcome`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: data.user.id })
           });
+          console.log('✅ Welcome email queued');
         } catch (emailError) {
           console.error('❌ Error sending welcome email:', emailError);
         }
@@ -125,17 +97,17 @@ export async function GET(req) {
       
       const origin = requestUrl.origin;
       
-      // If this is a brand new user, always send to profile edit
+      // NEW USERS → Always go to profile edit (they need to fill out bio, role, phone)
       if (isNewUser) {
-        console.log("🆕 NEW USER DETECTED → Redirecting to /profile/edit");
+        console.log("🆕 NEW USER → Redirecting to /profile/edit");
         return NextResponse.redirect(origin + "/profile/edit");
       }
       
-      // For existing users, check if profile is complete
+      // EXISTING USERS → Check if profile is complete
       // Required: bio, role, phone_number must all be filled out
-      const hasCompleteBio = existingProfile?.bio && existingProfile.bio.trim().length > 0;
-      const hasRole = existingProfile?.role && existingProfile.role.trim().length > 0;
-      const hasPhone = existingProfile?.phone_number && existingProfile.phone_number.trim().length > 0;
+      const hasCompleteBio = updatedProfile?.bio && updatedProfile.bio.trim().length > 0;
+      const hasRole = updatedProfile?.role && updatedProfile.role.trim().length > 0;
+      const hasPhone = updatedProfile?.phone_number && updatedProfile.phone_number.trim().length > 0;
       
       console.log('📊 Profile completeness check:');
       console.log('   ✓ Bio:', hasCompleteBio ? '✅ Complete' : '❌ Missing');
