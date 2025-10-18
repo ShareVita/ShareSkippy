@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { renderSchemaTags } from '@/libs/seo';
 
+
+
 // Carousel messages for the hero section
 const carouselMessages = [
   "Going on a date? Grab a pup first — it's the perfect wingman. If it flops, at least someone's happy to see you. 🐾",
@@ -98,14 +100,13 @@ export default function Home() {
 
   // Auto-rotate carousel messages
   useEffect(() => {
-    if (isPaused) return;
-    
+  if (!isPaused) {
     const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % carouselMessages.length);
-    }, 4000);
-
+      setCurrentMessageIndex(prev => (prev + 1) % carouselMessages.length);
+    }, 5000); // every 5 seconds
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }
+}, [isPaused]);
 
   // Handle button clicks - redirect to signin page
   const handleButtonClick = (e) => {
@@ -156,24 +157,33 @@ export default function Home() {
             </p>
 
             {/* Carousel Messages */}
-            <div 
-              className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 max-w-4xl mx-auto border border-blue-200 shadow-lg cursor-pointer transition-all hover:shadow-xl"
-              onClick={() => setIsPaused(!isPaused)}
-            >
-              <p className="text-lg md:text-xl text-gray-800 italic">
-                {carouselMessages[currentMessageIndex]}
-              </p>
-              <div className="flex justify-center mt-4 space-x-2">
-                {carouselMessages.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      index === currentMessageIndex ? 'bg-blue-500' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
+            {/* Added buttons to allow users to navigate by themselves*/}
+            <div className="flex flex-row justify-center gap-5 mb-8">
+              <div className="max-w-lg flex flex-col justify-center">
+                <button onClick={() => {setIsPaused(true); setCurrentMessageIndex((prev) => {return prev - 1 < 0 ? carouselMessages.length - 1 : (prev - 1) % carouselMessages.length}); setTimeout(() => setIsPaused(false), 5000);}}><svg aria-label="Previous" className="fill-current size-6 hover:scale-150" slot="previous" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M15.75 19.5 8.25 12l7.5-7.5"></path></svg></button>
+              </div>
+              <div 
+                className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 max-w-2xl border border-blue-200 shadow-lg cursor-pointer transition-all hover:shadow-xl"
+              >
+                <p className="text-lg md:text-xl text-gray-800 italic">
+                  {carouselMessages[currentMessageIndex]}
+                </p>
+                <div className="flex justify-center mt-4 space-x-2">
+                  {carouselMessages.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentMessageIndex ? 'bg-blue-500' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="max-w-lg flex flex-col justify-center">
+                <button onClick={() => {setIsPaused(true); setCurrentMessageIndex((prev) => (prev + 1) % carouselMessages.length); setTimeout(() => setIsPaused(false), 5000);}}><svg aria-label="Next" className="fill-current size-6 hover:scale-150" slot="next" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m8.25 4.5 7.5 7.5-7.5 7.5"></path></svg></button>
               </div>
             </div>
+            
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
