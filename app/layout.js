@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import { getSEOTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";
 import AppLayout from "@/components/AppLayout";
@@ -29,6 +30,20 @@ export default function RootLayout({ children }) {
 			className={font.className}
 		>
 			<body>
+				{/* Google Analytics */}
+				<Script
+					src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
+					strategy="afterInteractive"
+				/>
+				<Script id="google-analytics" strategy="afterInteractive">
+					{`
+						window.dataLayer = window.dataLayer || [];
+						function gtag(){dataLayer.push(arguments);}
+						gtag('js', new Date());
+						gtag('config', 'G-XXXXXXXXXX');
+					`}
+				</Script>
+				
 				{/* QueryProvider provides React Query for API caching */}
 				<QueryProvider>
 					{/* UserProvider provides centralized user state management */}
