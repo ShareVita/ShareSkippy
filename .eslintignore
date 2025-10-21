@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+dist
+coverage
+public
+*.config.js
+next-env.d.ts
+*.tsbuildinfo
+.vercel
+.supabase
+

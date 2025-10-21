@@ -127,7 +127,7 @@ export const profileValidationSchema = {
 // Validate request body against schema
 export const validateRequestBody = (body, schema) => {
   const errors = [];
-  
+
   for (const [field, validator] of Object.entries(schema)) {
     try {
       validator(body[field]);
@@ -135,10 +135,10 @@ export const validateRequestBody = (body, schema) => {
       errors.push(error.message);
     }
   }
-  
+
   if (errors.length > 0) {
     throw new Error(`Validation failed: ${errors.join(', ')}`);
   }
-  
+
   return true;
 };

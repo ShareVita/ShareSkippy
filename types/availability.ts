@@ -48,7 +48,7 @@ export interface AvailabilityPost {
   helping_others_context?: string;
   created_at?: string;
   updated_at?: string;
-  
+
   // Joined data
   owner?: {
     id: string;

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/libs/supabase/client';
-import UserReviews from '../../../../components/UserReviews';
 import MessageModal from '../../../../components/MessageModal';
+import UserReviews from '../../../../components/UserReviews';
 
 export default function AvailabilityDetailPage() {
   const params = useParams();
@@ -13,7 +13,11 @@ export default function AvailabilityDetailPage() {
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [messageModal, setMessageModal] = useState({ isOpen: false, recipient: null, availabilityPost: null });
+  const [messageModal, setMessageModal] = useState({
+    isOpen: false,
+    recipient: null,
+    availabilityPost: null,
+  });
   const [showStickyBar, setShowStickyBar] = useState(false);
 
   useEffect(() => {
@@ -42,13 +46,16 @@ export default function AvailabilityDetailPage() {
   const fetchAvailabilityDetails = async () => {
     try {
       const supabase = createClient();
-      
+
       // First, get the current user to check if they're the owner
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       let query = supabase
         .from('availability')
-        .select(`
+        .select(
+          `
           *,
           owner:profiles!availability_owner_id_fkey (
             id,
@@ -92,9 +99,10 @@ export default function AvailabilityDetailPage() {
             activities,
             description
           )
-        `)
+        `
+        )
         .eq('id', params.id);
-      
+
       // If user is not the owner, only show active posts
       if (!user) {
         query = query.eq('status', 'active');
@@ -105,14 +113,14 @@ export default function AvailabilityDetailPage() {
           .select('owner_id, status')
           .eq('id', params.id)
           .single();
-        
+
         if (postData && postData.owner_id !== user.id) {
           // User is not the owner, only show active posts
           query = query.eq('status', 'active');
         }
         // If user is the owner, show the post regardless of status
       }
-      
+
       const { data, error } = await query.single();
 
       if (data && !error) {
@@ -120,9 +128,11 @@ export default function AvailabilityDetailPage() {
         if (data.dog_ids && data.dog_ids.length > 1) {
           const { data: additionalDogs, error: dogsError } = await supabase
             .from('dogs')
-            .select('id, name, breed, photo_url, size, birthday, age_years, age_months, gender, neutered, temperament, energy_level, dog_friendly, cat_friendly, kid_friendly, leash_trained, crate_trained, house_trained, fully_vaccinated, activities, description')
+            .select(
+              'id, name, breed, photo_url, size, birthday, age_years, age_months, gender, neutered, temperament, energy_level, dog_friendly, cat_friendly, kid_friendly, leash_trained, crate_trained, house_trained, fully_vaccinated, activities, description'
+            )
             .in('id', data.dog_ids);
-          
+
           if (!dogsError && additionalDogs) {
             data.allDogs = additionalDogs;
           }
@@ -159,7 +169,7 @@ export default function AvailabilityDetailPage() {
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -171,39 +181,39 @@ export default function AvailabilityDetailPage() {
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
     });
   };
 
   const formatAvailabilitySchedule = (enabledDays, daySchedules) => {
     if (!enabledDays || !daySchedules) return [];
-    
+
     const dayNames = {
       monday: 'Monday',
-      tuesday: 'Tuesday', 
+      tuesday: 'Tuesday',
       wednesday: 'Wednesday',
       thursday: 'Thursday',
       friday: 'Friday',
       saturday: 'Saturday',
-      sunday: 'Sunday'
+      sunday: 'Sunday',
     };
-    
+
     const formattedSchedule = [];
-    
-    enabledDays.forEach(day => {
+
+    enabledDays.forEach((day) => {
       const schedule = daySchedules[day];
       if (schedule && schedule.enabled && schedule.timeSlots) {
         const dayName = dayNames[day] || day.charAt(0).toUpperCase() + day.slice(1);
         const timeSlots = schedule.timeSlots
-          .filter(slot => slot.start && slot.end)
-          .map(slot => `${formatTime(slot.start)} - ${formatTime(slot.end)}`);
-        
+          .filter((slot) => slot.start && slot.end)
+          .map((slot) => `${formatTime(slot.start)} - ${formatTime(slot.end)}`);
+
         if (timeSlots.length > 0) {
           formattedSchedule.push(`${dayName} ${timeSlots.join(', ')}`);
         }
       }
     });
-    
+
     return formattedSchedule;
   };
 
@@ -211,7 +221,7 @@ export default function AvailabilityDetailPage() {
     setMessageModal({
       isOpen: true,
       recipient,
-      availabilityPost
+      availabilityPost,
     });
     // TODO: Analytics - cta_message_primary_clicked { placement, post_id, recipient_id }
   };
@@ -220,7 +230,7 @@ export default function AvailabilityDetailPage() {
     setMessageModal({
       isOpen: false,
       recipient: null,
-      availabilityPost: null
+      availabilityPost: null,
     });
   };
 
@@ -235,39 +245,48 @@ export default function AvailabilityDetailPage() {
       if (weight <= 90) return '🦮';
       if (weight <= 110) return '🐺';
     }
-    
+
     // Fallback for old size values or any other cases
     switch (size) {
-      case 'small': return '🐕';
-      case 'medium': return '🐕‍🦺';
-      case 'large': return '🦮';
-      case 'extra_large': return '🐺';
-      default: return '🐕';
+      case 'small':
+        return '🐕';
+      case 'medium':
+        return '🐕‍🦺';
+      case 'large':
+        return '🦮';
+      case 'extra_large':
+        return '🐺';
+      default:
+        return '🐕';
     }
   };
 
   const getEnergyLevelColor = (level) => {
     switch (level) {
-      case 'low': return 'text-green-600';
-      case 'moderate': return 'text-yellow-600';
-      case 'high': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'low':
+        return 'text-green-600';
+      case 'moderate':
+        return 'text-yellow-600';
+      case 'high':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getTemperamentBadges = (temperament) => {
     if (!temperament || !Array.isArray(temperament)) return [];
-    return temperament.map(trait => ({
+    return temperament.map((trait) => ({
       text: trait,
-      color: 'bg-blue-100 text-blue-800'
+      color: 'bg-blue-100 text-blue-800',
     }));
   };
 
   const getActivityBadges = (activities) => {
     if (!activities || !Array.isArray(activities)) return [];
-    return activities.map(activity => ({
+    return activities.map((activity) => ({
       text: activity,
-      color: 'bg-purple-100 text-purple-800'
+      color: 'bg-purple-100 text-purple-800',
     }));
   };
 
@@ -285,7 +304,9 @@ export default function AvailabilityDetailPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">😔</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Availability Not Found</h1>
-          <p className="text-gray-600 mb-4">{error || 'This availability post could not be found.'}</p>
+          <p className="text-gray-600 mb-4">
+            {error || 'This availability post could not be found.'}
+          </p>
           <Link
             href="/community"
             className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
@@ -315,21 +336,25 @@ export default function AvailabilityDetailPage() {
                 {availability.title}
               </h1>
               <div className="flex items-center space-x-4 text-gray-600">
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              availability.post_type === 'dog_available' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-green-100 text-green-800'
-            }`}>
-              {availability.post_type === 'dog_available' ? '�� Dog Available' : '🤝 PetPal Available'}
-            </span>
-            {availability.is_urgent && (
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                🚨 Urgent
-              </span>
-            )}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    availability.post_type === 'dog_available'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}
+                >
+                  {availability.post_type === 'dog_available'
+                    ? '�� Dog Available'
+                    : '🤝 PetPal Available'}
+                </span>
+                {availability.is_urgent && (
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                    🚨 Urgent
+                  </span>
+                )}
               </div>
             </div>
-            
+
             {/* Primary Message CTA - Desktop */}
             <div className="hidden lg:block">
               <button
@@ -354,7 +379,7 @@ export default function AvailabilityDetailPage() {
                 <span className="mr-2">📅</span>
                 Availability Details
               </h2>
-              
+
               {availability.description && (
                 <div className="mb-6">
                   <h3 className="font-medium text-gray-900 mb-2">Description</h3>
@@ -363,18 +388,23 @@ export default function AvailabilityDetailPage() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {availability.enabled_days && availability.enabled_days.length > 0 && availability.day_schedules && (
-                  <div>
-                    <h3 className="font-medium text-gray-900 mb-2">Available Schedule</h3>
-                    <div className="text-gray-600 space-y-1">
-                      {formatAvailabilitySchedule(availability.enabled_days, availability.day_schedules).map((schedule, index) => (
-                        <div key={index} className="text-sm">
-                          {schedule}
-                        </div>
-                      ))}
+                {availability.enabled_days &&
+                  availability.enabled_days.length > 0 &&
+                  availability.day_schedules && (
+                    <div>
+                      <h3 className="font-medium text-gray-900 mb-2">Available Schedule</h3>
+                      <div className="text-gray-600 space-y-1">
+                        {formatAvailabilitySchedule(
+                          availability.enabled_days,
+                          availability.day_schedules
+                        ).map((schedule, index) => (
+                          <div key={index} className="text-sm">
+                            {schedule}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {availability.start_time && availability.end_time && (
                   <div>
@@ -428,7 +458,9 @@ export default function AvailabilityDetailPage() {
               <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                   <span className="mr-2">🐕</span>
-                  {availability.allDogs.length === 1 ? `${availability.allDogs[0].name}'s Profile` : 'Dogs Available'}
+                  {availability.allDogs.length === 1
+                    ? `${availability.allDogs[0].name}'s Profile`
+                    : 'Dogs Available'}
                 </h2>
 
                 {availability.allDogs.length === 1 ? (
@@ -447,11 +479,17 @@ export default function AvailabilityDetailPage() {
                         </div>
                       )}
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">{availability.allDogs[0].name}</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                          {availability.allDogs[0].name}
+                        </h3>
                         <p className="text-gray-600 mb-2">{availability.allDogs[0].breed}</p>
                         <div className="flex flex-wrap gap-2">
                           <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                            {availability.allDogs[0].size && availability.allDogs[0].size.includes('-') ? `${availability.allDogs[0].size} lbs` : availability.allDogs[0].size} size
+                            {availability.allDogs[0].size &&
+                            availability.allDogs[0].size.includes('-')
+                              ? `${availability.allDogs[0].size} lbs`
+                              : availability.allDogs[0].size}{' '}
+                            size
                           </span>
                           {availability.allDogs[0].gender && (
                             <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
@@ -469,8 +507,12 @@ export default function AvailabilityDetailPage() {
 
                     {availability.allDogs[0].description && (
                       <div className="mb-6">
-                        <h4 className="font-medium text-gray-900 mb-2">About {availability.allDogs[0].name}</h4>
-                        <p className="text-gray-600 leading-relaxed">{availability.allDogs[0].description}</p>
+                        <h4 className="font-medium text-gray-900 mb-2">
+                          About {availability.allDogs[0].name}
+                        </h4>
+                        <p className="text-gray-600 leading-relaxed">
+                          {availability.allDogs[0].description}
+                        </p>
                       </div>
                     )}
 
@@ -481,7 +523,9 @@ export default function AvailabilityDetailPage() {
                           {availability.allDogs[0].energy_level && (
                             <div className="flex justify-between">
                               <span className="text-gray-600">Energy Level:</span>
-                              <span className={`font-medium ${getEnergyLevelColor(availability.allDogs[0].energy_level)}`}>
+                              <span
+                                className={`font-medium ${getEnergyLevelColor(availability.allDogs[0].energy_level)}`}
+                              >
                                 {availability.allDogs[0].energy_level}
                               </span>
                             </div>
@@ -490,8 +534,10 @@ export default function AvailabilityDetailPage() {
                             <div className="flex justify-between">
                               <span className="text-gray-600">Age:</span>
                               <span className="font-medium text-gray-900">
-                                {availability.allDogs[0].age_years} year{availability.allDogs[0].age_years !== 1 ? 's' : ''}
-                                {availability.allDogs[0].age_months > 0 && ` ${availability.allDogs[0].age_months} month${availability.allDogs[0].age_months !== 1 ? 's' : ''}`}
+                                {availability.allDogs[0].age_years} year
+                                {availability.allDogs[0].age_years !== 1 ? 's' : ''}
+                                {availability.allDogs[0].age_months > 0 &&
+                                  ` ${availability.allDogs[0].age_months} month${availability.allDogs[0].age_months !== 1 ? 's' : ''}`}
                               </span>
                             </div>
                           )}
@@ -500,85 +546,107 @@ export default function AvailabilityDetailPage() {
 
                       <div>
                         <h4 className="font-medium text-gray-900 mb-3">Compatibility</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Dog Friendly:</span>
-                        <span className={`font-medium ${availability.dog.dog_friendly ? 'text-green-600' : 'text-red-600'}`}>
-                          {availability.dog.dog_friendly ? 'Yes' : 'No'}
-                        </span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Dog Friendly:</span>
+                            <span
+                              className={`font-medium ${availability.dog.dog_friendly ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {availability.dog.dog_friendly ? 'Yes' : 'No'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Cat Friendly:</span>
+                            <span
+                              className={`font-medium ${availability.dog.cat_friendly ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {availability.dog.cat_friendly ? 'Yes' : 'No'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Kid Friendly:</span>
+                            <span
+                              className={`font-medium ${availability.dog.kid_friendly ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {availability.dog.kid_friendly ? 'Yes' : 'No'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cat Friendly:</span>
-                        <span className={`font-medium ${availability.dog.cat_friendly ? 'text-green-600' : 'text-red-600'}`}>
-                          {availability.dog.cat_friendly ? 'Yes' : 'No'}
-                        </span>
+                    </div>
+
+                    {availability.dog.temperament && availability.dog.temperament.length > 0 && (
+                      <div className="mt-6">
+                        <h4 className="font-medium text-gray-900 mb-3">Temperament</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {getTemperamentBadges(availability.dog.temperament).map(
+                            (badge, index) => (
+                              <span
+                                key={index}
+                                className={`px-3 py-1 rounded-full text-sm ${badge.color}`}
+                              >
+                                {badge.text}
+                              </span>
+                            )
+                          )}
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Kid Friendly:</span>
-                        <span className={`font-medium ${availability.dog.kid_friendly ? 'text-green-600' : 'text-red-600'}`}>
-                          {availability.dog.kid_friendly ? 'Yes' : 'No'}
-                        </span>
+                    )}
+
+                    {availability.dog.activities && availability.dog.activities.length > 0 && (
+                      <div className="mt-6">
+                        <h4 className="font-medium text-gray-900 mb-3">Activities</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {getActivityBadges(availability.dog.activities).map((badge, index) => (
+                            <span
+                              key={index}
+                              className={`px-3 py-1 rounded-full text-sm ${badge.color}`}
+                            >
+                              {badge.text}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h4 className="font-medium text-gray-900 mb-3">Training & Health</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center">
+                          <span
+                            className={`mr-2 ${availability.dog.leash_trained ? 'text-green-600' : 'text-gray-400'}`}
+                          >
+                            {availability.dog.leash_trained ? '✅' : '❌'}
+                          </span>
+                          <span className="text-sm text-gray-600">Leash Trained</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span
+                            className={`mr-2 ${availability.dog.crate_trained ? 'text-green-600' : 'text-gray-400'}`}
+                          >
+                            {availability.dog.crate_trained ? '✅' : '❌'}
+                          </span>
+                          <span className="text-sm text-gray-600">Crate Trained</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span
+                            className={`mr-2 ${availability.dog.house_trained ? 'text-green-600' : 'text-gray-400'}`}
+                          >
+                            {availability.dog.house_trained ? '✅' : '❌'}
+                          </span>
+                          <span className="text-sm text-gray-600">House Trained</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span
+                            className={`mr-2 ${availability.dog.fully_vaccinated ? 'text-green-600' : 'text-gray-400'}`}
+                          >
+                            {availability.dog.fully_vaccinated ? '✅' : '❌'}
+                          </span>
+                          <span className="text-sm text-gray-600">Fully Vaccinated</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {availability.dog.temperament && availability.dog.temperament.length > 0 && (
-                  <div className="mt-6">
-                    <h4 className="font-medium text-gray-900 mb-3">Temperament</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {getTemperamentBadges(availability.dog.temperament).map((badge, index) => (
-                        <span key={index} className={`px-3 py-1 rounded-full text-sm ${badge.color}`}>
-                          {badge.text}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {availability.dog.activities && availability.dog.activities.length > 0 && (
-                  <div className="mt-6">
-                    <h4 className="font-medium text-gray-900 mb-3">Activities</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {getActivityBadges(availability.dog.activities).map((badge, index) => (
-                        <span key={index} className={`px-3 py-1 rounded-full text-sm ${badge.color}`}>
-                          {badge.text}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h4 className="font-medium text-gray-900 mb-3">Training & Health</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center">
-                      <span className={`mr-2 ${availability.dog.leash_trained ? 'text-green-600' : 'text-gray-400'}`}>
-                        {availability.dog.leash_trained ? '✅' : '❌'}
-                      </span>
-                      <span className="text-sm text-gray-600">Leash Trained</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`mr-2 ${availability.dog.crate_trained ? 'text-green-600' : 'text-gray-400'}`}>
-                        {availability.dog.crate_trained ? '✅' : '❌'}
-                      </span>
-                      <span className="text-sm text-gray-600">Crate Trained</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`mr-2 ${availability.dog.house_trained ? 'text-green-600' : 'text-gray-400'}`}>
-                        {availability.dog.house_trained ? '✅' : '❌'}
-                      </span>
-                      <span className="text-sm text-gray-600">House Trained</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`mr-2 ${availability.dog.fully_vaccinated ? 'text-green-600' : 'text-gray-400'}`}>
-                        {availability.dog.fully_vaccinated ? '✅' : '❌'}
-                      </span>
-                      <span className="text-sm text-gray-600">Fully Vaccinated</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
                 ) : (
                   // Multiple dogs display
                   <div className="space-y-6">
@@ -601,7 +669,8 @@ export default function AvailabilityDetailPage() {
                             <p className="text-gray-600 mb-2">{dog.breed}</p>
                             <div className="flex flex-wrap gap-2">
                               <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                                {dog.size && dog.size.includes('-') ? `${dog.size} lbs` : dog.size} size
+                                {dog.size && dog.size.includes('-') ? `${dog.size} lbs` : dog.size}{' '}
+                                size
                               </span>
                               {dog.gender && (
                                 <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
@@ -631,7 +700,9 @@ export default function AvailabilityDetailPage() {
                               {dog.energy_level && (
                                 <div className="flex justify-between">
                                   <span className="text-gray-600">Energy Level:</span>
-                                  <span className={`font-medium ${getEnergyLevelColor(dog.energy_level)}`}>
+                                  <span
+                                    className={`font-medium ${getEnergyLevelColor(dog.energy_level)}`}
+                                  >
                                     {dog.energy_level}
                                   </span>
                                 </div>
@@ -641,7 +712,8 @@ export default function AvailabilityDetailPage() {
                                   <span className="text-gray-600">Age:</span>
                                   <span className="text-sm text-gray-900">
                                     {dog.age_years} year{dog.age_years !== 1 ? 's' : ''}
-                                    {dog.age_months > 0 && ` ${dog.age_months} month${dog.age_months !== 1 ? 's' : ''}`}
+                                    {dog.age_months > 0 &&
+                                      ` ${dog.age_months} month${dog.age_months !== 1 ? 's' : ''}`}
                                   </span>
                                 </div>
                               )}
@@ -653,19 +725,25 @@ export default function AvailabilityDetailPage() {
                             <div className="space-y-2">
                               <div className="flex justify-between">
                                 <span className="text-gray-600">Dog Friendly:</span>
-                                <span className={`font-medium ${dog.dog_friendly ? 'text-green-600' : 'text-red-600'}`}>
+                                <span
+                                  className={`font-medium ${dog.dog_friendly ? 'text-green-600' : 'text-red-600'}`}
+                                >
                                   {dog.dog_friendly ? 'Yes' : 'No'}
                                 </span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-gray-600">Cat Friendly:</span>
-                                <span className={`font-medium ${dog.cat_friendly ? 'text-green-600' : 'text-red-600'}`}>
+                                <span
+                                  className={`font-medium ${dog.cat_friendly ? 'text-green-600' : 'text-red-600'}`}
+                                >
                                   {dog.cat_friendly ? 'Yes' : 'No'}
                                 </span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-gray-600">Kid Friendly:</span>
-                                <span className={`font-medium ${dog.kid_friendly ? 'text-green-600' : 'text-red-600'}`}>
+                                <span
+                                  className={`font-medium ${dog.kid_friendly ? 'text-green-600' : 'text-red-600'}`}
+                                >
                                   {dog.kid_friendly ? 'Yes' : 'No'}
                                 </span>
                               </div>
@@ -678,7 +756,10 @@ export default function AvailabilityDetailPage() {
                             <h4 className="font-medium text-gray-900 mb-2">Temperament</h4>
                             <div className="flex flex-wrap gap-2">
                               {getTemperamentBadges(dog.temperament).map((badge, index) => (
-                                <span key={index} className={`px-3 py-1 rounded-full text-sm ${badge.color}`}>
+                                <span
+                                  key={index}
+                                  className={`px-3 py-1 rounded-full text-sm ${badge.color}`}
+                                >
                                   {badge.text}
                                 </span>
                               ))}
@@ -691,7 +772,10 @@ export default function AvailabilityDetailPage() {
                             <h4 className="font-medium text-gray-900 mb-2">Activities</h4>
                             <div className="flex flex-wrap gap-2">
                               {getActivityBadges(dog.activities).map((badge, index) => (
-                                <span key={index} className={`px-3 py-1 rounded-full text-sm ${badge.color}`}>
+                                <span
+                                  key={index}
+                                  className={`px-3 py-1 rounded-full text-sm ${badge.color}`}
+                                >
                                   {badge.text}
                                 </span>
                               ))}
@@ -703,25 +787,33 @@ export default function AvailabilityDetailPage() {
                           <h4 className="font-medium text-gray-900 mb-2">Training & Health</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="flex items-center">
-                              <span className={`mr-2 ${dog.leash_trained ? 'text-green-600' : 'text-gray-400'}`}>
+                              <span
+                                className={`mr-2 ${dog.leash_trained ? 'text-green-600' : 'text-gray-400'}`}
+                              >
                                 {dog.leash_trained ? '✅' : '❌'}
                               </span>
                               <span className="text-sm text-gray-600">Leash Trained</span>
                             </div>
                             <div className="flex items-center">
-                              <span className={`mr-2 ${dog.crate_trained ? 'text-green-600' : 'text-gray-400'}`}>
+                              <span
+                                className={`mr-2 ${dog.crate_trained ? 'text-green-600' : 'text-gray-400'}`}
+                              >
                                 {dog.crate_trained ? '✅' : '❌'}
                               </span>
                               <span className="text-sm text-gray-600">Crate Trained</span>
                             </div>
                             <div className="flex items-center">
-                              <span className={`mr-2 ${dog.house_trained ? 'text-green-600' : 'text-gray-400'}`}>
+                              <span
+                                className={`mr-2 ${dog.house_trained ? 'text-green-600' : 'text-gray-400'}`}
+                              >
                                 {dog.house_trained ? '✅' : '❌'}
                               </span>
                               <span className="text-sm text-gray-600">House Trained</span>
                             </div>
                             <div className="flex items-center">
-                              <span className={`mr-2 ${dog.fully_vaccinated ? 'text-green-600' : 'text-gray-400'}`}>
+                              <span
+                                className={`mr-2 ${dog.fully_vaccinated ? 'text-green-600' : 'text-gray-400'}`}
+                              >
                                 {dog.fully_vaccinated ? '✅' : '❌'}
                               </span>
                               <span className="text-sm text-gray-600">Fully Vaccinated</span>
@@ -741,7 +833,9 @@ export default function AvailabilityDetailPage() {
             <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                 <span className="mr-2">👤</span>
-                {availability.post_type === 'dog_available' ? 'About the Owner' : 'About the PetPal'}
+                {availability.post_type === 'dog_available'
+                  ? 'About the Owner'
+                  : 'About the PetPal'}
               </h2>
 
               <div className="text-center mb-6">
@@ -782,7 +876,9 @@ export default function AvailabilityDetailPage() {
                   <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-3 border border-green-200">
                     <div className="flex items-center mb-2">
                       <span className="text-green-600 mr-2">🏆</span>
-                      <span className="font-medium text-green-800">{availability.owner.community_support_badge}</span>
+                      <span className="font-medium text-green-800">
+                        {availability.owner.community_support_badge}
+                      </span>
                     </div>
                     {availability.owner.support_story && (
                       <p className="text-sm text-green-700">{availability.owner.support_story}</p>
@@ -791,22 +887,28 @@ export default function AvailabilityDetailPage() {
                 </div>
               )}
 
-              {availability.owner?.support_preferences && availability.owner.support_preferences.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="font-medium text-gray-900 mb-2">Support Preferences</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {availability.owner.support_preferences.map((pref, index) => (
-                      <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                        {pref}
-                      </span>
-                    ))}
+              {availability.owner?.support_preferences &&
+                availability.owner.support_preferences.length > 0 && (
+                  <div className="mb-6">
+                    <h4 className="font-medium text-gray-900 mb-2">Support Preferences</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {availability.owner.support_preferences.map((pref, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+                        >
+                          {pref}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Social Links */}
-              {(availability.owner?.facebook_url || availability.owner?.instagram_url || 
-                availability.owner?.linkedin_url || availability.owner?.airbnb_url || 
+              {(availability.owner?.facebook_url ||
+                availability.owner?.instagram_url ||
+                availability.owner?.linkedin_url ||
+                availability.owner?.airbnb_url ||
                 availability.owner?.other_social_url) && (
                 <div className="mb-6">
                   <h4 className="font-medium text-gray-900 mb-2">Social Links</h4>
@@ -871,7 +973,7 @@ export default function AvailabilityDetailPage() {
               )}
 
               <div className="pt-4 border-t border-gray-200">
-                <button 
+                <button
                   onClick={() => openMessageModal(availability.owner, availability)}
                   className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm"
                 >
@@ -909,7 +1011,10 @@ export default function AvailabilityDetailPage() {
 
       {/* Mobile Sticky Bottom Action Bar */}
       {showStickyBar && !messageModal.isOpen && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40 lg:hidden" style={{ paddingBottom: `calc(1rem + env(safe-area-inset-bottom))` }}>
+        <div
+          className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-40 lg:hidden"
+          style={{ paddingBottom: `calc(1rem + env(safe-area-inset-bottom))` }}
+        >
           <button
             onClick={() => openMessageModal(availability.owner, availability)}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg"

@@ -1,18 +1,14 @@
-"use client";
+'use client';
 
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Dialog, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 // A simple modal component which can be shown/hidden with a boolean and a function
 // Because of the setIsModalOpen function, you can't use it in a server component.
 const Modal = ({ isModalOpen, setIsModalOpen }) => {
   return (
     <Transition appear show={isModalOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        className="relative z-50"
-        onClose={() => setIsModalOpen(false)}
-      >
+      <Dialog as="div" className="relative z-50" onClose={() => setIsModalOpen(false)}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

@@ -1,0 +1,91 @@
+name: CI - Lint, Type Check, and Test
+
+# This workflow runs automatically on every Pull Request
+# It ensures code quality by checking linting, types, formatting, and tests
+# PRs cannot be merged unless all checks pass ✅
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+
+jobs:
+  quality-check:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.11.1]
+
+    steps:
+      # Step 1: Get the code from GitHub
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js (the JavaScript runtime)
+      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Step 3: Install all the project dependencies
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      # Step 4: Check code formatting with Prettier
+      - name: 💅 Check formatting
+        run: npm run format:check
+
+      # Step 5: Run ESLint to check code quality
+      - name: 🔍 Run ESLint
+        run: npm run lint
+
+      # Step 6: Check TypeScript types
+      - name: 🔎 Type check
+        run: npm run typecheck
+
+      # Step 7: Run all tests
+      - name: 🧪 Run tests
+        run: npm test
+        env:
+          # Set CI environment variable so tests run in CI mode
+          CI: true
+
+      # Step 8: Upload test coverage (optional)
+      - name: 📊 Upload coverage reports
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  # Build check - make sure the app actually builds
+  build-check:
+    name: Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.11.1
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🏗️ Build application
+        run: npm run build
+        env:
+          # Add any required environment variables for build
+          SKIP_ENV_VALIDATION: true

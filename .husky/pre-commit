@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged to check only the files you're committing
+# This keeps commits fast and catches issues before they reach GitHub!
+npx lint-staged

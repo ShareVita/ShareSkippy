@@ -1,7 +1,13 @@
-"use client";
+'use client';
 import { useState, useRef, useEffect } from 'react';
 
-export default function DatePicker({ selectedDate, onDateSelect, minDate, placeholder = "Select date", maxDate }) {
+export default function DatePicker({
+  selectedDate,
+  onDateSelect,
+  minDate,
+  placeholder = 'Select date',
+  maxDate,
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(selectedDate ? new Date(selectedDate) : null);
@@ -33,7 +39,7 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -46,28 +52,28 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     return days;
   };
 
   const handleDateSelect = (date) => {
     if (!date) return;
-    
+
     const minDateObj = minDate ? new Date(minDate) : new Date();
     minDateObj.setHours(0, 0, 0, 0);
-    
+
     if (date < minDateObj) return;
-    
+
     setSelectedDay(date);
     // Use local date formatting to avoid timezone issues
     const year = date.getFullYear();
@@ -98,7 +104,7 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
 
   const isDisabled = (date) => {
     if (!date) return false;
-    
+
     // Parse minDate safely to avoid timezone issues
     let minDateObj;
     if (minDate) {
@@ -108,9 +114,9 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
       minDateObj = new Date();
     }
     minDateObj.setHours(0, 0, 0, 0);
-    
+
     if (date < minDateObj) return true;
-    
+
     if (maxDate) {
       // Parse maxDate safely to avoid timezone issues
       const [year, month, day] = maxDate.split('-').map(Number);
@@ -118,14 +124,24 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
       maxDateObj.setHours(23, 59, 59, 999);
       return date > maxDateObj;
     }
-    
+
     return false;
   };
 
   const days = getDaysInMonth(currentMonth);
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -138,13 +154,25 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-left flex items-center justify-between"
       >
         <span className={selectedDate ? 'text-gray-900' : 'text-gray-500'}>
-          {selectedDate ? (() => {
-            const [year, month, day] = selectedDate.split('-').map(Number);
-            return formatDate(new Date(year, month - 1, day));
-          })() : placeholder}
+          {selectedDate
+            ? (() => {
+                const [year, month, day] = selectedDate.split('-').map(Number);
+                return formatDate(new Date(year, month - 1, day));
+              })()
+            : placeholder}
         </span>
-        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <svg
+          className="w-5 h-5 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
         </svg>
       </button>
 
@@ -159,21 +187,31 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
-            
+
             <h3 className="text-lg font-semibold text-gray-900">
               {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
-            
+
             <button
               type="button"
               onClick={goToNextMonth}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>
@@ -198,17 +236,14 @@ export default function DatePicker({ selectedDate, onDateSelect, minDate, placeh
                 className={`
                   w-8 h-8 text-sm rounded-md transition-colors
                   ${!date ? 'cursor-default' : ''}
-                  ${isDisabled(date) 
-                    ? 'text-gray-300 cursor-not-allowed' 
-                    : 'hover:bg-blue-100 cursor-pointer'
+                  ${
+                    isDisabled(date)
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'hover:bg-blue-100 cursor-pointer'
                   }
-                  ${isToday(date) 
-                    ? 'bg-blue-200 text-blue-800 font-semibold' 
-                    : 'text-gray-700'
-                  }
-                  ${isSelected(date) 
-                    ? 'bg-blue-600 text-white font-semibold hover:bg-blue-700' 
-                    : ''
+                  ${isToday(date) ? 'bg-blue-200 text-blue-800 font-semibold' : 'text-gray-700'}
+                  ${
+                    isSelected(date) ? 'bg-blue-600 text-white font-semibold hover:bg-blue-700' : ''
                   }
                 `}
               >

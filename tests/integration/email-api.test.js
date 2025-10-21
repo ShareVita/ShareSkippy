@@ -17,14 +17,14 @@ const mockSupabase = {
   auth: {
     getUser: vi.fn().mockResolvedValue({
       data: { user: { id: 'test-user-id' } },
-      error: null
-    })
-  }
+      error: null,
+    }),
+  },
 };
 
 vi.mock('@/libs/supabase/server', () => ({
   createClient: vi.fn().mockReturnValue(mockSupabase),
-  createServiceClient: vi.fn().mockReturnValue(mockSupabase)
+  createServiceClient: vi.fn().mockReturnValue(mockSupabase),
 }));
 
 // Mock email templates
@@ -35,7 +35,7 @@ vi.mock('@/libs/emailTemplates', () => ({
   sendMeetingReminder: vi.fn().mockResolvedValue({ id: 'reminder-email-id' }),
   sendFollowUp3DaysEmail: vi.fn().mockResolvedValue({ id: 'followup-3day-email-id' }),
   sendFollowUpEmail: vi.fn().mockResolvedValue({ id: 'followup-email-id' }),
-  sendReviewEmail: vi.fn().mockResolvedValue({ id: 'review-email-id' })
+  sendReviewEmail: vi.fn().mockResolvedValue({ id: 'review-email-id' }),
 }));
 
 describe('Email API Integration Tests', () => {
@@ -47,15 +47,15 @@ describe('Email API Integration Tests', () => {
   describe('POST /api/emails/welcome', () => {
     it('should send welcome email for valid user', async () => {
       const { default: handler } = await import('@/app/api/emails/welcome/route');
-      
+
       mockSupabase.single.mockResolvedValue({
         data: { email: 'test@example.com', first_name: 'John' },
-        error: null
+        error: null,
       });
 
       const request = new NextRequest('http://localhost:3000/api/emails/welcome', {
         method: 'POST',
-        body: JSON.stringify({ userId: 'test-user-id' })
+        body: JSON.stringify({ userId: 'test-user-id' }),
       });
 
       const response = await handler(request);
@@ -68,15 +68,15 @@ describe('Email API Integration Tests', () => {
 
     it('should return 404 for non-existent user', async () => {
       const { default: handler } = await import('@/app/api/emails/welcome/route');
-      
+
       mockSupabase.single.mockResolvedValue({
         data: null,
-        error: { message: 'User not found' }
+        error: { message: 'User not found' },
       });
 
       const request = new NextRequest('http://localhost:3000/api/emails/welcome', {
         method: 'POST',
-        body: JSON.stringify({ userId: 'non-existent-user' })
+        body: JSON.stringify({ userId: 'non-existent-user' }),
       });
 
       const response = await handler(request);
@@ -90,19 +90,19 @@ describe('Email API Integration Tests', () => {
   describe('POST /api/emails/send-new-message', () => {
     it('should send new message notification', async () => {
       const { default: handler } = await import('@/app/api/emails/send-new-message/route');
-      
+
       mockSupabase.single
         .mockResolvedValueOnce({
           data: { email: 'recipient@example.com', first_name: 'Jane' },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { first_name: 'John', last_name: 'Doe' },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { email_notifications: true },
-          error: null
+          error: null,
         });
 
       const request = new NextRequest('http://localhost:3000/api/emails/send-new-message', {
@@ -111,8 +111,8 @@ describe('Email API Integration Tests', () => {
           recipientId: 'recipient-id',
           senderId: 'sender-id',
           messagePreview: 'Hello there!',
-          messageId: 'message-123'
-        })
+          messageId: 'message-123',
+        }),
       });
 
       const response = await handler(request);
@@ -124,19 +124,19 @@ describe('Email API Integration Tests', () => {
 
     it('should skip email if notifications disabled', async () => {
       const { default: handler } = await import('@/app/api/emails/send-new-message/route');
-      
+
       mockSupabase.single
         .mockResolvedValueOnce({
           data: { email: 'recipient@example.com', first_name: 'Jane' },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { first_name: 'John', last_name: 'Doe' },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { email_notifications: false },
-          error: null
+          error: null,
         });
 
       const request = new NextRequest('http://localhost:3000/api/emails/send-new-message', {
@@ -145,8 +145,8 @@ describe('Email API Integration Tests', () => {
           recipientId: 'recipient-id',
           senderId: 'sender-id',
           messagePreview: 'Hello there!',
-          messageId: 'message-123'
-        })
+          messageId: 'message-123',
+        }),
       });
 
       const response = await handler(request);
@@ -160,7 +160,7 @@ describe('Email API Integration Tests', () => {
   describe('POST /api/emails/meeting-scheduled', () => {
     it('should send meeting confirmation for confirmed meetings', async () => {
       const { default: handler } = await import('@/app/api/emails/meeting-scheduled/route');
-      
+
       mockSupabase.single
         .mockResolvedValueOnce({
           data: {
@@ -174,21 +174,21 @@ describe('Email API Integration Tests', () => {
             requester: { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
             recipient: { first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
             requester_dog: { name: 'Buddy' },
-            recipient_dog: { name: 'Max' }
+            recipient_dog: { name: 'Max' },
           },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { email_notifications: true },
-          error: null
+          error: null,
         });
 
       const request = new NextRequest('http://localhost:3000/api/emails/meeting-scheduled', {
         method: 'POST',
         body: JSON.stringify({
           meetingId: 'meeting-123',
-          userId: 'requester-id'
-        })
+          userId: 'requester-id',
+        }),
       });
 
       const response = await handler(request);
@@ -200,23 +200,23 @@ describe('Email API Integration Tests', () => {
 
     it('should skip email for non-confirmed meetings', async () => {
       const { default: handler } = await import('@/app/api/emails/meeting-scheduled/route');
-      
+
       mockSupabase.single.mockResolvedValue({
         data: {
           id: 'meeting-123',
           status: 'pending',
           requester_id: 'requester-id',
-          recipient_id: 'recipient-id'
+          recipient_id: 'recipient-id',
         },
-        error: null
+        error: null,
       });
 
       const request = new NextRequest('http://localhost:3000/api/emails/meeting-scheduled', {
         method: 'POST',
         body: JSON.stringify({
           meetingId: 'meeting-123',
-          userId: 'requester-id'
-        })
+          userId: 'requester-id',
+        }),
       });
 
       const response = await handler(request);
@@ -228,30 +228,32 @@ describe('Email API Integration Tests', () => {
   });
 
   describe('GET /api/cron/send-email-reminders', () => {
-    it('should send meeting reminders for tomorrow\'s meetings', async () => {
+    it("should send meeting reminders for tomorrow's meetings", async () => {
       const { GET } = await import('@/app/api/cron/send-email-reminders/route');
-      
+
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(0, 0, 0, 0);
-      
+
       const dayAfter = new Date(tomorrow);
       dayAfter.setDate(dayAfter.getDate() + 1);
 
       mockSupabase.select.mockResolvedValue({
-        data: [{
-          id: 'meeting-123',
-          status: 'confirmed',
-          scheduled_date: tomorrow.toISOString(),
-          location: 'Central Park',
-          requester_id: 'requester-id',
-          recipient_id: 'recipient-id',
-          requester: { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
-          recipient: { first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
-          requester_dog: { name: 'Buddy' },
-          recipient_dog: { name: 'Max' }
-        }],
-        error: null
+        data: [
+          {
+            id: 'meeting-123',
+            status: 'confirmed',
+            scheduled_date: tomorrow.toISOString(),
+            location: 'Central Park',
+            requester_id: 'requester-id',
+            recipient_id: 'recipient-id',
+            requester: { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+            recipient: { first_name: 'Jane', last_name: 'Smith', email: 'jane@example.com' },
+            requester_dog: { name: 'Buddy' },
+            recipient_dog: { name: 'Max' },
+          },
+        ],
+        error: null,
       });
 
       mockSupabase.update.mockResolvedValue({ error: null });
@@ -268,39 +270,46 @@ describe('Email API Integration Tests', () => {
   describe('GET /api/cron/send-follow-up-emails', () => {
     it('should send 1-week follow-up emails', async () => {
       const { GET } = await import('@/app/api/cron/send-follow-up-emails/route');
-      
+
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       sevenDaysAgo.setHours(0, 0, 0, 0);
 
       mockSupabase.select
         .mockResolvedValueOnce({
-          data: [{ id: 'user-123', email: 'user@example.com', first_name: 'John', created_at: sevenDaysAgo.toISOString() }],
-          error: null
+          data: [
+            {
+              id: 'user-123',
+              email: 'user@example.com',
+              first_name: 'John',
+              created_at: sevenDaysAgo.toISOString(),
+            },
+          ],
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { email_notifications: true },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { name: 'Buddy' },
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           count: 5,
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           count: 3,
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           count: 1,
-          error: null
+          error: null,
         })
         .mockResolvedValueOnce({
           data: [{ sender_id: 'user-456', recipient_id: 'user-123' }],
-          error: null
+          error: null,
         });
 
       mockSupabase.upsert.mockResolvedValue({ error: null });
@@ -317,19 +326,26 @@ describe('Email API Integration Tests', () => {
   describe('GET /api/cron/send-3day-follow-up-emails', () => {
     it('should send 3-day follow-up emails', async () => {
       const { GET } = await import('@/app/api/cron/send-3day-follow-up-emails/route');
-      
+
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
       threeDaysAgo.setHours(0, 0, 0, 0);
 
       mockSupabase.select
         .mockResolvedValueOnce({
-          data: [{ id: 'user-123', email: 'user@example.com', first_name: 'John', created_at: threeDaysAgo.toISOString() }],
-          error: null
+          data: [
+            {
+              id: 'user-123',
+              email: 'user@example.com',
+              first_name: 'John',
+              created_at: threeDaysAgo.toISOString(),
+            },
+          ],
+          error: null,
         })
         .mockResolvedValueOnce({
           data: { email_notifications: true, follow_up_3day_sent: false },
-          error: null
+          error: null,
         });
 
       mockSupabase.upsert.mockResolvedValue({ error: null });

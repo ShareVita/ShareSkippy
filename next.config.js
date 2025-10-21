@@ -4,9 +4,10 @@ const withNextBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   reactStrictMode: true,
-  // Temporarily disable ESLint during build for production deployment
+  // ESLint is now enabled! All critical errors have been resolved.
+  // Remaining warnings will be fixed incrementally (see LINT_CLEANUP_PLAN.md)
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // ✅ ESLint now runs during builds!
   },
   // Performance optimizations
   experimental: {
@@ -80,11 +81,11 @@ const nextConfig = {
   images: {
     domains: [
       // NextJS <Image> component needs to whitelist domains for src={}
-      "lh3.googleusercontent.com",
-      "pbs.twimg.com",
-      "images.unsplash.com",
-      "logos-world.net",
-      "utrvultsbtsywypztfnn.supabase.co", // Supabase storage domain
+      'lh3.googleusercontent.com',
+      'pbs.twimg.com',
+      'images.unsplash.com',
+      'logos-world.net',
+      'utrvultsbtsywypztfnn.supabase.co', // Supabase storage domain
     ],
     // Add image optimization settings
     formats: ['image/webp', 'image/avif'],
