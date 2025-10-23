@@ -138,7 +138,7 @@ export default function MessagesPage() {
     };
   }, [selectedConversationKey, selectedConversation]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -197,13 +197,13 @@ export default function MessagesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, selectedConversation]);
 
-  const fetchMessages = async (conversationId) => {
+  const fetchMessages = useCallback(async (conversationId) => {
     if (!conversationId || !selectedConversation) return;
 
     try {
-      const { participant1_id, participant2_id, availability_id } = selectedConversation;
+      const { participant1_id, participant2_id } = selectedConversation;
 
       // Fetch messages arguments
 
@@ -255,7 +255,7 @@ export default function MessagesPage() {
       console.error('Error fetching messages:', error);
       return []; // Return empty array on error
     }
-  };
+  }, [selectedConversation]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -420,13 +420,13 @@ export default function MessagesPage() {
               </div>
             ) : (
               conversations.map((conversation) => (
-                <div
+                <button
                   key={conversation.id}
                   onClick={() => {
                     setSelectedConversation(conversation);
                     setShowConversations(false); // Hide sidebar on mobile after selection
                   }}
-                  className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors ${
+                  className={`w-full text-left p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors ${
                     selectedConversation?.id === conversation.id ? 'bg-blue-50 border-blue-200' : ''
                   }`}
                 >
@@ -454,7 +454,7 @@ export default function MessagesPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>

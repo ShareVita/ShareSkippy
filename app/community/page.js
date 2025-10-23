@@ -782,7 +782,7 @@ openMessageModal(post.owner, post);
                 <span className="mr-2">🐕</span>
                 Dog Owners in the Community
               </h3>
-              <ProfilesList role="dog_owner" onMessage={openMessageModal} />
+              <ProfilesList userType="dog_owner" onMessage={openMessageModal} />
             </div>
           </div>
         )}
@@ -943,7 +943,7 @@ openMessageModal(post.owner, post);
                 <span className="mr-2">🤝</span>
                 PetPals in the Community
               </h3>
-              <ProfilesList role="petpal" onMessage={openMessageModal} />
+              <ProfilesList userType="petpal" onMessage={openMessageModal} />
             </div>
           </div>
         )}

@@ -172,10 +172,6 @@ export async function GET(request) {
       );
 
       // Distance calculation completed
-        fromLng: currentProfile.display_lng,
-        toLat: profile.display_lat,
-        toLng: profile.display_lng,
-      });
 
       return {
         ...profile,

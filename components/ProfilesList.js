@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import ProfileCard from './ProfileCard';
 
-export default function ProfilesList({ role, onMessage }) {
+export default function ProfilesList({ userType, onMessage }) {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -99,11 +99,11 @@ export default function ProfilesList({ role, onMessage }) {
     }
   }, [isVisible, profiles.length, loading, fetchProfiles]);
 
-  // Filter profiles by role
+  // Filter profiles by userType
   const filteredProfiles = profiles.filter((profile) => {
-    if (role === 'dog_owner') {
+    if (userType === 'dog_owner') {
       return profile.role === 'dog_owner' || profile.role === 'both';
-    } else if (role === 'petpal') {
+    } else if (userType === 'petpal') {
       return profile.role === 'petpal' || profile.role === 'both';
     }
     return true;
@@ -182,9 +182,9 @@ export default function ProfilesList({ role, onMessage }) {
       {/* No Profiles State */}
       {!loading && filteredProfiles.length === 0 && profiles.length > 0 && (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">{role === 'dog_owner' ? '🐕' : '🤝'}</div>
+          <div className="text-6xl mb-4">{userType === 'dog_owner' ? '🐕' : '🤝'}</div>
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-            No {role === 'dog_owner' ? 'Dog Owners' : 'PetPals'} available right now
+            No {userType === 'dog_owner' ? 'Dog Owners' : 'PetPals'} available right now
           </h3>
           <p className="text-sm sm:text-base text-gray-600">Check back later for new profiles!</p>
         </div>
