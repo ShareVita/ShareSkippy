@@ -1,4 +1,7 @@
 'use client';
+import { useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/contexts/UserContext';
@@ -123,7 +126,7 @@ export default function MyDogsPage() {
                 {/* Dog Photo */}
                 <div className="aspect-square bg-gray-100 relative group">
                   {dog.photo_url ? (
-                    <img
+                    <Image
                       src={dog.photo_url}
                       alt={dog.name}
                       className="w-full h-full object-cover"
