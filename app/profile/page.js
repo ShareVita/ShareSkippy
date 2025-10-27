@@ -8,7 +8,6 @@ import { formatLocation } from '@/libs/utils';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
 import UserReviews from '../../components/UserReviews';
 import DeletionRequestStatus from '../../components/DeletionRequestStatus';
-import { formatLocation } from '@/libs/utils';
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser();
