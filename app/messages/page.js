@@ -186,7 +186,7 @@ export default function MessagesPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, selectedConversation, setSelectedConvsersation]);
+  }, [user, selectedConversation, setSelectedConversation]);
 
   useEffect(() => {
     if (user && !authLoading) {
