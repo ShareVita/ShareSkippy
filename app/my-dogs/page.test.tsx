@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import React from 'react'; // Import React for types
+import React from 'react';
 import { useUser } from '@/components/providers/SupabaseUserProvider';
 import { useUserDogs } from '@/hooks/useProfile';
 import { supabase } from '@/libs/supabase';
