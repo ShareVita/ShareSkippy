@@ -9,9 +9,7 @@ export default function OurStoryPage() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-              Our Story
-            </h1>
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">Our Story</h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               How a simple act of kindness became a community movement
             </p>
@@ -28,13 +26,18 @@ export default function OurStoryPage() {
           </h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              Hi, I'm Kaia, the founder of ShareSkippy — a free, community-driven way to connect dog owners with dog lovers for walks, hikes, cuddles, and adventures.
+              Hi, I&apos;m Kaia, the founder of ShareSkippy — a free, community-driven way to
+              connect dog owners with dog lovers for walks, hikes, cuddles, and adventures.
             </p>
             <p>
-              The idea came from a simple act of kindness. A close friend of mine was very sick and couldn't take his dog out for more than a few quick bathroom breaks. I posted on a local Oakland Facebook group asking if anyone could help. Within hours, over 40 people replied. Total strangers. All offering to walk a dog they'd never met.
+              The idea came from a simple act of kindness. A close friend of mine was very sick and
+              couldn&apos;t take his dog out for more than a few quick bathroom breaks. I posted on
+              a local Oakland Facebook group asking if anyone could help. Within hours, over 40
+              people replied. Total strangers. All offering to walk a dog they&apos;d never met.
             </p>
             <p>
-              That moment stuck with me. It showed me how powerful small acts of care can be — and how dogs can bring people together faster than almost anything else.
+              That moment stuck with me. It showed me how powerful small acts of care can be — and
+              how dogs can bring people together faster than almost anything else.
             </p>
           </div>
         </section>
@@ -46,14 +49,21 @@ export default function OurStoryPage() {
           </h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              I didn't want to build "the next Rover" or "another app." I wanted to create a space that feels neighborly — where people help each other because they care, not because they're being paid.
+              I didn&apos;t want to build &quot;the next Rover&quot; or &quot;another app.&quot; I
+              wanted to create a space that feels neighborly — where people help each other because
+              they care, not because they&apos;re being paid.
             </p>
             <p>
-              There are already plenty of platforms that make dog care transactional. ShareSkippy is about connection over commerce. It's for the busy dog owner who needs help during the day, the college student who misses their dog back home, the retiree who just wants some furry company on walks, and everyone in between.
+              There are already plenty of platforms that make dog care transactional. ShareSkippy is
+              about connection over commerce. It&apos;s for the busy dog owner who needs help during
+              the day, the college student who misses their dog back home, the retiree who just
+              wants some furry company on walks, and everyone in between.
             </p>
             <p className="font-semibold text-gray-900">
-              Dogs get more love and exercise.<br />
-              Humans get more connection and purpose.<br />
+              Dogs get more love and exercise.
+              <br />
+              Humans get more connection and purpose.
+              <br />
               Everyone wins.
             </p>
           </div>
@@ -66,15 +76,19 @@ export default function OurStoryPage() {
           </h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              When I started, I had zero coding experience. I was coming out of a stressful job in business and operations strategy and needed to build something that felt good.
+              When I started, I had zero coding experience. I was coming out of a stressful job in
+              business and operations strategy and needed to build something that felt good.
             </p>
             <p>
-              So I taught myself to code — with a lot of late nights, a lot of trial and error, and a little help from AI tools. The result is what you see here: ShareSkippy.com, built from scratch, designed to be simple, kind, and safe.
+              So I taught myself to code — with a lot of late nights, a lot of trial and error, and
+              a little help from AI tools. The result is what you see here: ShareSkippy.com, built
+              from scratch, designed to be simple, kind, and safe.
             </p>
             <p>
-              However, I'm still learning and always open to feedback or guidance. Feel free to reach me at{' '}
-              <a 
-                href="mailto:kaia@shareskippy.com" 
+              However, I&apos;m still learning and always open to feedback or guidance. Feel free to
+              reach me at{' '}
+              <a
+                href="mailto:kaia@shareskippy.com"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
               >
                 kaia@shareskippy.com
@@ -94,7 +108,7 @@ export default function OurStoryPage() {
               <span className="text-3xl">💛</span>
               <div>
                 <strong className="block mb-1">Free for everyone.</strong>
-                There's no payment or membership required — kindness shouldn't cost money.
+                There&apos;s no payment or membership required — kindness shouldn&apos;t cost money.
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -108,14 +122,16 @@ export default function OurStoryPage() {
               <span className="text-3xl">🌱</span>
               <div>
                 <strong className="block mb-1">Community Care.</strong>
-                ShareSkippy is part of my nonprofit, ShareVita, so that time spent helping a neighbor with their dog can count as community service.
+                ShareSkippy is part of my nonprofit, ShareVita, so that time spent helping a
+                neighbor with their dog can count as community service.
               </div>
             </div>
             <div className="flex items-start gap-4">
               <span className="text-3xl">🔒</span>
               <div>
                 <strong className="block mb-1">Safety through transparency.</strong>
-                Users can link their social profiles like LinkedIn or Instagram to help others get to know them before meeting in person.
+                Users can link their social profiles like LinkedIn or Instagram to help others get
+                to know them before meeting in person.
               </div>
             </div>
           </div>
@@ -123,17 +139,19 @@ export default function OurStoryPage() {
 
         {/* About Me */}
         <section className="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            About Me
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">About Me</h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              I was born in Norway, grew up in San Diego, studied at Cornell, and now live in Oakland, California — a city that feels like home in every sense. I spend most of my free time walking in circles around the city, camping in the summer, and skiing in the winter.
+              I was born in Norway, grew up in San Diego, studied at Cornell, and now live in
+              Oakland, California — a city that feels like home in every sense. I spend most of my
+              free time walking in circles around the city, camping in the summer, and skiing in the
+              winter.
             </p>
             <p>
-              I write about building things — startups, communities, and sometimes myself — on my blog:{' '}
-              <a 
-                href="https://medium.com/@kcolban" 
+              I write about building things — startups, communities, and sometimes myself — on my
+              blog:{' '}
+              <a
+                href="https://medium.com/@kcolban"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
@@ -142,24 +160,24 @@ export default function OurStoryPage() {
               </a>
             </p>
             <p>
-              If you want to follow the journey of ShareSkippy, or just read honest thoughts on creating, failing, and figuring it out, that's where I share it all.
+              If you want to follow the journey of ShareSkippy, or just read honest thoughts on
+              creating, failing, and figuring it out, that&apos;s where I share it all.
             </p>
           </div>
         </section>
 
         {/* Looking Forward */}
         <section className="bg-white rounded-2xl shadow-lg p-8 md:p-12 mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Looking Forward
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Looking Forward</h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              We'd like to grow and expand! To do so, I'm looking for donations (501(c)(3) pending) and more volunteers and interns to help out.
+              We&apos;d like to grow and expand! To do so, I&apos;m looking for donations (501(c)(3)
+              pending) and more volunteers and interns to help out.
             </p>
             <p>
-              If you'd like to get involved, please email me at{' '}
-              <a 
-                href="mailto:kaia@shareskippy.com" 
+              If you&apos;d like to get involved, please email me at{' '}
+              <a
+                href="mailto:kaia@shareskippy.com"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
               >
                 kaia@shareskippy.com
@@ -196,4 +214,3 @@ export default function OurStoryPage() {
     </div>
   );
 }
-
