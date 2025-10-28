@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/libs/supabase/client';
+import Image from 'next/image';
 
 export default function UserRatingsEnhanced({ userId, userRole }) {
   const [reviews, setReviews] = useState([]);
@@ -122,7 +123,7 @@ export default function UserRatingsEnhanced({ userId, userRole }) {
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center">
                 {review.reviewer?.profile_photo_url && (
-                  <img
+                  <Image
                     src={review.reviewer.profile_photo_url}
                     alt="Reviewer"
                     className="w-8 h-8 rounded-full mr-3 object-cover"
