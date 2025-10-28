@@ -21,13 +21,16 @@ export const useUser = () => {
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Memoize the supabase client to prevent recreation on every render
   const supabase = useMemo(() => createClient(), []);
 
   const refreshUser = async () => {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
       if (error) throw error;
       setUser(user);
       return user;
@@ -52,13 +55,16 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
-    
+
     const initializeAuth = async () => {
       try {
         // Get initial user
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error,
+        } = await supabase.auth.getUser();
         if (error) throw error;
-        
+
         if (mounted) {
           setUser(user);
           setLoading(false);
@@ -75,14 +81,14 @@ export const UserProvider = ({ children }) => {
     initializeAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (mounted) {
-          setUser(session?.user ?? null);
-          setLoading(false);
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (mounted) {
+        setUser(session?.user ?? null);
+        setLoading(false);
       }
-    );
+    });
 
     return () => {
       mounted = false;
@@ -90,16 +96,15 @@ export const UserProvider = ({ children }) => {
     };
   }, [supabase]);
 
-  const value = useMemo(() => ({
-    user,
-    loading,
-    signOut,
-    refreshUser,
-  }), [user, loading]);
-
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      signOut,
+      refreshUser,
+    }),
+    [user, loading, signOut, refreshUser]
   );
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
