@@ -20,6 +20,7 @@ const CrispChat = () => {
     if (config?.crisp?.id && !crispInitialized) {
       // Set up Crisp only once
       Crisp.configure(config.crisp.id);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCrispInitialized(true);
     }
   }, [crispInitialized]);
