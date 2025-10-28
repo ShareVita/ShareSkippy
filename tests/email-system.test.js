@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Comprehensive tests for the centralized email system
  * Run with: npm test tests/email-system.test.js
@@ -5,14 +7,14 @@
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { createServiceClient } from '@/libs/supabase/server';
-import { 
-  sendEmail, 
-  scheduleEmail, 
-  recordUserActivity, 
+import {
+  sendEmail,
+  scheduleEmail,
+  recordUserActivity,
   processScheduledEmails,
   processReengageEmails,
   scheduleMeetingReminder,
-  loadEmailTemplate
+  loadEmailTemplate,
 } from '@/libs/email';
 
 // Mock the Supabase client
@@ -21,24 +23,24 @@ jest.mock('@/libs/supabase/server', () => ({
     from: jest.fn(() => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
-          single: jest.fn(() => ({ data: null, error: null }))
-        }))
+          single: jest.fn(() => ({ data: null, error: null })),
+        })),
       })),
       insert: jest.fn(() => ({
         select: jest.fn(() => ({
-          single: jest.fn(() => ({ data: { id: 1 }, error: null }))
-        }))
+          single: jest.fn(() => ({ data: { id: 1 }, error: null })),
+        })),
       })),
       update: jest.fn(() => ({
-        eq: jest.fn(() => ({ error: null }))
-      }))
-    }))
-  }))
+        eq: jest.fn(() => ({ error: null })),
+      })),
+    })),
+  })),
 }));
 
 // Mock the Resend email sending
 jest.mock('@/libs/resend', () => ({
-  sendEmail: jest.fn(() => Promise.resolve({ id: 'test-message-id' }))
+  sendEmail: jest.fn(() => Promise.resolve({ id: 'test-message-id' })),
 }));
 
 describe('Email System Tests', () => {
@@ -49,20 +51,20 @@ describe('Email System Tests', () => {
       from: jest.fn(() => ({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn(() => ({ data: null, error: null }))
-          }))
+            single: jest.fn(() => ({ data: null, error: null })),
+          })),
         })),
         insert: jest.fn(() => ({
           select: jest.fn(() => ({
-            single: jest.fn(() => ({ data: { id: 1 }, error: null }))
-          }))
+            single: jest.fn(() => ({ data: { id: 1 }, error: null })),
+          })),
         })),
         update: jest.fn(() => ({
-          eq: jest.fn(() => ({ error: null }))
-        }))
-      }))
+          eq: jest.fn(() => ({ error: null })),
+        })),
+      })),
     };
-    
+
     createServiceClient.mockReturnValue(mockSupabase);
   });
 
@@ -76,16 +78,16 @@ describe('Email System Tests', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn(() => ({ data: null, error: null }))
-          }))
-        }))
+            single: jest.fn(() => ({ data: null, error: null })),
+          })),
+        })),
       });
 
       const result = await sendEmail({
         userId: 'test-user-id',
         to: 'test@example.com',
         emailType: 'welcome',
-        payload: { userName: 'Test User' }
+        payload: { userName: 'Test User' },
       });
 
       expect(result.status).toBe('sent');
@@ -97,19 +99,19 @@ describe('Email System Tests', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn(() => ({ 
-              data: { id: 1, status: 'sent' }, 
-              error: null 
-            }))
-          }))
-        }))
+            single: jest.fn(() => ({
+              data: { id: 1, status: 'sent' },
+              error: null,
+            })),
+          })),
+        })),
       });
 
       const result = await sendEmail({
         userId: 'test-user-id',
         to: 'test@example.com',
         emailType: 'welcome',
-        payload: { userName: 'Test User' }
+        payload: { userName: 'Test User' },
       });
 
       expect(result.status).toBe('sent');
@@ -123,17 +125,19 @@ describe('Email System Tests', () => {
       mockSupabase.from.mockReturnValue({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            single: jest.fn(() => ({ data: null, error: null }))
-          }))
-        }))
+            single: jest.fn(() => ({ data: null, error: null })),
+          })),
+        })),
       });
 
-      await expect(sendEmail({
-        userId: 'test-user-id',
-        to: 'test@example.com',
-        emailType: 'welcome',
-        payload: { userName: 'Test User' }
-      })).rejects.toThrow('Email sending failed');
+      await expect(
+        sendEmail({
+          userId: 'test-user-id',
+          to: 'test@example.com',
+          emailType: 'welcome',
+          payload: { userName: 'Test User' },
+        })
+      ).rejects.toThrow('Email sending failed');
     });
   });
 
@@ -145,7 +149,7 @@ describe('Email System Tests', () => {
         userId: 'test-user-id',
         emailType: 'nurture_day3',
         runAfter,
-        payload: { userName: 'Test User' }
+        payload: { userName: 'Test User' },
       });
 
       expect(mockSupabase.from).toHaveBeenCalledWith('scheduled_emails');
@@ -153,7 +157,7 @@ describe('Email System Tests', () => {
         user_id: 'test-user-id',
         email_type: 'nurture_day3',
         run_after: runAfter.toISOString(),
-        payload: { userName: 'Test User' }
+        payload: { userName: 'Test User' },
       });
     });
   });
@@ -163,14 +167,14 @@ describe('Email System Tests', () => {
       await recordUserActivity({
         userId: 'test-user-id',
         event: 'login',
-        metadata: { source: 'test' }
+        metadata: { source: 'test' },
       });
 
       expect(mockSupabase.from).toHaveBeenCalledWith('user_activity');
       expect(mockSupabase.from().insert).toHaveBeenCalledWith({
         user_id: 'test-user-id',
         event: 'login',
-        metadata: { source: 'test' }
+        metadata: { source: 'test' },
       });
     });
   });
@@ -184,7 +188,7 @@ describe('Email System Tests', () => {
           email_type: 'nurture_day3',
           run_after: new Date(Date.now() - 1000).toISOString(),
           payload: { userName: 'Test User 1' },
-          picked_at: null
+          picked_at: null,
         },
         {
           id: 2,
@@ -192,13 +196,13 @@ describe('Email System Tests', () => {
           email_type: 'welcome',
           run_after: new Date(Date.now() - 2000).toISOString(),
           payload: { userName: 'Test User 2' },
-          picked_at: null
-        }
+          picked_at: null,
+        },
       ];
 
       const mockUsers = [
         { id: 'test-user-1', email: 'user1@example.com', first_name: 'User 1' },
-        { id: 'test-user-2', email: 'user2@example.com', first_name: 'User 2' }
+        { id: 'test-user-2', email: 'user2@example.com', first_name: 'User 2' },
       ];
 
       // Mock scheduled emails query
@@ -209,26 +213,26 @@ describe('Email System Tests', () => {
               lte: jest.fn(() => ({
                 is: jest.fn(() => ({
                   order: jest.fn(() => ({
-                    limit: jest.fn(() => ({ data: mockScheduledEmails, error: null }))
-                  }))
-                }))
-              }))
-            }))
+                    limit: jest.fn(() => ({ data: mockScheduledEmails, error: null })),
+                  })),
+                })),
+              })),
+            })),
           };
         }
         if (table === 'profiles') {
           return {
             select: jest.fn(() => ({
               eq: jest.fn(() => ({
-                single: jest.fn(() => ({ data: mockUsers[0], error: null }))
-              }))
-            }))
+                single: jest.fn(() => ({ data: mockUsers[0], error: null })),
+              })),
+            })),
           };
         }
         return {
           update: jest.fn(() => ({
-            eq: jest.fn(() => ({ error: null }))
-          }))
+            eq: jest.fn(() => ({ error: null })),
+          })),
         };
       });
 
@@ -247,7 +251,7 @@ describe('Email System Tests', () => {
         userId: 'test-user-id',
         meetingId: 'test-meeting-id',
         meetingTitle: 'Test Meeting',
-        startsAt
+        startsAt,
       });
 
       expect(mockSupabase.from).toHaveBeenCalledWith('scheduled_emails');
@@ -257,8 +261,8 @@ describe('Email System Tests', () => {
         run_after: expect.any(String),
         payload: expect.objectContaining({
           meetingId: 'test-meeting-id',
-          meetingTitle: 'Test Meeting'
-        })
+          meetingTitle: 'Test Meeting',
+        }),
       });
     });
   });
@@ -267,7 +271,7 @@ describe('Email System Tests', () => {
     it('should load and process email template', async () => {
       const template = await loadEmailTemplate('welcome', {
         userName: 'Test User',
-        appUrl: 'https://shareskippy.com'
+        appUrl: 'https://shareskippy.com',
       });
 
       expect(template.subject).toContain('Welcome to ShareSkippy');
@@ -276,8 +280,9 @@ describe('Email System Tests', () => {
     });
 
     it('should handle invalid email type', async () => {
-      await expect(loadEmailTemplate('invalid_type', {}))
-        .rejects.toThrow('Unknown email type: invalid_type');
+      await expect(loadEmailTemplate('invalid_type', {})).rejects.toThrow(
+        'Unknown email type: invalid_type'
+      );
     });
   });
 
@@ -288,8 +293,8 @@ describe('Email System Tests', () => {
           id: 'test-user-1',
           email: 'user1@example.com',
           first_name: 'User 1',
-          user_activity: { at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() }
-        }
+          user_activity: { at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+        },
       ];
 
       // Mock inactive users query
@@ -300,11 +305,11 @@ describe('Email System Tests', () => {
               lt: jest.fn(() => ({
                 eq: jest.fn(() => ({
                   not: jest.fn(() => ({
-                    not: jest.fn(() => ({ data: mockInactiveUsers, error: null }))
-                  }))
-                }))
-              }))
-            }))
+                    not: jest.fn(() => ({ data: mockInactiveUsers, error: null })),
+                  })),
+                })),
+              })),
+            })),
           };
         }
         if (table === 'email_events') {
@@ -314,16 +319,16 @@ describe('Email System Tests', () => {
                 eq: jest.fn(() => ({
                   eq: jest.fn(() => ({
                     gte: jest.fn(() => ({
-                      single: jest.fn(() => ({ data: null, error: null }))
-                    }))
-                  }))
-                }))
-              }))
-            }))
+                      single: jest.fn(() => ({ data: null, error: null })),
+                    })),
+                  })),
+                })),
+              })),
+            })),
           };
         }
         return {
-          insert: jest.fn(() => ({ error: null }))
+          insert: jest.fn(() => ({ error: null })),
         };
       });
 
