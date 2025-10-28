@@ -65,7 +65,7 @@ export default function ProfileEditPage() {
     // Try to load draft first, then load profile
     const draft = loadDraft();
     if (draft) {
-      // eslint-disable-next-line no-console
+       
       console.log('📂 Restoring profile draft from sessionStorage');
       setLoading(false);
     } else {
@@ -251,14 +251,14 @@ export default function ProfileEditPage() {
         throw new Error(`Database error: ${error.message} (Code: ${error.code})`);
       }
 
-      // eslint-disable-next-line no-console
+       
       console.log('Profile saved successfully:', data);
       toast.success('Profile saved successfully!');
       
       // Clear the draft since profile is now saved
       clearDraft();
       
-      // eslint-disable-next-line no-console
+       
       console.log('Redirecting to welcome page...');
       
       // Use window.location for a full page navigation to ensure proper context loading
