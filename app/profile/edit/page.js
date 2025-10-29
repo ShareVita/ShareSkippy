@@ -1,9 +1,9 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/libs/supabase/client";
-import { useUser } from "@/libs/supabase/hooks";
-import { useProfileDraft } from "@/hooks/useProfileDraft";
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/libs/supabase/client';
+import { useUser } from '@/libs/supabase/hooks';
+import { useProfileDraft } from '@/hooks/useProfileDraft';
 import toast from 'react-hot-toast';
 import PhotoUpload from '../../../components/ui/PhotoUpload';
 import { formatLocation } from '@/libs/utils';
@@ -41,31 +41,24 @@ export default function ProfileEditPage() {
     city: '',
     street_address: '',
     state: '',
-    zip_code: ''
+    zip_code: '',
   };
 
   // Use the sessionStorage-based profile draft hook
-  const {
-    profile,
-    setProfile,
-    loadDraft,
-    clearDraft,
-    hasDraft,
-    draftSource
-  } = useProfileDraft(initialProfile);
+  const { profile, setProfile, loadDraft, clearDraft, hasDraft, draftSource } =
+    useProfileDraft(initialProfile);
 
   useEffect(() => {
     if (userLoading) return;
-    
+
     if (!user) {
       router.push('/signin');
       return;
     }
-    
+
     // Try to load draft first, then load profile
     const draft = loadDraft();
     if (draft) {
-       
       console.log('📂 Restoring profile draft from sessionStorage');
       setLoading(false);
     } else {
@@ -76,9 +69,9 @@ export default function ProfileEditPage() {
   const loadProfile = async () => {
     try {
       const supabase = createClient();
-      
+
       console.log('Loading profile for user:', user?.id);
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -94,19 +87,19 @@ export default function ProfileEditPage() {
           throw error;
         }
       }
-      
+
       // Get Google auth metadata for pre-filling
       const userMetadata = user?.user_metadata || {};
       const googleGivenName = userMetadata?.given_name || userMetadata?.first_name;
       const googleFamilyName = userMetadata?.family_name || userMetadata?.last_name;
       const googlePicture = userMetadata?.picture || userMetadata?.avatar_url;
-      
+
       console.log('🔍 Debug: Google user metadata for pre-filling:', {
         given_name: googleGivenName,
         family_name: googleFamilyName,
-        picture: googlePicture
+        picture: googlePicture,
       });
-      
+
       if (data) {
         console.log('Profile loaded successfully:', data);
         setProfile({
@@ -134,7 +127,7 @@ export default function ProfileEditPage() {
           city: data.city || '',
           street_address: data.street_address || '',
           state: data.state || '',
-          zip_code: data.zip_code || ''
+          zip_code: data.zip_code || '',
         });
       } else {
         console.log('No profile data found, using Google data for pre-filling');
@@ -163,10 +156,9 @@ export default function ProfileEditPage() {
           city: '',
           street_address: '',
           state: '',
-          zip_code: ''
+          zip_code: '',
         });
       }
-
     } catch (err) {
       console.error('Error loading profile:', err);
       toast.error(`Failed to load profile: ${err.message}`);
@@ -181,10 +173,17 @@ export default function ProfileEditPage() {
 
     try {
       const supabase = createClient();
-      
+
       // Validate required fields
-      if (!profile.first_name?.trim() || !profile.last_name?.trim() || !profile.phone_number?.trim() || !profile.role?.trim()) {
-        toast.error('Please fill in all required fields (First Name, Last Name, Phone Number, and Role)');
+      if (
+        !profile.first_name?.trim() ||
+        !profile.last_name?.trim() ||
+        !profile.phone_number?.trim() ||
+        !profile.role?.trim()
+      ) {
+        toast.error(
+          'Please fill in all required fields (First Name, Last Name, Phone Number, and Role)'
+        );
         setSaving(false);
         return;
       }
@@ -217,14 +216,14 @@ export default function ProfileEditPage() {
         street_address: profile.street_address?.trim() || null,
         state: profile.state?.trim() || null,
         zip_code: profile.zip_code?.trim() || null,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       // Format location data with proper capitalization
       const formattedLocation = formatLocation({
         neighborhood: profile.neighborhood?.trim() || '',
         city: profile.city?.trim() || '',
-        state: profile.state?.trim() || ''
+        state: profile.state?.trim() || '',
       });
 
       // Add location data with proper capitalization
@@ -239,33 +238,29 @@ export default function ProfileEditPage() {
       }
 
       console.log('Attempting to save profile with data:', profileData);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .upsert(profileData, {
-          onConflict: 'id'
-        });
+
+      const { data, error } = await supabase.from('profiles').upsert(profileData, {
+        onConflict: 'id',
+      });
 
       if (error) {
         console.error('Supabase error details:', error);
         throw new Error(`Database error: ${error.message} (Code: ${error.code})`);
       }
 
-       
       console.log('Profile saved successfully:', data);
       toast.success('Profile saved successfully!');
-      
+
       // Clear the draft since profile is now saved
       clearDraft();
-      
-       
+
       console.log('Redirecting to welcome page...');
-      
+
       // Use window.location for a full page navigation to ensure proper context loading
       window.location.href = '/onboarding/welcome';
     } catch (err) {
       console.error('Error saving profile:', err);
-      
+
       // Provide more specific error messages
       let errorMessage = 'Failed to save profile';
       if (err.message.includes('Database error:')) {
@@ -275,7 +270,7 @@ export default function ProfileEditPage() {
       } else if (err.message.includes('network')) {
         errorMessage = 'Network error. Please check your connection and try again.';
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setSaving(false);
@@ -284,30 +279,35 @@ export default function ProfileEditPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSupportPreferenceChange = (preference) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
       support_preferences: prev.support_preferences.includes(preference)
-        ? prev.support_preferences.filter(p => p !== preference)
-        : [...prev.support_preferences, preference]
+        ? prev.support_preferences.filter((p) => p !== preference)
+        : [...prev.support_preferences, preference],
     }));
   };
 
   const handlePhotoUpload = (photoUrl) => {
-    setProfile(prev => ({
+    setProfile((prev) => ({
       ...prev,
-      profile_photo_url: photoUrl
+      profile_photo_url: photoUrl,
     }));
   };
 
   const verifyAddress = async () => {
-    if (!profile.street_address.trim() || !profile.city.trim() || !profile.state.trim() || !profile.zip_code.trim()) {
+    if (
+      !profile.street_address.trim() ||
+      !profile.city.trim() ||
+      !profile.state.trim() ||
+      !profile.zip_code.trim()
+    ) {
       toast.error('Please fill in all address fields');
       return;
     }
@@ -316,16 +316,18 @@ export default function ProfileEditPage() {
     try {
       // Create a full address string for geocoding
       const fullAddress = `${profile.street_address}, ${profile.city}, ${profile.state} ${profile.zip_code}`;
-      
+
       // Get geocoding result
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&addressdetails=1`);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&addressdetails=1`
+      );
       const data = await response.json();
 
       if (data && data.length > 0) {
         const result = data[0];
         const lat = parseFloat(result.lat);
         const lng = parseFloat(result.lon);
-        
+
         // Pick area (first available) with mid-sized labels preferred:
         const area =
           result.address.suburb ||
@@ -334,8 +336,8 @@ export default function ProfileEditPage() {
           result.address.quarter ||
           result.address.ward ||
           result.address.district ||
-          result.address.neighborhood ||      // US spelling
-          result.address.neighbourhood ||     // Intl spelling
+          result.address.neighborhood || // US spelling
+          result.address.neighbourhood || // Intl spelling
           result.address.locality ||
           result.address.residential ||
           '';
@@ -356,18 +358,18 @@ export default function ProfileEditPage() {
         const formatted = formatLocation({
           neighborhood: area || '',
           city,
-          state
+          state,
         });
-        
+
         // Update profile with verified location (with proper capitalization)
-        
-        setProfile(prev => ({
+
+        setProfile((prev) => ({
           ...prev,
           display_lat: lat,
           display_lng: lng,
           neighborhood: formatted.neighborhood,
           city: formatted.city,
-          state: formatted.state
+          state: formatted.state,
         }));
 
         setAddressVerified(true);
@@ -395,14 +397,18 @@ export default function ProfileEditPage() {
   return (
     <div className="min-h-screen w-full bg-white max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6 text-black">Create Your Profile</h1>
-      
+
       {/* Draft indicator */}
       {hasDraft && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
@@ -413,17 +419,15 @@ export default function ProfileEditPage() {
           </div>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Profile Photo
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
               <PhotoUpload
                 onPhotoUploaded={handlePhotoUpload}
                 initialPhotoUrl={profile.profile_photo_url}
@@ -431,9 +435,7 @@ export default function ProfileEditPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
                 <input
                   type="text"
                   name="first_name"
@@ -445,9 +447,7 @@ export default function ProfileEditPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
                 <input
                   type="text"
                   name="last_name"
@@ -461,9 +461,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
               <input
                 type="email"
                 name="email"
@@ -474,9 +472,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
               <input
                 type="tel"
                 name="phone_number"
@@ -489,9 +485,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
               <select
                 name="role"
                 value={profile.role}
@@ -506,11 +500,8 @@ export default function ProfileEditPage() {
               </select>
             </div>
 
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
               <textarea
                 name="bio"
                 value={profile.bio}
@@ -523,19 +514,17 @@ export default function ProfileEditPage() {
           </div>
         </div>
 
-
         {/* Social Media Links */}
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Social Media Links</h2>
           <p className="text-sm text-gray-600 mb-4">
-            To help verify your identity and build trust in the community, please share your social media profiles.
+            To help verify your identity and build trust in the community, please share your social
+            media profiles.
           </p>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Facebook URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Facebook URL</label>
               <input
                 type="url"
                 name="facebook_url"
@@ -547,9 +536,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instagram URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Instagram URL</label>
               <input
                 type="url"
                 name="instagram_url"
@@ -561,9 +548,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                LinkedIn URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn URL</label>
               <input
                 type="url"
                 name="linkedin_url"
@@ -575,9 +560,7 @@ export default function ProfileEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Airbnb URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Airbnb URL</label>
               <input
                 type="url"
                 name="airbnb_url"
@@ -608,9 +591,10 @@ export default function ProfileEditPage() {
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-lg font-semibold mb-4">Location</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Enter your address to help community members find you. Only your neighborhood and city will be shown publicly.
+            Enter your address to help community members find you. Only your neighborhood and city
+            will be shown publicly.
           </p>
-          
+
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
@@ -626,11 +610,9 @@ export default function ProfileEditPage() {
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                 <input
                   type="text"
                   name="city"
@@ -640,11 +622,9 @@ export default function ProfileEditPage() {
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
                 <input
                   type="text"
                   name="state"
@@ -654,11 +634,9 @@ export default function ProfileEditPage() {
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ZIP Code
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
                 <input
                   type="text"
                   name="zip_code"
@@ -668,36 +646,45 @@ export default function ProfileEditPage() {
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                 />
               </div>
-              
+
               <div className="md:col-span-2">
                 <button
                   type="button"
                   onClick={verifyAddress}
-                  disabled={verifyingAddress || !profile.street_address.trim() || !profile.city.trim() || !profile.state.trim() || !profile.zip_code.trim()}
+                  disabled={
+                    verifyingAddress ||
+                    !profile.street_address.trim() ||
+                    !profile.city.trim() ||
+                    !profile.state.trim() ||
+                    !profile.zip_code.trim()
+                  }
                   className="w-full px-4 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {verifyingAddress ? 'Verifying Address...' : 'Verify Address'}
                 </button>
               </div>
             </div>
-            
+
             {addressVerified && profile.neighborhood && profile.city && (
               <div className="bg-green-50 border border-green-200 rounded-md p-4">
                 <h3 className="text-sm font-medium text-green-800 mb-2">✅ Address Verified</h3>
                 <div className="text-sm text-green-700">
-                  <div><strong>Neighborhood:</strong> {profile.neighborhood}</div>
-                  <div><strong>City:</strong> {profile.city}</div>
+                  <div>
+                    <strong>Neighborhood:</strong> {profile.neighborhood}
+                  </div>
+                  <div>
+                    <strong>City:</strong> {profile.city}
+                  </div>
                   <div className="text-xs text-green-600 mt-2">
                     This is what will be shown publicly to other community members.
                   </div>
                 </div>
               </div>
             )}
-            
 
-            
             <div className="text-xs text-gray-500">
-              💡 Your exact address is never shared publicly. Only your neighborhood and city are visible to help with community matching.
+              💡 Your exact address is never shared publicly. Only your neighborhood and city are
+              visible to help with community matching.
             </div>
           </div>
         </div>
@@ -708,7 +695,7 @@ export default function ProfileEditPage() {
           <p className="text-sm text-gray-600 mb-4">
             Optional emergency contact information for safety purposes.
           </p>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ export default function PublicProfilePage() {
   const params = useParams();
   const router = useRouter();
   const profileId = params.id;
-  
+
   const [profile, setProfile] = useState(null);
   const [dogs, setDogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,9 @@ export default function PublicProfilePage() {
   const loadCurrentUser = async () => {
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       setCurrentUser(user);
     } catch (err) {
       console.error('Error loading current user:', err);
@@ -37,7 +39,7 @@ export default function PublicProfilePage() {
   const loadProfile = async () => {
     try {
       const supabase = createClient();
-      
+
       // Load profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -46,7 +48,7 @@ export default function PublicProfilePage() {
         .single();
 
       if (profileError) throw profileError;
-      
+
       if (!profileData) {
         setError('Profile not found');
         setLoading(false);
@@ -64,7 +66,6 @@ export default function PublicProfilePage() {
       if (!dogsError && dogsData) {
         setDogs(dogsData);
       }
-
     } catch (err) {
       console.error('Error loading profile:', err);
       setError('Failed to load profile');
@@ -91,7 +92,7 @@ export default function PublicProfilePage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -99,8 +100,8 @@ export default function PublicProfilePage() {
           <h2 className="text-2xl font-bold text-red-600">Error</h2>
           <p className="text-gray-600">{error}</p>
           <div className="flex gap-2 justify-center">
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
             >
               Try Again
@@ -116,7 +117,7 @@ export default function PublicProfilePage() {
       </div>
     );
   }
-  
+
   if (!profile) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -136,19 +137,27 @@ export default function PublicProfilePage() {
 
   const getRoleIcon = (role) => {
     switch (role) {
-      case 'dog_owner': return '🐕';
-      case 'petpal': return '🤝';
-      case 'both': return '🐕‍🦺';
-      default: return '👤';
+      case 'dog_owner':
+        return '🐕';
+      case 'petpal':
+        return '🤝';
+      case 'both':
+        return '🐕‍🦺';
+      default:
+        return '👤';
     }
   };
 
   const getRoleLabel = (role) => {
     switch (role) {
-      case 'dog_owner': return 'Dog Owner';
-      case 'petpal': return 'PetPal';
-      case 'both': return 'Dog Owner & PetPal';
-      default: return 'Community Member';
+      case 'dog_owner':
+        return 'Dog Owner';
+      case 'petpal':
+        return 'PetPal';
+      case 'both':
+        return 'Dog Owner & PetPal';
+      default:
+        return 'Community Member';
     }
   };
 
@@ -172,8 +181,8 @@ export default function PublicProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6 mb-6">
             {/* Profile Photo */}
             {profile.profile_photo_url ? (
-              <img 
-                src={profile.profile_photo_url} 
+              <img
+                src={profile.profile_photo_url}
                 alt={`${profile.first_name}'s profile`}
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-blue-100"
               />
@@ -192,7 +201,7 @@ export default function PublicProfilePage() {
                 <span className="text-2xl">{getRoleIcon(profile.role)}</span>
                 <span className="text-lg text-gray-600">{getRoleLabel(profile.role)}</span>
               </div>
-              
+
               {/* Location */}
               {(profile.neighborhood || profile.city) && (
                 <div className="flex items-center justify-center sm:justify-start text-gray-600 mb-4">
@@ -202,7 +211,7 @@ export default function PublicProfilePage() {
                       const formattedLocation = formatLocation({
                         neighborhood: profile.neighborhood,
                         city: profile.city,
-                        state: profile.state
+                        state: profile.state,
                       });
                       return (
                         <>
@@ -235,9 +244,7 @@ export default function PublicProfilePage() {
                 </Link>
               )}
 
-              {!currentUser && (
-                <p className="text-sm text-gray-500">Sign in to send a message</p>
-              )}
+              {!currentUser && <p className="text-sm text-gray-500">Sign in to send a message</p>}
             </div>
           </div>
 
@@ -253,14 +260,19 @@ export default function PublicProfilePage() {
           {(profile.support_preferences?.length > 0 || profile.support_story) && (
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <h3 className="font-semibold text-gray-900 mb-3">Community Support Preferences</h3>
-              
+
               {/* Support Preferences */}
               {profile.support_preferences && profile.support_preferences.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Feels most empowered supporting:</p>
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Feels most empowered supporting:
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.support_preferences.map((pref) => (
-                      <span key={pref} className="inline-flex items-center bg-white text-gray-700 px-3 py-1 rounded-full text-sm border border-blue-200">
+                      <span
+                        key={pref}
+                        className="inline-flex items-center bg-white text-gray-700 px-3 py-1 rounded-full text-sm border border-blue-200"
+                      >
                         {pref === 'elderly_dog_owners' && '👴🐕 Elderly dog owners'}
                         {pref === 'sick_recovering' && '🏥 Sick or recovering owners'}
                         {pref === 'low_income_families' && '💰 Low-income families'}
@@ -272,7 +284,7 @@ export default function PublicProfilePage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Support Story */}
               {profile.support_story && (
                 <div>
@@ -284,45 +296,48 @@ export default function PublicProfilePage() {
           )}
 
           {/* Social Links */}
-          {(profile.facebook_url || profile.instagram_url || profile.linkedin_url || profile.airbnb_url) && (
+          {(profile.facebook_url ||
+            profile.instagram_url ||
+            profile.linkedin_url ||
+            profile.airbnb_url) && (
             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
               <h3 className="font-semibold text-gray-900 mb-3">Social Links</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {profile.facebook_url && (
-                  <a 
-                    href={profile.facebook_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={profile.facebook_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center p-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
                   >
                     📘 Facebook
                   </a>
                 )}
                 {profile.instagram_url && (
-                  <a 
-                    href={profile.instagram_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={profile.instagram_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center p-3 bg-pink-100 text-pink-700 rounded-lg hover:bg-pink-200 transition-colors"
                   >
                     📷 Instagram
                   </a>
                 )}
                 {profile.linkedin_url && (
-                  <a 
-                    href={profile.linkedin_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={profile.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center p-3 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors"
                   >
                     💼 LinkedIn
                   </a>
                 )}
                 {profile.airbnb_url && (
-                  <a 
-                    href={profile.airbnb_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={profile.airbnb_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center p-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
                   >
                     🏠 Airbnb
@@ -345,8 +360,8 @@ export default function PublicProfilePage() {
                 <div key={dog.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center space-x-4">
                     {dog.photo_url ? (
-                      <img 
-                        src={dog.photo_url} 
+                      <img
+                        src={dog.photo_url}
                         alt={dog.name}
                         className="w-16 h-16 rounded-full object-cover"
                       />
@@ -366,9 +381,7 @@ export default function PublicProfilePage() {
                       )}
                     </div>
                   </div>
-                  {dog.bio && (
-                    <p className="mt-3 text-sm text-gray-600">{dog.bio}</p>
-                  )}
+                  {dog.bio && <p className="mt-3 text-sm text-gray-600">{dog.bio}</p>}
                 </div>
               ))}
             </div>
@@ -394,4 +407,3 @@ export default function PublicProfilePage() {
     </div>
   );
 }
-

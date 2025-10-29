@@ -1,29 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
-  sendWelcomeEmail, 
-  sendNewMessageNotification, 
+import {
+  sendWelcomeEmail,
+  sendNewMessageNotification,
   sendMeetingScheduledConfirmation,
   sendMeetingReminder,
   sendFollowUp3DaysEmail,
   sendFollowUpEmail,
-  sendReviewEmail
+  sendReviewEmail,
 } from '@/libs/emailTemplates';
 
 // Mock the sendEmail function
 vi.mock('@/libs/resend.js', () => ({
-  sendEmail: vi.fn().mockResolvedValue({ id: 'test-email-id' })
+  sendEmail: vi.fn().mockResolvedValue({ id: 'test-email-id' }),
 }));
 
 // Mock fs module
 vi.mock('fs', () => ({
-  readFileSync: vi.fn().mockReturnValue('<html>Test template with {{userName}}</html>')
+  readFileSync: vi.fn().mockReturnValue('<html>Test template with {{userName}}</html>'),
 }));
 
 // Mock config
 vi.mock('@/config', () => ({
   default: {
-    domainName: 'shareskippy.com'
-  }
+    domainName: 'shareskippy.com',
+  },
 }));
 
 describe('Email Templates', () => {
@@ -36,40 +36,38 @@ describe('Email Templates', () => {
   describe('sendWelcomeEmail', () => {
     it('should send welcome email with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendWelcomeEmail({
         to: 'test@example.com',
         userName: 'John',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'test@example.com',
         subject: 'Welcome to ShareSkippy, John! 🐕',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
 
     it('should log email operation when debug logging is enabled', async () => {
       const consoleSpy = vi.spyOn(console, 'log');
-      
+
       await sendWelcomeEmail({
         to: 'test@example.com',
         userName: 'John',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"email_key":"welcome"')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('"email_key":"welcome"'));
     });
   });
 
   describe('sendNewMessageNotification', () => {
     it('should send new message notification with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendNewMessageNotification({
         to: 'recipient@example.com',
         recipientName: 'Jane',
@@ -78,14 +76,14 @@ describe('Email Templates', () => {
         messagePreview: 'Hello there!',
         messageTime: '2024-01-01 12:00:00',
         messageUrl: 'https://shareskippy.com/messages/123',
-        userId: 'user-456'
+        userId: 'user-456',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'recipient@example.com',
         subject: 'New message from John Doe on ShareSkippy 💬',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
   });
@@ -93,7 +91,7 @@ describe('Email Templates', () => {
   describe('sendMeetingScheduledConfirmation', () => {
     it('should send meeting confirmation with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendMeetingScheduledConfirmation({
         to: 'user@example.com',
         userName: 'John',
@@ -106,14 +104,14 @@ describe('Email Templates', () => {
         meetingNotes: 'Bring treats!',
         meetingUrl: 'https://shareskippy.com/meetings/123',
         messageUrl: 'https://shareskippy.com/messages',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
         subject: 'Meeting Confirmed! Playdate with Jane Smith 🎉',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
   });
@@ -121,7 +119,7 @@ describe('Email Templates', () => {
   describe('sendMeetingReminder', () => {
     it('should send meeting reminder with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendMeetingReminder({
         to: 'user@example.com',
         userName: 'John',
@@ -134,14 +132,14 @@ describe('Email Templates', () => {
         meetingUrl: 'https://shareskippy.com/meetings/123',
         messageUrl: 'https://shareskippy.com/messages',
         unsubscribeUrl: 'https://shareskippy.com/profile',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
         subject: 'Reminder: Playdate with Jane Smith tomorrow! ⏰',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
   });
@@ -149,18 +147,18 @@ describe('Email Templates', () => {
   describe('sendFollowUp3DaysEmail', () => {
     it('should send 3-day follow-up with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendFollowUp3DaysEmail({
         to: 'user@example.com',
         userName: 'John',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
         subject: 'Ready to connect with your neighbors? 🐕',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
   });
@@ -168,7 +166,7 @@ describe('Email Templates', () => {
   describe('sendFollowUpEmail', () => {
     it('should send 1-week follow-up with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendFollowUpEmail({
         to: 'user@example.com',
         userName: 'John',
@@ -177,15 +175,15 @@ describe('Email Templates', () => {
         messagesReceived: 3,
         meetingsScheduled: 1,
         connectionsMade: 2,
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
-        subject: 'How\'s ShareSkippy going? - 1 Week Check-in 📅',
+        subject: "How's ShareSkippy going? - 1 Week Check-in 📅",
         html: expect.any(String),
         text: expect.any(String),
-        replyTo: 'support@shareskippy.com'
+        replyTo: 'support@shareskippy.com',
       });
     });
   });
@@ -193,7 +191,7 @@ describe('Email Templates', () => {
   describe('sendReviewEmail', () => {
     it('should send review request with correct parameters', async () => {
       const mockSendEmail = await import('@/libs/resend.js');
-      
+
       await sendReviewEmail({
         to: 'user@example.com',
         userName: 'John',
@@ -204,14 +202,14 @@ describe('Email Templates', () => {
         meetingLocation: 'Central Park',
         reviewUrl: 'https://shareskippy.com/reviews/123',
         messageUrl: 'https://shareskippy.com/messages',
-        userId: 'user-123'
+        userId: 'user-123',
       });
 
       expect(mockSendEmail.sendEmail).toHaveBeenCalledWith({
         to: 'user@example.com',
         subject: 'How was your playdate with Jane Smith? 🐕',
         html: expect.any(String),
-        text: expect.any(String)
+        text: expect.any(String),
       });
     });
   });
