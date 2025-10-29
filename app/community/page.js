@@ -13,7 +13,7 @@ export default function CommunityPage() {
   const [myAvailabilityPosts, setMyAvailabilityPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dog-availability');
-  const [joiningEvent, setJoiningEvent] = useState(null);
+  // const [joiningEvent, setJoiningEvent] = useState(null);
   const [messageModal, setMessageModal] = useState({
     isOpen: false,
     recipient: null,
@@ -345,74 +345,74 @@ export default function CommunityPage() {
     });
   };
 
-  const getRoleIcon = (role) => {
-    switch (role) {
-      case 'dog_owner':
-        return '🐕';
-      case 'dog_walker':
-        return '🚶‍♂️';
-      case 'both':
-        return '🐕‍🦺';
-      default:
-        return '👤';
-    }
-  };
+  // const getRoleIcon = (role) => {
+  //   switch (role) {
+  //     case 'dog_owner':
+  //       return '🐕';
+  //     case 'dog_walker':
+  //       return '🚶‍♂️';
+  //     case 'both':
+  //       return '🐕‍🦺';
+  //     default:
+  //       return '👤';
+  //   }
+  // };
 
-  const getEventIcon = (eventType) => {
-    switch (eventType) {
-      case 'meetup':
-        return '🤝';
-      case 'workshop':
-        return '📚';
-      case 'outdoor':
-        return '🏔️';
-      default:
-        return '📅';
-    }
-  };
+  // const getEventIcon = (eventType) => {
+  //   switch (eventType) {
+  //     case 'meetup':
+  //       return '🤝';
+  //     case 'workshop':
+  //       return '📚';
+  //     case 'outdoor':
+  //       return '🏔️';
+  //     default:
+  //       return '📅';
+  //   }
+  // };
 
-  const getPlaceIcon = (type) => {
-    switch (type) {
-      case 'park':
-        return '🌳';
-      case 'cafe':
-        return '☕';
-      case 'store':
-        return '🛍️';
-      default:
-        return '📍';
-    }
-  };
+  // const getPlaceIcon = (type) => {
+  //   switch (type) {
+  //     case 'park':
+  //       return '🌳';
+  //     case 'cafe':
+  //       return '☕';
+  //     case 'store':
+  //       return '🛍️';
+  //     default:
+  //       return '📍';
+  //   }
+  // };
 
-  const handleJoinEvent = async (eventId) => {
-    setJoiningEvent(eventId);
-    try {
-      const response = await fetch(`/api/community/events/${eventId}/join`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  // const handleJoinEvent = async (eventId) => {
+  //   setJoiningEvent(eventId);
+  //   try {
+  //     const response = await fetch(`/api/community/events/${eventId}/join`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
 
-      if (response.ok) {
-        // Refresh events to show updated participant count
-        const eventsResponse = await fetch('/api/community/events?limit=10');
-        if (eventsResponse.ok) {
-          const eventsData = await eventsResponse.json();
-          // Note: setCommunityEvents is not defined in this component
-          // This will be handled by the parent component or removed if not needed
-        }
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to join event');
-      }
-    } catch (error) {
-      console.error('Error joining event:', error);
-      alert('Failed to join event');
-    } finally {
-      setJoiningEvent(null);
-    }
-  };
+  //     if (response.ok) {
+  //       // Refresh events to show updated participant count
+  //       const eventsResponse = await fetch('/api/community/events?limit=10');
+  //       if (eventsResponse.ok) {
+  //         const eventsData = await eventsResponse.json();
+  //         // Note: setCommunityEvents is not defined in this component
+  //         // This will be handled by the parent component or removed if not needed
+  //       }
+  //     } else {
+  //       const errorData = await response.json();
+  //       alert(errorData.error || 'Failed to join event');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error joining event:', error);
+  //     alert('Failed to join event');
+  //   } finally {
+  //     setJoiningEvent(null);
+  //   }
+  // };
 
   const openMessageModal = (recipient, availabilityPost) => {
     console.log('Opening message modal with:', { recipient, availabilityPost });
