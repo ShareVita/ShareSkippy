@@ -5,8 +5,6 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import jestPlugin from "eslint-plugin-jest";
 import json from "@eslint/json";
 import markdown from "@eslint/markdown";
-import css from "@eslint/css";
-import tailwind from "eslint-plugin-tailwindcss";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
@@ -32,13 +30,6 @@ export default defineConfig([
     plugins: { markdown },
     language: "markdown/gfm",
     extends: ["markdown/recommended"],
-  },
-  ...tailwind.configs["flat/recommended"],
-  {
-    files: ["**/*.css"],
-    plugins: { css },
-    language: "css/css",
-    extends: ["css/recommended"],
   },
   {
     files: ["tests/**/*", "**/*.test.*"],
