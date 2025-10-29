@@ -122,7 +122,9 @@ export default function PublicProfilePage() {
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="max-w-md mx-auto p-6 text-center space-y-4">
           <h2 className="text-2xl font-bold text-gray-900">Profile Not Found</h2>
-          <p className="text-gray-600">This profile doesn't exist or is no longer available.</p>
+          <p className="text-gray-600">
+            This profile doesn&apos;t exist or is no longer available.
+          </p>
           <Link
             href="/community"
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
@@ -352,7 +354,7 @@ export default function PublicProfilePage() {
           <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
               <span className="mr-2">🐕</span>
-              {profile.first_name}'s {dogs.length === 1 ? 'Dog' : 'Dogs'}
+              {profile.first_name}&apos;s {dogs.length === 1 ? 'Dog' : 'Dogs'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {dogs.map((dog) => (
