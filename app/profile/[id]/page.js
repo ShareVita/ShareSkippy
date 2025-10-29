@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/libs/supabase/client';
 import { formatLocation } from '@/libs/utils';
@@ -9,7 +9,6 @@ import MessageModal from '@/components/MessageModal';
 
 export default function PublicProfilePage() {
   const params = useParams();
-  const router = useRouter();
   const profileId = params.id;
 
   const [profile, setProfile] = useState(null);
