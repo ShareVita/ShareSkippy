@@ -1,6 +1,7 @@
 'use client';
 import { useUser } from '@/libs/supabase/hooks';
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import DeleteAccountModal from '../../components/DeleteAccountModal';
 import UserReviews from '../../components/UserReviews';
@@ -101,7 +102,7 @@ export default function ProfilePage() {
         {/* Profile Photo */}
         {profile.profile_photo_url && (
           <div className="mb-4">
-            <img
+            <Image
               src={profile.profile_photo_url}
               alt="Profile"
               className="w-24 h-24 rounded-full mx-auto object-cover"
