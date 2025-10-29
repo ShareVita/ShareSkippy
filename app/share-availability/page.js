@@ -1,7 +1,8 @@
 'use client';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import CommunitySupportSection from '@/components/CommunitySupportSection';
 import { useUser } from '@/components/providers/SupabaseUserProvider';
 import { useUserProfile, useUserDogs } from '@/hooks/useProfile';
@@ -407,7 +408,7 @@ export default function ShareAvailability() {
         start_date: post.start_date || null,
         end_date: post.end_date || null,
         // Remove any undefined values
-        ...Object.fromEntries(Object.entries(post).filter(([_, value]) => value !== undefined)),
+        ...Object.fromEntries(Object.entries(post).filter(([value]) => value !== undefined)),
       }));
 
       const { error } = await supabase.from('availability').insert(cleanedPosts).select();
@@ -546,9 +547,8 @@ export default function ShareAvailability() {
             {error}
             {error.includes('add a dog') && (
               <div className="mt-2">
-                <a href="/my-dogs/add" className="text-red-800 underline font-medium">
-                  Add a dog to your profile
-                </a>
+                <Link href="/my-dogs/add" className="text-red-800 underline font-medium" />
+                Add a dog to your profile
               </div>
             )}
           </div>
@@ -585,12 +585,11 @@ export default function ShareAvailability() {
                   <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded-sm text-sm">
                     ⚠️ You need to add a dog to your profile first
                     <div className="mt-2">
-                      <a
+                      <Link
                         href="/my-dogs/add"
                         className="text-yellow-900 underline font-medium hover:text-yellow-700 transition-colors"
-                      >
-                        Add a dog to your profile
-                      </a>
+                      />
+                      Add a dog to your profile
                     </div>
                   </div>
                 )}
@@ -812,9 +811,7 @@ export default function ShareAvailability() {
 
             {/* Description */}
             <div className="mb-8">
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
               <textarea
                 id="description"
                 value={formData.description}
