@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @plugin "daisyui"
 
 :root {
@@ -9,7 +10,7 @@
 
 html,
 body,
-#__next {
+#next {
   height: 100%;
 }
 
@@ -33,14 +34,13 @@ body {
 /* Message spacing improvements */
 .message-bubble {
   max-width: 85%;
-  word-wrap: break-word;
   overflow-wrap: break-word;
-  word-break: break-word;
+  word-break: break-all;
   hyphens: auto;
 }
 
 /* Mobile-specific message constraints */
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .message-bubble {
     max-width: 90%;
     min-width: 0;
@@ -61,7 +61,7 @@ body {
 
   /* Handle long words and URLs in messages */
   .message-bubble p {
-    word-break: break-word;
+    word-break: break-all;
     overflow-wrap: break-word;
     hyphens: auto;
     max-width: 100%;
@@ -80,8 +80,9 @@ body {
   }
 
   .message-input textarea {
-    word-break: break-word;
+    word-break: break-all;
     overflow-wrap: break-word;
+
     /* Ensure textarea doesn't get covered by mobile keyboard */
     transition: height 0.1s ease-out;
   }
@@ -105,26 +106,27 @@ body {
   @supports (-webkit-touch-callout: none) {
     /* iOS Safari specific */
     .message-input textarea {
-      -webkit-appearance: none;
+      appearance: none;
       border-radius: 12px;
     }
   }
 
   /* Android Chrome specific */
-  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* stylelint-disable media-feature-name-no-vendor-prefix, media-feature-name-no-unknown */
+  @media screen and (min-device-pixel-ratio: 0) {
     .message-input textarea {
       border-radius: 12px;
     }
   }
 }
 
-@media (min-width: 640px) {
+@media (width >= 640px) {
   .message-bubble {
     max-width: 75%;
   }
 }
 
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
   .message-bubble {
     max-width: 65%;
   }
@@ -148,6 +150,7 @@ progress::-webkit-progress-value {
   .btn-gradient {
     @apply !bg-gradient !bg-[length:300%_300%] hover:saturate-[1.2] shadow duration-100 !border-0 !border-transparent !bg-transparent animate-shimmer disabled:!bg-none disabled:!bg-gray-500/30  !text-white;
   }
+
   .btn {
     @apply !capitalize;
   }
@@ -201,6 +204,7 @@ progress::-webkit-progress-value {
   /* Ensure checkboxes have white backgrounds with specific styling */
   input[type='checkbox'] {
     @apply bg-white border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-0;
+
     background-color: white !important;
     border-color: #d1d5db !important;
   }
@@ -208,6 +212,7 @@ progress::-webkit-progress-value {
   /* Override any browser default checkbox styling */
   input[type='checkbox']:checked {
     @apply bg-blue-600 border-blue-600;
+
     background-color: #2563eb !important;
     border-color: #2563eb !important;
   }
@@ -239,12 +244,6 @@ progress::-webkit-progress-value {
     border-color: #3b82f6 !important;
   }
 
-  /* Override any hover states */
-  input[type='checkbox']:hover:not(:checked) {
-    background-color: white !important;
-    border-color: #9ca3af !important;
-  }
-
   /* Override DaisyUI checkbox styling */
   input[type='checkbox'].checkbox,
   .checkbox input[type='checkbox'] {
@@ -270,19 +269,10 @@ progress::-webkit-progress-value {
     border-color: #d1d5db !important;
   }
 
-  /* Override browser default appearance */
-  input[type='checkbox'] {
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    display: inline-block !important;
-    width: 1rem !important;
-    height: 1rem !important;
-    border: 2px solid #d1d5db !important;
-    border-radius: 0.25rem !important;
+  /* Override any hover states */
+  input[type='checkbox']:hover:not(:checked) {
     background-color: white !important;
-    position: relative !important;
-    cursor: pointer !important;
+    border-color: #9ca3af !important;
   }
 
   /* Custom checkbox checked state */
@@ -296,11 +286,6 @@ progress::-webkit-progress-value {
     font-size: 0.75rem !important;
     font-weight: bold !important;
     line-height: 1 !important;
-  }
-
-  input[type='checkbox']:checked {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
   }
 }
 
