@@ -6,14 +6,14 @@ import ClientLayout from '@/components/LayoutClient';
 import { SupabaseUserProvider } from '@/components/providers/SupabaseUserProvider';
 import config from '@/config';
 import { QueryProvider } from '@/contexts/QueryProvider';
-import { getSEOTags } from '@/libs/seo';
-import { createClient as getServerClient } from '@/libs/supabase/server';
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 
 const font = Inter({ subsets: ['latin'] });
 
 export const viewport = {
-  themeColor: config.colors.main,
+  // Will use the primary color of your theme to show a nice theme color in the URL bar of supported browsers
+  themeColor: 'light',
   width: 'device-width',
   initialScale: 1,
 };
@@ -27,7 +27,7 @@ export default async function RootLayout({ children }) {
   } = await supabase.auth.getSession();
 
   return (
-    <html lang="en" data-theme={config.colors.theme} className={font.className}>
+    <html lang="en" data-theme={viewport.themeColor} className={font.className}>
       <body>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TGM53SZZX1"
