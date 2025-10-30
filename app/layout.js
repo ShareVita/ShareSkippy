@@ -6,14 +6,13 @@ import AppLayout from '@/components/AppLayout';
 import { UserProvider } from '@/contexts/UserContext';
 import { QueryProvider } from '@/contexts/QueryProvider';
 import { Analytics } from '@vercel/analytics/react';
-import config from '@/config';
 import './globals.css';
 
 const font = Inter({ subsets: ['latin'] });
 
 export const viewport = {
   // Will use the primary color of your theme to show a nice theme color in the URL bar of supported browsers
-  themeColor: config.colors.main,
+  themeColor: 'light',
   width: 'device-width',
   initialScale: 1,
 };
@@ -24,7 +23,7 @@ export const metadata = getSEOTags();
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme={config.colors.theme} className={font.className}>
+    <html lang="en" data-theme={viewport.themeColor} className={font.className}>
       <body>
         {/* Google Analytics */}
         <Script
