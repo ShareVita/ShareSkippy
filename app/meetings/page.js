@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Image from 'next/image';
-import { useUser } from '@/contexts/UserContext';
+import { useUser } from '@/components/providers/SupabaseUserProvider';
 import { useMeetings, useUpdateMeetingStatus } from '@/hooks/useMeetings';
 import { useQueryClient } from '@tanstack/react-query';
 import ReviewModal from '@/components/ReviewModal';
