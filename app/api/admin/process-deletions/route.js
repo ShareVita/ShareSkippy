@@ -89,7 +89,9 @@ export async function POST() {
 
         if (profileError) {
           console.error(
-            `Error deleting profile for user ${deletionRequest.user_id}:`,
+            'Error deleting profile for user ',
+            deletionRequest.user_id,
+            ':',
             profileError
           );
           errors.push({
@@ -103,7 +105,7 @@ export async function POST() {
         const { error: authError } = await supabase.auth.admin.deleteUser(deletionRequest.user_id);
 
         if (authError) {
-          console.error(`Error deleting auth user ${deletionRequest.user_id}:`, authError);
+          console.error('Error deleting auth user', deletionRequest.user_id, ':', authError);
           errors.push({
             userId: deletionRequest.user_id,
             error: authError.message,
