@@ -4,9 +4,9 @@ import Script from 'next/script';
 import AppLayout from '@/components/AppLayout';
 import ClientLayout from '@/components/LayoutClient';
 import { SupabaseUserProvider } from '@/components/providers/SupabaseUserProvider';
-import config from '@/config';
 import { QueryProvider } from '@/contexts/QueryProvider';
-import { Analytics } from '@vercel/analytics/react';
+import { getServerClient } from '@/lib/supabase/server/client';
+import { getSEOTags } from '@/lib/seo/getSEOTags';
 import './globals.css';
 
 const font = Inter({ subsets: ['latin'] });
