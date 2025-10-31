@@ -39,39 +39,54 @@ export const SupabaseUserProvider: FC<SupabaseUserProviderProps> = ({
 
   const [session, setSession] = useState<Session | null>(initialSession);
   const [user, setUser] = useState<User | null>(initialSession?.user || null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [authLoading, setAuthLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false); // Renamed 'loading' to 'saving' for sign-out button
+
+  // Set initial auth loading based on whether a session was passed in
+  const [authLoading, setAuthLoading] = useState<boolean>(!initialSession);
 
   useEffect(() => {
-    if (!session) {
-      setAuthLoading(true);
+    let _isMounted = true; // Flag to prevent state update on unmounted component
+
+    // Only run getSession if we don't have an initial session
+    if (!initialSession) {
       supabase.auth.getSession().then(({ data: { session: newSession } }) => {
-        setSession(newSession);
-        setUser(newSession?.user || null);
-        setAuthLoading(false);
+        if (_isMounted) {
+          setSession(newSession);
+          setUser(newSession?.user || null);
+          setAuthLoading(false);
+        }
       });
     }
 
+    // This sets up the real-time listener for Auth state changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user || null);
+      if (_isMounted) {
+        setSession(newSession);
+        setUser(newSession?.user || null);
+
+        // Ensure authLoading is false after the first state change listener fires
+        if (authLoading) {
+          setAuthLoading(false);
+        }
+      }
     });
 
     return () => {
+      _isMounted = false; // Cleanup flag
       subscription?.unsubscribe();
     };
-  }, [supabase, session]);
+  }, [supabase, initialSession, authLoading]); // Added initialSession to dependencies
 
   const signOut = async () => {
-    setLoading(true);
+    setSaving(true);
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setUser(null);
       setSession(null);
     }
-    setLoading(false);
+    setSaving(false);
     return { error };
   };
 
@@ -79,7 +94,7 @@ export const SupabaseUserProvider: FC<SupabaseUserProviderProps> = ({
     user,
     session,
     signOut,
-    loading: authLoading || loading,
+    loading: authLoading || saving, // FIX: Combined authLoading with new 'saving' state
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
