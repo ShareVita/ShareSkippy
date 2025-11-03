@@ -69,7 +69,7 @@ export default function LocationFilter({ onFilterChange }) {
         type: 'zip-city',
         lat: coords.lat,
         lng: coords.lng,
-        radius: 2, // 2 miles for zip/city (increased from 1 mile for better accuracy)
+        radius: 5, // 5 miles for zip/city
         query: zipCityInput.trim(), // Store the query for display
       };
       setActiveFilter(filter);
