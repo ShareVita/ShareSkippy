@@ -921,7 +921,11 @@ export default function CommunityPage() {
                 <span className="mr-2">🐕</span>
                 Dog Owners in the Community
               </h3>
-              <ProfilesList role="dog_owner" onMessage={openMessageModal} />
+              <ProfilesList 
+                role="dog_owner" 
+                onMessage={openMessageModal}
+                locationFilter={locationFilter}
+              />
             </div>
           </div>
         )}
@@ -1084,7 +1088,11 @@ export default function CommunityPage() {
                 <span className="mr-2">🤝</span>
                 PetPals in the Community
               </h3>
-              <ProfilesList role="petpal" onMessage={openMessageModal} />
+              <ProfilesList 
+                role="petpal" 
+                onMessage={openMessageModal}
+                locationFilter={locationFilter}
+              />
             </div>
           </div>
         )}

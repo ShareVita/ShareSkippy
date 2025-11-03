@@ -26,6 +26,8 @@ export async function GET(request) {
         neighborhood,
         role,
         bio,
+        display_lat,
+        display_lng,
         updated_at,
         user_activity(at)
       `
@@ -95,7 +97,9 @@ export async function GET(request) {
         neighborhood: profile.neighborhood,
         role: profile.role,
         bio_excerpt: bioExcerpt,
-        last_online_at: lastOnlineAt,
+        display_lat: profile.display_lat,
+        display_lng: profile.display_lng,
+        last_online_at: lastOnlineAt
       };
     });
 
