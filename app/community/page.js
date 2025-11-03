@@ -865,6 +865,7 @@ export default function CommunityPage() {
               <ProfilesList 
                 role="dog_owner" 
                 onMessage={openMessageModal}
+                locationFilter={locationFilter}
               />
             </div>
           </div>
@@ -1015,6 +1016,7 @@ export default function CommunityPage() {
               <ProfilesList 
                 role="petpal" 
                 onMessage={openMessageModal}
+                locationFilter={locationFilter}
               />
             </div>
           </div>
