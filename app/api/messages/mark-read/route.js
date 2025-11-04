@@ -1,0 +1,56 @@
+import { NextResponse } from 'next/server';
+import { createClient } from '@/libs/supabase/server';
+
+export async function POST(request) {
+  try {
+    const supabase = createClient();
+    
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { conversation_id } = await request.json();
+
+    if (!conversation_id) {
+      return NextResponse.json({ error: 'Conversation ID required' }, { status: 400 });
+    }
+
+    // Fetch the conversation to verify the user is a participant
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .select('participant1_id, participant2_id')
+      .eq('id', conversation_id)
+      .single();
+
+    if (convError || !conversation) {
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
+    }
+
+    // Verify user is a participant
+    if (conversation.participant1_id !== user.id && conversation.participant2_id !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Mark all unread messages in this conversation as read for the current user
+    // Only mark messages where the current user is the recipient
+    const { error: updateError } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('conversation_id', conversation_id)
+      .eq('recipient_id', user.id)
+      .eq('is_read', false);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
+    return NextResponse.json({ error: 'Failed to mark messages as read' }, { status: 500 });
+  }
+}
+

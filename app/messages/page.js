@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { useSupabaseAuth } from '@/libs/supabase/hooks';
 import { supabase } from '@/libs/supabase';
 import MessageModal from '@/components/MessageModal';
@@ -99,6 +100,20 @@ export default function MessagesPage() {
 
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
           setMessages(data || []);
+          
+          // Mark messages as read after fetching them
+          try {
+            await fetch('/api/messages/mark-read', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ conversation_id: selectedConversation.id }),
+            });
+            // Refresh conversations to update unread counts
+            await fetchConversations();
+          } catch (markReadError) {
+            console.error('Error marking messages as read:', markReadError);
+            // Don't fail the message fetch if mark-read fails
+          }
         }
       } catch (e) {
         if (!cancelled && !abortControllerRef.current?.signal.aborted) {
@@ -180,6 +195,26 @@ export default function MessagesPage() {
 
       if (error) throw error;
 
+      // Fetch unread counts for all conversations
+      const conversationIds = data.map((conv) => conv.id);
+      let unreadCounts = {};
+      
+      if (conversationIds.length > 0) {
+        const { data: unreadMessages, error: unreadError } = await supabase
+          .from('messages')
+          .select('conversation_id')
+          .in('conversation_id', conversationIds)
+          .eq('recipient_id', user.id)
+          .eq('is_read', false);
+
+        if (!unreadError && unreadMessages) {
+          // Count unread messages per conversation
+          unreadMessages.forEach((msg) => {
+            unreadCounts[msg.conversation_id] = (unreadCounts[msg.conversation_id] || 0) + 1;
+          });
+        }
+      }
+
       const processedConversations = data.map((conv) => {
         const otherParticipant =
           conv.participant1_id === user.id ? conv.participant2 : conv.participant1;
@@ -188,6 +223,7 @@ export default function MessagesPage() {
           otherParticipant,
           displayName: `${otherParticipant.first_name} ${otherParticipant.last_name}`,
           profilePhoto: otherParticipant.profile_photo_url,
+          unreadCount: unreadCounts[conv.id] || 0,
         };
       });
 
@@ -209,6 +245,32 @@ export default function MessagesPage() {
       fetchConversations();
     }
   }, [user, authLoading, fetchConversations]);
+
+  // Real-time subscription for unread message counts
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('unread-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Refresh conversations to update unread counts
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchConversations]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -300,6 +362,35 @@ export default function MessagesPage() {
     }
   };
 
+  const formatTimestamp = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    let datePart;
+    if (messageDate.getTime() === today.getTime()) {
+      datePart = 'Today';
+    } else if (messageDate.getTime() === yesterday.getTime()) {
+      datePart = 'Yesterday';
+    } else if (now.getTime() - messageDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
+      datePart = date.toLocaleDateString('en-US', { weekday: 'long' });
+    } else {
+      datePart = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    const timePart = date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+
+    return `${datePart}, ${timePart}`;
+  };
+
   const scrollRef = useRef(null);
   useEffect(() => {
     if (scrollRef.current) {
@@ -386,21 +477,40 @@ export default function MessagesPage() {
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    {conversation.profilePhoto ? (
-                      <img
-                        src={conversation.profilePhoto}
-                        alt={conversation.displayName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
-                        {conversation.displayName?.[0] || '👤'}
-                      </div>
-                    )}
+                    <Link
+                      href={`/profile/${conversation.otherParticipant.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-shrink-0"
+                    >
+                      {conversation.profilePhoto ? (
+                        <img
+                          src={conversation.profilePhoto}
+                          alt={conversation.displayName}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
+                          {conversation.displayName?.[0] || '👤'}
+                        </div>
+                      )}
+                    </Link>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">
-                        {conversation.displayName}
-                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          href={`/profile/${conversation.otherParticipant.id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="block flex-1 min-w-0"
+                        >
+                          <h3 className="font-semibold text-gray-900 truncate hover:text-blue-600 transition-colors">
+                            {conversation.displayName}
+                          </h3>
+                        </Link>
+                        {conversation.unreadCount > 0 && (
+                          <span className="flex-shrink-0 bg-red-500 text-white text-xs font-semibold rounded-full h-5 w-5 min-w-[20px] flex items-center justify-center">
+                            {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500 truncate mt-1">
                         {conversation.availability?.title || 'Availability Post'}
                       </p>
@@ -429,21 +539,33 @@ export default function MessagesPage() {
                     >
                       ←
                     </button>
-                    {selectedConversation.profilePhoto ? (
-                      <img
-                        src={selectedConversation.profilePhoto}
-                        alt={selectedConversation.displayName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
-                        {selectedConversation.displayName?.[0] || '👤'}
-                      </div>
-                    )}
+                    <Link
+                      href={`/profile/${selectedConversation.otherParticipant.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex-shrink-0"
+                    >
+                      {selectedConversation.profilePhoto ? (
+                        <img
+                          src={selectedConversation.profilePhoto}
+                          alt={selectedConversation.displayName}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-medium text-gray-600">
+                          {selectedConversation.displayName?.[0] || '👤'}
+                        </div>
+                      )}
+                    </Link>
                     <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">
-                        {selectedConversation.displayName}
-                      </h3>
+                      <Link
+                        href={`/profile/${selectedConversation.otherParticipant.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="block"
+                      >
+                        <h3 className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors">
+                          {selectedConversation.displayName}
+                        </h3>
+                      </Link>
                       <p className="text-sm text-gray-500">
                         {selectedConversation.availability?.post_type === 'dog_available'
                           ? 'Dog Owner'
@@ -500,7 +622,7 @@ export default function MessagesPage() {
                           message.sender_id === user.id ? 'text-blue-100' : 'text-gray-500'
                         }`}
                       >
-                        {formatTime(message.created_at)}
+                        {formatTimestamp(message.created_at)}
                       </p>
                     </div>
                   </div>

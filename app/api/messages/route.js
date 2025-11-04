@@ -58,6 +58,7 @@ export async function POST(request) {
       .insert({
         sender_id: user.id,
         recipient_id: recipient_id,
+        conversation_id: conversationId,
         availability_id: null, // Always null for new messages
         subject: null, // Subject is no longer used
         content: content
