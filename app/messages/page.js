@@ -110,12 +110,11 @@ export default function MessagesPage() {
             });
             
             if (markReadResponse.ok) {
-              // Refresh conversations to update unread counts immediately
-              await fetchConversations();
-              // Force a small delay to ensure database update is propagated
+              // Refresh conversations to update unread counts after a short delay
+              // This allows the database update to propagate
               setTimeout(() => {
                 fetchConversations();
-              }, 100);
+              }, 200);
             }
           } catch (markReadError) {
             console.error('Error marking messages as read:', markReadError);
@@ -264,11 +263,12 @@ export default function MessagesPage() {
       setConversations(processedConversations);
       
       // Update selected conversation's unread count if it exists
+      // Only update if the conversation still exists and has changed unread count
       if (selectedConversation) {
         const updatedSelected = processedConversations.find(
           (c) => c.id === selectedConversation.id
         );
-        if (updatedSelected) {
+        if (updatedSelected && updatedSelected.unreadCount !== selectedConversation.unreadCount) {
           setSelectedConversation(updatedSelected);
         }
       }
@@ -279,21 +279,23 @@ export default function MessagesPage() {
       }
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      setError('Failed to load conversations. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [user, selectedConversation]);
+  }, [user]);
 
   useEffect(() => {
     if (user && !authLoading) {
       fetchConversations();
     }
-  }, [user, authLoading, fetchConversations]);
+  }, [user, authLoading]);
 
   // Real-time subscription for unread message counts
   useEffect(() => {
     if (!user) return;
 
+    let timeoutId;
     const channel = supabase
       .channel(`unread-messages-${user.id}`)
       .on(
@@ -305,17 +307,20 @@ export default function MessagesPage() {
           filter: `recipient_id=eq.${user.id}`,
         },
         (payload) => {
-          // Refresh conversations to update unread counts when messages change
-          // This includes when is_read is updated (UPDATE event)
-          fetchConversations();
+          // Debounce refresh to avoid too many rapid updates
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            fetchConversations();
+          }, 300);
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
-  }, [user, fetchConversations]);
+  }, [user]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
