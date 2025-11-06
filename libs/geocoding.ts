@@ -1,9 +1,24 @@
 /**
  * Geocode a zip code or city name to get coordinates using Nominatim API
- * @param {string} query - Zip code or city name (e.g., "78701" or "Austin, TX")
- * @returns {Promise<{lat: number, lng: number} | null>} Coordinates or null on error
  */
-export async function geocodeLocation(query) {
+
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
+/**
+ * Geocode a zip code or city name to get coordinates using Nominatim API
+ * @param query - Zip code or city name (e.g., "78701" or "Austin, TX")
+ * @returns Promise resolving to coordinates or null on error
+ */
+export async function geocodeLocation(query: string): Promise<Coordinates | null> {
   if (!query || !query.trim()) {
     return null;
   }
@@ -26,8 +41,6 @@ export async function geocodeLocation(query) {
       searchQuery = `${searchQuery}, USA`;
     }
 
-    console.log('🌍 Geocoding query:', searchQuery);
-
     const response = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
         searchQuery
@@ -38,27 +51,18 @@ export async function geocodeLocation(query) {
       throw new Error('Geocoding request failed');
     }
 
-    const data = await response.json();
+    const data: NominatimResult[] = await response.json();
 
     if (data && data.length > 0) {
       const result = data[0];
-      const coords = {
+      const coords: Coordinates = {
         lat: parseFloat(result.lat),
         lng: parseFloat(result.lon),
       };
       
-      console.log('📍 Geocoded coordinates:', {
-        originalQuery: query.trim(),
-        searchQuery,
-        lat: coords.lat,
-        lng: coords.lng,
-        display_name: result.display_name,
-      });
-      
       return coords;
     }
 
-    console.log('⚠️ No geocoding results found for:', query.trim());
     return null;
   } catch (error) {
     console.error('Error geocoding location:', error);

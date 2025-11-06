@@ -1,13 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 
-export default function LocationFilter({ onFilterChange }) {
-  const [filterType, setFilterType] = useState('none'); // 'none', 'shared-location', 'zip-city'
-  const [zipCityInput, setZipCityInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [activeFilter, setActiveFilter] = useState(null); // { type, lat, lng, radius }
+interface LocationFilter {
+  type: 'shared-location' | 'zip-city';
+  lat: number;
+  lng: number;
+  radius: number;
+  query?: string;
+}
+
+interface LocationFilterProps {
+  onFilterChange: (filter: LocationFilter | null) => void;
+}
+
+type FilterType = 'none' | 'shared-location' | 'zip-city';
+
+export default function LocationFilter({ onFilterChange }: LocationFilterProps) {
+  const [filterType, setFilterType] = useState<FilterType>('none');
+  const [zipCityInput, setZipCityInput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<LocationFilter | null>(null);
 
   const handleShareLocation = () => {
     if (!navigator.geolocation) {
@@ -21,7 +35,7 @@ export default function LocationFilter({ onFilterChange }) {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        const filter = {
+        const filter: LocationFilter = {
           type: 'shared-location',
           lat: latitude,
           lng: longitude,
@@ -44,7 +58,7 @@ export default function LocationFilter({ onFilterChange }) {
     );
   };
 
-  const handleZipCitySubmit = async (e) => {
+  const handleZipCitySubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!zipCityInput.trim()) {
@@ -65,7 +79,7 @@ export default function LocationFilter({ onFilterChange }) {
         return;
       }
 
-      const filter = {
+      const filter: LocationFilter = {
         type: 'zip-city',
         lat: coords.lat,
         lng: coords.lng,
