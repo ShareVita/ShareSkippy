@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { createClient } from '@/libs/supabase/client';
 import MessageModal from '@/components/MessageModal';
 import ProfilesList from '@/components/ProfilesList';
+import LocationFilter from '@/components/LocationFilter';
+import { calculateDistance } from '@/libs/distance';
 
 export default function CommunityPage() {
   const [user, setUser] = useState(null);
@@ -23,6 +25,52 @@ export default function CommunityPage() {
   const [deletingPost, setDeletingPost] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [networkInfo, setNetworkInfo] = useState(null);
+  const [locationFilter, setLocationFilter] = useState(null); // { type, lat, lng, radius } or null
+  const [allDogPosts, setAllDogPosts] = useState([]); // Store unfiltered posts
+  const [allPetpalPosts, setAllPetpalPosts] = useState([]); // Store unfiltered posts
+
+  // Filter posts by location
+  const filterPostsByLocation = (posts, filter) => {
+    if (!filter || !posts || posts.length === 0) {
+      return posts || [];
+    }
+
+    const filteredPosts = posts.filter((post) => {
+      // Simplified: Always use display_lat/display_lng from availability table
+      // The availability table always has these populated (either from profile or custom location)
+      const postLat = post.display_lat;
+      const postLng = post.display_lng;
+
+      // If post has no location data, exclude it from filtered results
+      if (!postLat || !postLng) {
+        return false;
+      }
+
+      // Calculate distance from filter location to post location
+      const distance = calculateDistance(filter.lat, filter.lng, postLat, postLng);
+
+      return distance <= filter.radius;
+    });
+
+    return filteredPosts;
+  };
+
+  // Apply location filter when filter changes
+  useEffect(() => {
+    if (locationFilter) {
+      // Apply filter to dog posts
+      const filteredDogPosts = filterPostsByLocation(allDogPosts, locationFilter);
+      setDogAvailabilityPosts(filteredDogPosts);
+
+      // Apply filter to petpal posts
+      const filteredPetpalPosts = filterPostsByLocation(allPetpalPosts, locationFilter);
+      setPetpalAvailabilityPosts(filteredPetpalPosts);
+    } else {
+      // Reset to unfiltered posts when filter is cleared
+      setDogAvailabilityPosts(allDogPosts);
+      setPetpalAvailabilityPosts(allPetpalPosts);
+    }
+  }, [locationFilter, allDogPosts, allPetpalPosts]);
 
   const formatAvailabilitySchedule = (enabledDays, daySchedules) => {
     if (!enabledDays || !daySchedules) return [];
@@ -86,7 +134,6 @@ export default function CommunityPage() {
           timestamp: new Date().toISOString(),
         };
         setNetworkInfo(info);
-        console.log('Network info:', info);
       }
     };
 
@@ -111,8 +158,6 @@ export default function CommunityPage() {
     try {
       const supabase = createClient();
 
-      console.log('Fetching availability data for user:', currentUser?.id || 'not logged in');
-
       // Add cache-busting parameter to prevent stale data
       const cacheBuster = Date.now();
 
@@ -125,12 +170,10 @@ export default function CommunityPage() {
       }
 
       // First, let's test if we can fetch any availability posts at all
-      const { data: allPosts, error: allPostsError } = await supabase
+      const { error: allPostsError } = await supabase
         .from('availability')
         .select('id, title, post_type, status, owner_id')
         .limit(5);
-
-      console.log('All availability posts test:', allPosts?.length || 0, 'Error:', allPostsError);
 
       // If we can't fetch any posts, there might be a database connection issue
       if (allPostsError) {
@@ -167,21 +210,11 @@ export default function CommunityPage() {
       // Only exclude current user's posts if they're logged in
       if (currentUser) {
         dogQuery = dogQuery.neq('owner_id', currentUser.id);
-        console.log('Excluding posts from user:', currentUser.id);
       }
 
       const { data: dogPosts, error: dogError } = await dogQuery.order('created_at', {
         ascending: false,
       });
-
-      // Debug logging for dog posts
-      console.log('Dog posts fetched:', dogPosts?.length || 0);
-      if (dogPosts && dogPosts.length > 0) {
-        console.log('First dog post owner data:', dogPosts[0].owner);
-        console.log('First dog post dog_id:', dogPosts[0].dog_id);
-        console.log('First dog post dog_ids:', dogPosts[0].dog_ids);
-        console.log('First dog post dog data:', dogPosts[0].dog);
-      }
 
       // Fetch all dogs for each post (handle both single dog_id and dog_ids array)
       if (dogPosts) {
@@ -207,7 +240,6 @@ export default function CommunityPage() {
 
             if (!dogsError && allDogs) {
               post.allDogs = allDogs;
-              console.log('Successfully fetched dogs for post:', post.id, 'dogs:', allDogs);
             } else {
               console.error('Error fetching dogs for post:', post.id, dogsError);
               post.allDogs = [];
@@ -222,8 +254,10 @@ export default function CommunityPage() {
         console.error('Error fetching dog posts:', dogError);
         throw dogError;
       }
-      console.log('Dog posts fetched:', dogPosts?.length || 0);
-      setDogAvailabilityPosts(dogPosts || []);
+      // Store unfiltered posts with allDogs attached
+      // Let useEffect handle filtering to avoid duplicate logic
+      const postsWithDogs = dogPosts || [];
+      setAllDogPosts(postsWithDogs);
 
       // Fetch petpal availability posts (excluding current user's posts if logged in)
       let petpalQuery = supabase
@@ -253,18 +287,14 @@ export default function CommunityPage() {
         ascending: false,
       });
 
-      // Debug logging for petpal posts
-      console.log('Petpal posts fetched:', petpalPosts?.length || 0);
-      if (petpalPosts && petpalPosts.length > 0) {
-        console.log('First petpal post owner data:', petpalPosts[0].owner);
-      }
-
       if (petpalError) {
         console.error('Error fetching petpal posts:', petpalError);
         throw petpalError;
       }
-      console.log('Petpal posts fetched:', petpalPosts?.length || 0);
-      setPetpalAvailabilityPosts(petpalPosts || []);
+      // Store unfiltered posts
+      // Let useEffect handle filtering to avoid duplicate logic
+      const postsWithData = petpalPosts || [];
+      setAllPetpalPosts(postsWithData);
 
       // Fetch user's own availability posts
       if (currentUser) {
@@ -323,13 +353,11 @@ export default function CommunityPage() {
           console.error('Error fetching user posts:', myError);
           throw myError;
         }
-        console.log('My posts fetched:', myPosts?.length || 0);
         setMyAvailabilityPosts(myPosts || []);
       }
     } catch (error) {
       console.error('Error fetching availability data:', error);
     } finally {
-      console.log('Setting loading to false');
       setLoading(false);
     }
   };
@@ -416,7 +444,6 @@ export default function CommunityPage() {
   // };
 
   const openMessageModal = (recipient, availabilityPost) => {
-    console.log('Opening message modal with:', { recipient, availabilityPost });
     setMessageModal({ isOpen: true, recipient, availabilityPost });
   };
 
@@ -533,6 +560,9 @@ export default function CommunityPage() {
           </div>
         </div>
 
+        {/* Location Filter */}
+        <LocationFilter onFilterChange={setLocationFilter} />
+
         {/* Tabs */}
         <div className="mb-6 sm:mb-8">
           <div className="grid grid-cols-1 sm:flex sm:space-x-1 bg-white rounded-xl p-2 sm:p-1 shadow-md border border-gray-200 gap-2 sm:gap-0">
@@ -593,16 +623,6 @@ export default function CommunityPage() {
                   </h3>
 
                   {/* Dog Information */}
-                  {console.log(
-                    'Rendering post:',
-                    post.id,
-                    'allDogs:',
-                    post.allDogs,
-                    'dog_id:',
-                    post.dog_id,
-                    'dog_ids:',
-                    post.dog_ids
-                  )}
                   {post.allDogs && post.allDogs.length > 0 && (
                     <div className="mb-4">
                       {post.allDogs.length === 1 ? (
@@ -753,11 +773,7 @@ export default function CommunityPage() {
 
                       {user && user.id !== post.owner_id ? (
                         <button
-                          onClick={() => {
-                            console.log('Dog post owner data:', post.owner);
-                            console.log('Dog post owner_id:', post.owner_id);
-                            openMessageModal(post.owner, post);
-                          }}
+                          onClick={() => openMessageModal(post.owner, post)}
                           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                         >
                           Send Message
@@ -797,7 +813,11 @@ export default function CommunityPage() {
                 <span className="mr-2">🐕</span>
                 Dog Owners in the Community
               </h3>
-              <ProfilesList role="dog_owner" onMessage={openMessageModal} />
+              <ProfilesList 
+                role="dog_owner" 
+                onMessage={openMessageModal}
+                locationFilter={locationFilter}
+              />
             </div>
           </div>
         )}
@@ -920,11 +940,7 @@ export default function CommunityPage() {
                       </Link>
                       {user && user.id !== post.owner_id && (
                         <button
-                          onClick={() => {
-                            console.log('Petpal post owner data:', post.owner);
-                            console.log('Petpal post owner_id:', post.owner_id);
-                            openMessageModal(post.owner, post);
-                          }}
+                          onClick={() => openMessageModal(post.owner, post)}
                           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                         >
                           Send Message
@@ -960,7 +976,11 @@ export default function CommunityPage() {
                 <span className="mr-2">🤝</span>
                 PetPals in the Community
               </h3>
-              <ProfilesList role="petpal" onMessage={openMessageModal} />
+              <ProfilesList 
+                role="petpal" 
+                onMessage={openMessageModal}
+                locationFilter={locationFilter}
+              />
             </div>
           </div>
         )}
