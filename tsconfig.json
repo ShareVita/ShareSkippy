@@ -37,6 +37,8 @@
     "components/**/*.tsx",
     "lib/**/*.ts",
     "lib/**/*.tsx",
+    "libs/**/*.ts",
+    "libs/**/*.tsx",
     "pages/**/*.ts",
     "pages/**/*.tsx",
     "scripts/**/*.ts",
