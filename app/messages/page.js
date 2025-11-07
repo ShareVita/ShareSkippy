@@ -185,11 +185,11 @@ export default function MessagesPage() {
                 return prev;
               });
 
-              // Refresh conversations to update unread counts after a short delay
-              // This allows the database update to propagate
+              // Refresh conversations to update unread counts after a delay
+              // This allows the database update to propagate and ensures we get fresh counts
               setTimeout(() => {
                 fetchConversations();
-              }, 500);
+              }, 1000);
             }
           } catch (markReadError) {
             console.error('Error marking messages as read:', markReadError);
@@ -362,21 +362,14 @@ export default function MessagesPage() {
       setConversations(processedConversations);
       
       // Update selected conversation's unread count if it exists
-      // Preserve the selected conversation if it was just marked as read (unreadCount = 0)
       if (selectedConversation) {
         const updatedSelected = processedConversations.find(
           (c) => c.id === selectedConversation.id
         );
         if (updatedSelected) {
-          // If we just marked messages as read (unreadCount is 0 in state), keep it at 0
-          // Otherwise, update with the fetched count
-          const shouldPreserveZero = selectedConversation.unreadCount === 0 && updatedSelected.unreadCount > 0;
-          if (!shouldPreserveZero && updatedSelected.unreadCount !== selectedConversation.unreadCount) {
-            setSelectedConversation(updatedSelected);
-          } else if (shouldPreserveZero) {
-            // Keep the zero count but update other fields
-            setSelectedConversation({ ...updatedSelected, unreadCount: 0 });
-          }
+          // Always update with the fetched count (database is source of truth)
+          // If we just marked as read, the count should be 0 from the database
+          setSelectedConversation(updatedSelected);
         }
       }
 
