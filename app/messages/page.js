@@ -235,39 +235,6 @@ export default function MessagesPage() {
     };
   }, [selectedConversationKey, selectedConversation]);
 
-  // Real-time subscription for unread count updates
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('messages-unread-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages',
-          filter: `recipient_id=eq.${user.id}`,
-        },
-        (payload) => {
-          // When a message's is_read status changes, refresh conversations
-          // This ensures unread counts stay in sync
-          if (payload.new.is_read !== payload.old.is_read) {
-            console.log('Message read status changed, refreshing conversations');
-            // Debounce to avoid too many refreshes
-            setTimeout(() => {
-              fetchConversations();
-            }, 500);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, fetchConversations]);
-
   const fetchConversations = useCallback(async () => {
     if (!user) return;
 
@@ -434,11 +401,44 @@ export default function MessagesPage() {
     }
   }, [user, searchParams, router, selectedConversation]);
 
+  // Real-time subscription for unread count updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('messages-unread-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `recipient_id=eq.${user.id}`,
+        },
+        (payload) => {
+          // When a message's is_read status changes, refresh conversations
+          // This ensures unread counts stay in sync
+          if (payload.new.is_read !== payload.old.is_read) {
+            console.log('Message read status changed, refreshing conversations');
+            // Debounce to avoid too many refreshes
+            setTimeout(() => {
+              fetchConversations();
+            }, 500);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchConversations]);
+
   useEffect(() => {
     if (user && !authLoading) {
       fetchConversations();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, fetchConversations]);
 
   // Real-time subscription for unread message counts
   useEffect(() => {
