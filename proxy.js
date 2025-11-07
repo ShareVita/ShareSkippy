@@ -1,16 +1,44 @@
-import { updateSession } from '@/libs/supabase/middleware';
+// In /proxy.js (or /proxy.ts) at the root of your project
+
+import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
 export async function proxy(request) {
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request,
   });
 
-  return await updateSession(request, response);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          // Set cookies on the request (for Server Components)
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          // Re-create response to apply request cookies
+          response = NextResponse.next({
+            request,
+          });
+          // Set cookies on the response (to send back to browser)
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  // This is the critical line that refreshes the session and handles cookies
+  await supabase.auth.getSession();
+
+  return response;
 }
 
+// Your config
 export const config = {
   unstable_allowDynamic: [
     './node_modules/@supabase/supabase-js/dist/module/index.js',
@@ -18,14 +46,5 @@ export const config = {
     './node_modules/@supabase/realtime-js/**',
     './node_modules/@supabase/supabase-js/**',
   ],
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };
