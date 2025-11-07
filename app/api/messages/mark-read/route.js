@@ -92,10 +92,6 @@ export async function POST(request) {
       }
     }
 
-    if (!error3 && updatedLegacy2) {
-      updatedMessages = [...updatedMessages, ...updatedLegacy2];
-    }
-
     // If we had an error with conversation_id query and no legacy messages were updated, throw
     if (updateError && updatedMessages.length === 0) {
       console.error('Error updating messages:', updateError);
