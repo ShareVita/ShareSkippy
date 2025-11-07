@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
+import Image from 'next/image';
 import { useSupabaseAuth } from '@/libs/supabase/hooks';
 import { supabase } from '@/libs/supabase';
 import MessageModal from '@/components/MessageModal';
@@ -115,7 +116,7 @@ export default function MessagesPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedConversationKey, fetchMessages]);
+  }, [selectedConversation, selectedConversationKey, fetchMessages]);
 
   useEffect(() => {
     if (!selectedConversation) return;
@@ -242,9 +243,9 @@ export default function MessagesPage() {
     }
   };
 
-  const openMessageModal = (recipient, availabilityPost) => {
-    setMessageModal({ isOpen: true, recipient, availabilityPost });
-  };
+  // const openMessageModal = (recipient, availabilityPost) => {
+  // 	setMessageModal({ isOpen: true, recipient, availabilityPost });
+  // };
 
   const closeMessageModal = () => {
     setMessageModal({ isOpen: false, recipient: null, availabilityPost: null });
@@ -387,9 +388,11 @@ export default function MessagesPage() {
                 >
                   <div className="flex items-center space-x-3">
                     {conversation.profilePhoto ? (
-                      <img
+                      <Image
                         src={conversation.profilePhoto}
                         alt={conversation.displayName}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (
@@ -430,9 +433,11 @@ export default function MessagesPage() {
                       ←
                     </button>
                     {selectedConversation.profilePhoto ? (
-                      <img
+                      <Image
                         src={selectedConversation.profilePhoto}
                         alt={selectedConversation.displayName}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover"
                       />
                     ) : (

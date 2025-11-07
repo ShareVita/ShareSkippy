@@ -20,6 +20,7 @@ const CrispChat = () => {
     if (config?.crisp?.id && !crispInitialized) {
       // Set up Crisp only once
       Crisp.configure(config.crisp.id);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCrispInitialized(true);
     }
   }, [crispInitialized]);
@@ -68,7 +69,7 @@ const ClientLayout = ({ children }) => {
   return (
     <>
       {/* Show a progress bar at the top when navigating between pages */}
-      <NextTopLoader color={config.colors.main} showSpinner={false} />
+      <NextTopLoader color="light" showSpinner={false} />
 
       {/* Content inside app/page.js files  */}
       {children}

@@ -1,17 +1,17 @@
 'use client';
+
+import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import DeleteAccountModal from '@/components/DeleteAccountModal';
+import DeletionRequestStatus from '@/components/DeletionRequestStatus';
 import { createClient } from '@/libs/supabase/client';
-import { useUser } from '@/libs/supabase/hooks';
+import { useUser } from '@/components/providers/SupabaseUserProvider';
+import UserReviews from '@/components/UserReviews';
 import { formatLocation } from '@/libs/utils';
-import DeleteAccountModal from '../../components/DeleteAccountModal';
-import UserReviews from '../../components/UserReviews';
-import DeletionRequestStatus from '../../components/DeletionRequestStatus';
 
 export default function ProfilePage() {
   const { user, loading: userLoading } = useUser();
-  const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +41,7 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  });
+  }, [user, setProfile, setLoading, setError]);
 
   useEffect(() => {
     if (userLoading) return;
@@ -103,10 +103,12 @@ export default function ProfilePage() {
         {/* Profile Photo */}
         {profile.profile_photo_url && (
           <div className="mb-4">
-            <img
+            <Image
               src={profile.profile_photo_url}
               alt="Profile"
               className="w-24 h-24 rounded-full mx-auto object-cover"
+              width={96}
+              height={96}
             />
           </div>
         )}

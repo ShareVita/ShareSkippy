@@ -1,15 +1,15 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/libs/supabase/client';
-import UserReviews from '../../../../components/UserReviews';
-import MessageModal from '../../../../components/MessageModal';
+import UserReviews from '@/components/UserReviews';
+import MessageModal from '@/components/MessageModal';
 
 export default function AvailabilityDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -102,7 +102,7 @@ export default function AvailabilityDetailPage() {
         query = query.eq('status', 'active');
       } else {
         // Check if user is the owner first
-        const { data: postData, error: postError } = await supabase
+        const { data: postData } = await supabase
           .from('availability')
           .select('owner_id, status')
           .eq('id', params.id)
@@ -153,7 +153,7 @@ export default function AvailabilityDetailPage() {
     } finally {
       setLoading(false);
     }
-  });
+  }, [params, setAvailability, setError, setLoading]);
 
   useEffect(() => {
     if (params.id) {
@@ -161,17 +161,17 @@ export default function AvailabilityDetailPage() {
     }
   }, [params.id, fetchAvailabilityDetails]);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString('en-US', {
+  //     weekday: 'long',
+  //     year: 'numeric',
+  //     month: 'long',
+  //     day: 'numeric',
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //   });
+  // };
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
@@ -234,32 +234,32 @@ export default function AvailabilityDetailPage() {
     });
   };
 
-  const getSizeIcon = (size) => {
-    // Handle weight ranges
-    if (size && size.includes('-')) {
-      const weight = parseInt(size.split('-')[0]);
-      if (weight <= 10) return '🐕';
-      if (weight <= 25) return '🐕‍🦺';
-      if (weight <= 40) return '🐕‍🦺';
-      if (weight <= 70) return '🦮';
-      if (weight <= 90) return '🦮';
-      if (weight <= 110) return '🐺';
-    }
+  // const getSizeIcon = (size) => {
+  //   // Handle weight ranges
+  //   if (size && size.includes('-')) {
+  //     const weight = parseInt(size.split('-')[0]);
+  //     if (weight <= 10) return '🐕';
+  //     if (weight <= 25) return '🐕‍🦺';
+  //     if (weight <= 40) return '🐕‍🦺';
+  //     if (weight <= 70) return '🦮';
+  //     if (weight <= 90) return '🦮';
+  //     if (weight <= 110) return '🐺';
+  //   }
 
-    // Fallback for old size values or any other cases
-    switch (size) {
-      case 'small':
-        return '🐕';
-      case 'medium':
-        return '🐕‍🦺';
-      case 'large':
-        return '🦮';
-      case 'extra_large':
-        return '🐺';
-      default:
-        return '🐕';
-    }
-  };
+  //   // Fallback for old size values or any other cases
+  //   switch (size) {
+  //     case 'small':
+  //       return '🐕';
+  //     case 'medium':
+  //       return '🐕‍🦺';
+  //     case 'large':
+  //       return '🦮';
+  //     case 'extra_large':
+  //       return '🐺';
+  //     default:
+  //       return '🐕';
+  //   }
+  // };
 
   const getEnergyLevelColor = (level) => {
     switch (level) {
@@ -468,7 +468,7 @@ export default function AvailabilityDetailPage() {
                   <div>
                     <div className="flex items-start space-x-6 mb-6">
                       {availability.allDogs[0].photo_url ? (
-                        <img
+                        <Image
                           src={availability.allDogs[0].photo_url}
                           alt={availability.allDogs[0].name}
                           className="w-24 h-24 rounded-full object-cover shadow-md"
@@ -650,11 +650,11 @@ export default function AvailabilityDetailPage() {
                 ) : (
                   // Multiple dogs display
                   <div className="space-y-6">
-                    {availability.allDogs.map((dog, index) => (
+                    {availability.allDogs.map((dog) => (
                       <div key={dog.id} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-start space-x-4 mb-4">
                           {dog.photo_url ? (
-                            <img
+                            <Image
                               src={dog.photo_url}
                               alt={dog.name}
                               className="w-16 h-16 rounded-full object-cover shadow-md"
@@ -840,7 +840,7 @@ export default function AvailabilityDetailPage() {
 
               <div className="text-center mb-6">
                 {availability.owner?.profile_photo_url ? (
-                  <img
+                  <Image
                     src={availability.owner.profile_photo_url}
                     alt={`${availability.owner.first_name} ${availability.owner.last_name}`}
                     className="w-20 h-20 rounded-full object-cover shadow-md mx-auto mb-4"

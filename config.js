@@ -1,5 +1,3 @@
-import lightTheme from 'daisyui/theme/light';
-
 const config = {
   // REQUIRED
   appName: 'ShareSkippy',
@@ -44,11 +42,6 @@ const config = {
     fromAdmin: `ShareSkippy <admin@send.shareskippy.com>`,
     // Email shown to customer if need support. Leave empty if not needed => if empty, set up Crisp above, otherwise you won't be able to offer customer support."
     supportEmail: 'support@shareskippy.com',
-  },
-  colors: {
-    // REQUIRED — The DaisyUI theme to use (added to the main layout.js). Leave blank for default (light & dark mode). If you any other theme than light/dark, you need to add it in the theme name after "data-theme=")
-    // OR you can just do this to use a custom color: main: "#f37055". HEX only.
-    main: lightTheme.primary,
   },
   auth: {
     // REQUIRED — the path to log in users. It's use to protect private routes (like /dashboard). It's used in apiClient (/libs/api.js) upon 401 errors from our API

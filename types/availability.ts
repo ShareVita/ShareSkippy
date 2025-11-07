@@ -30,7 +30,7 @@ export interface AvailabilityPost {
   support_preferences?: string[];
   flexible_scheduling_needed?: boolean;
   support_story?: string;
-  enabled_days?: any[];
+  enabled_days?: string[];
   day_schedules?: Record<string, { enabled: boolean; start_time: string; end_time: string }>;
   need_extra_help?: boolean;
   help_reason_elderly?: boolean;
@@ -48,7 +48,7 @@ export interface AvailabilityPost {
   helping_others_context?: string;
   created_at?: string;
   updated_at?: string;
-  
+
   // Joined data
   owner?: {
     id: string;

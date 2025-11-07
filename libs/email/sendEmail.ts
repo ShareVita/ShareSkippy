@@ -1,16 +1,17 @@
 import { createServiceClient } from '@/libs/supabase/server';
 import { sendEmail as resendSendEmail } from '@/libs/resend';
-import { loadEmailTemplate } from './templates';
-import config from '@/config';
-
-export interface EmailPayload {
-  [key: string]: any;
-}
+import { EmailPayload, loadEmailTemplate, ResendSendResult } from './templates';
 
 export interface SendEmailParams {
   userId: string;
   to: string;
-  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'meeting_scheduled' | 'reengage' | 'new_message';
+  emailType:
+    | 'welcome'
+    | 'nurture_day3'
+    | 'meeting_reminder'
+    | 'meeting_scheduled'
+    | 'reengage'
+    | 'new_message';
   subject?: string;
   html?: string;
   text?: string;
@@ -40,10 +41,10 @@ export async function sendEmail({
   subject,
   html,
   text,
-  payload = {}
+  payload = {},
 }: SendEmailParams): Promise<EmailEvent> {
   const supabase = createServiceClient();
-  
+
   try {
     // Check for idempotency - prevent duplicate sends for single-shot emails
     if (['welcome', 'nurture_day3'].includes(emailType)) {
@@ -56,14 +57,14 @@ export async function sendEmail({
 
       if (existingEvent) {
         console.log(`Email ${emailType} already sent to user ${userId}, skipping`);
-        
+
         // Return the existing event
         const { data: event } = await supabase
           .from('email_events')
           .select('*')
           .eq('id', existingEvent.id)
           .single();
-          
+
         return event as EmailEvent;
       }
     }
@@ -105,7 +106,7 @@ export async function sendEmail({
         status: 'queued',
         to_email: to,
         subject: finalSubject,
-        payload: payload
+        payload: payload,
       })
       .select()
       .single();
@@ -120,15 +121,18 @@ export async function sendEmail({
         to,
         subject: finalSubject,
         html: finalHtml,
-        text: finalText
+        text: finalText,
       });
+
+      const resendData = resendResult as ResendSendResult;
+      const externalMessageId = resendData.id;
 
       // Update event with success
       const { error: updateError } = await supabase
         .from('email_events')
         .update({
           status: 'sent',
-          external_message_id: (resendResult as any).id
+          external_message_id: externalMessageId,
         })
         .eq('id', emailEvent.id);
 
@@ -136,28 +140,18 @@ export async function sendEmail({
         console.error('Failed to update email event:', updateError);
       }
 
-      // Log success
-      console.log(`Email ${emailType} sent successfully to ${to} (user: ${userId})`, {
-        emailType,
-        userId,
-        to,
-        externalMessageId: (resendResult as any).id,
-        subject: finalSubject
-      });
-
       return {
         ...emailEvent,
         status: 'sent',
-        external_message_id: (resendResult as any).id
+        external_message_id: externalMessageId,
       } as EmailEvent;
-
     } catch (sendError) {
       // Update event with failure
       const { error: updateError } = await supabase
         .from('email_events')
         .update({
           status: 'failed',
-          error: sendError instanceof Error ? sendError.message : 'Unknown error'
+          error: sendError instanceof Error ? sendError.message : 'Unknown error',
         })
         .eq('id', emailEvent.id);
 
@@ -170,12 +164,11 @@ export async function sendEmail({
         emailType,
         userId,
         to,
-        error: sendError instanceof Error ? sendError.message : 'Unknown error'
+        error: sendError instanceof Error ? sendError.message : 'Unknown error',
       });
 
       throw sendError;
     }
-
   } catch (error) {
     console.error('Error in sendEmail:', error);
     throw error;
@@ -189,23 +182,27 @@ export async function scheduleEmail({
   userId,
   emailType,
   runAfter,
-  payload = {}
+  payload = {},
 }: {
   userId: string;
-  emailType: 'welcome' | 'nurture_day3' | 'meeting_reminder' | 'meeting_scheduled' | 'reengage' | 'new_message';
+  emailType:
+    | 'welcome'
+    | 'nurture_day3'
+    | 'meeting_reminder'
+    | 'meeting_scheduled'
+    | 'reengage'
+    | 'new_message';
   runAfter: Date;
   payload?: EmailPayload;
 }): Promise<void> {
   const supabase = createServiceClient();
 
-  const { error } = await supabase
-    .from('scheduled_emails')
-    .insert({
-      user_id: userId,
-      email_type: emailType,
-      run_after: runAfter.toISOString(),
-      payload
-    });
+  const { error } = await supabase.from('scheduled_emails').insert({
+    user_id: userId,
+    email_type: emailType,
+    run_after: runAfter.toISOString(),
+    payload,
+  });
 
   if (error) {
     throw new Error(`Failed to schedule email: ${error.message}`);
@@ -220,7 +217,7 @@ export async function scheduleEmail({
 export async function recordUserActivity({
   userId,
   event,
-  metadata = {}
+  metadata = {},
 }: {
   userId: string;
   event: string;
@@ -228,13 +225,11 @@ export async function recordUserActivity({
 }): Promise<void> {
   const supabase = createServiceClient();
 
-  const { error } = await supabase
-    .from('user_activity')
-    .insert({
-      user_id: userId,
-      event,
-      metadata
-    });
+  const { error } = await supabase.from('user_activity').insert({
+    user_id: userId,
+    event,
+    metadata,
+  });
 
   if (error) {
     console.error('Failed to record user activity:', error);
@@ -245,10 +240,7 @@ export async function recordUserActivity({
 /**
  * Get user's last activity for a specific event
  */
-export async function getUserLastActivity(
-  userId: string, 
-  event: string
-): Promise<Date | null> {
+export async function getUserLastActivity(userId: string, event: string): Promise<Date | null> {
   const supabase = createServiceClient();
 
   const { data } = await supabase

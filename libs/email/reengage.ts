@@ -20,10 +20,7 @@ export async function processReengageEmails(): Promise<ReengageResult> {
 
   try {
     // Check if the user_activity table exists
-    const { error: tableCheckError } = await supabase
-      .from('user_activity')
-      .select('id')
-      .limit(1);
+    const { error: tableCheckError } = await supabase.from('user_activity').select('id').limit(1);
 
     if (tableCheckError && tableCheckError.message.includes('Could not find the table')) {
       console.log('User activity table does not exist yet. Skipping re-engagement processing.');
@@ -35,10 +32,12 @@ export async function processReengageEmails(): Promise<ReengageResult> {
 
     const { data: inactiveUsers, error: usersError } = await supabase
       .from('profiles')
-      .select(`
+      .select(
+        `
         id, email, first_name, last_name, created_at,
         user_activity!inner(at)
-      `)
+      `
+      )
       .lt('user_activity.at', sevenDaysAgo.toISOString())
       .eq('user_activity.event', 'login')
       .not('email', 'is', null)
@@ -60,7 +59,7 @@ export async function processReengageEmails(): Promise<ReengageResult> {
       try {
         // Check if user should receive re-engagement email
         const shouldSend = await shouldSendReengageEmail(user.id);
-        
+
         if (!shouldSend) {
           skipped++;
           console.log(`Skipping re-engagement email for user ${user.id} - already sent recently`);
@@ -74,18 +73,17 @@ export async function processReengageEmails(): Promise<ReengageResult> {
           emailType: 'reengage',
           payload: {
             userName: user.first_name || '',
-            userEmail: user.email
-          }
+            userEmail: user.email,
+          },
         });
 
         sent++;
         console.log(`Sent re-engagement email to ${user.email}`);
-
       } catch (error) {
         console.error(`Error processing re-engagement for user ${user.id}:`, error);
-        errors.push({ 
-          userId: user.id, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        errors.push({
+          userId: user.id,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -94,9 +92,8 @@ export async function processReengageEmails(): Promise<ReengageResult> {
       processed: inactiveUsers.length,
       sent,
       skipped,
-      errors
+      errors,
     };
-
   } catch (error) {
     console.error('Error in processReengageEmails:', error);
     throw error;
@@ -128,22 +125,26 @@ async function shouldSendReengageEmail(userId: string): Promise<boolean> {
 /**
  * Get users who are candidates for re-engagement emails
  */
-export async function getReengageCandidates(): Promise<Array<{
-  id: string;
-  email: string;
-  first_name: string | null;
-  last_login: string | null;
-  days_since_login: number;
-}>> {
+export async function getReengageCandidates(): Promise<
+  Array<{
+    id: string;
+    email: string;
+    first_name: string | null;
+    last_login: string | null;
+    days_since_login: number;
+  }>
+> {
   const supabase = createServiceClient();
 
   // Get users with their last login activity
   const { data: users, error } = await supabase
     .from('profiles')
-    .select(`
+    .select(
+      `
       id, email, first_name, last_name,
       user_activity!inner(at)
-    `)
+    `
+    )
     .eq('user_activity.event', 'login')
     .not('email', 'is', null)
     .not('email', 'eq', '')
@@ -160,25 +161,27 @@ export async function getReengageCandidates(): Promise<Array<{
   for (const user of users) {
     if (!userMap.has(user.id)) {
       // user.user_activity is an array from the join, get the most recent
-      const mostRecentActivity = Array.isArray(user.user_activity) 
-        ? user.user_activity[0] 
+      const mostRecentActivity = Array.isArray(user.user_activity)
+        ? user.user_activity[0]
         : user.user_activity;
-      
+
       userMap.set(user.id, {
         id: user.id,
         email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
         last_login: mostRecentActivity?.at,
-        days_since_login: mostRecentActivity?.at 
-          ? Math.floor((Date.now() - new Date(mostRecentActivity.at).getTime()) / (1000 * 60 * 60 * 24))
-          : 999 // If no activity, consider them very inactive
+        days_since_login: mostRecentActivity?.at
+          ? Math.floor(
+              (Date.now() - new Date(mostRecentActivity.at).getTime()) / (1000 * 60 * 60 * 24)
+            )
+          : 999, // If no activity, consider them very inactive
       });
     }
   }
 
   // Filter for users inactive for 7+ days
-  return Array.from(userMap.values()).filter(user => user.days_since_login >= 7);
+  return Array.from(userMap.values()).filter((user) => user.days_since_login >= 7);
 }
 
 /**
@@ -188,18 +191,17 @@ export async function scheduleReengageEmails(): Promise<{
   scheduled: number;
   errors: Array<{ userId: string; error: string }>;
 }> {
-  const supabase = createServiceClient();
   const errors: Array<{ userId: string; error: string }> = [];
   let scheduled = 0;
 
   try {
     const candidates = await getReengageCandidates();
-    
+
     for (const user of candidates) {
       try {
         // Check if user should receive re-engagement email
         const shouldSend = await shouldSendReengageEmail(user.id);
-        
+
         if (!shouldSend) {
           continue;
         }
@@ -211,24 +213,22 @@ export async function scheduleReengageEmails(): Promise<{
           runAfter: new Date(),
           payload: {
             userName: user.first_name || '',
-            userEmail: user.email
-          }
+            userEmail: user.email,
+          },
         });
 
         scheduled++;
         console.log(`Scheduled re-engagement email for user ${user.id}`);
-
       } catch (error) {
         console.error(`Error scheduling re-engagement for user ${user.id}:`, error);
-        errors.push({ 
-          userId: user.id, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        errors.push({
+          userId: user.id,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
 
     return { scheduled, errors };
-
   } catch (error) {
     console.error('Error in scheduleReengageEmails:', error);
     throw error;

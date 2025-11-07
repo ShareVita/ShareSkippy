@@ -1,13 +1,11 @@
-const withNextBundleAnalyzer = require('@next/bundle-analyzer')({
+import nextBundleAnalyzer from '@next/bundle-analyzer';
+
+const withNextBundleAnalyzer = nextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
 const nextConfig = {
   reactStrictMode: true,
-  // Temporarily disable ESLint during build for production deployment
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['@supabase/supabase-js', 'react-hot-toast'],
@@ -78,13 +76,14 @@ const nextConfig = {
     ];
   },
   images: {
-    domains: [
-      // NextJS <Image> component needs to whitelist domains for src={}
-      "lh3.googleusercontent.com",
-      "pbs.twimg.com",
-      "images.unsplash.com",
-      "logos-world.net",
-      "utrvultsbtsywypztfnn.supabase.co", // Supabase storage domain
+    remotePatterns: [
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com', port: '', pathname: '**' },
+      { protocol: 'https', hostname: 'pbs.twimg.com', port: '', pathname: '**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', port: '', pathname: '**' },
+      { protocol: 'https', hostname: 'logos-world.net', port: '', pathname: '**' },
+      { protocol: 'https', hostname: 'utrvultsbtsywypztfnn.supabase.co', port: '', pathname: '**' }, // Supabase storage domain
+      { protocol: 'http', hostname: '127.0.0.1', port: '54321', pathname: '**' },
+      { protocol: 'http', hostname: 'localhost', port: '54321', pathname: '**' },
     ],
     // Add image optimization settings
     formats: ['image/webp', 'image/avif'],
@@ -99,4 +98,4 @@ const nextConfig = {
   poweredByHeader: false,
 };
 
-module.exports = withNextBundleAnalyzer(nextConfig);
+export default withNextBundleAnalyzer(nextConfig);

@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-@plugin 'daisyui';
 
 @theme {
   --background-image-gradient: linear-gradient(
@@ -13,9 +12,8 @@
     #07b39b,
     #6fba82
   );
-
   --animate-opacity: opacity 0.25s ease-in-out;
-  --animate-appear-from-right: appearFromRight 300ms ease-in-out;
+  --animate-appear-from-right: appearfromright 300ms ease-in-out;
   --animate-wiggle: wiggle 1.5s ease-in-out infinite;
   --animate-popup: popup 0.25s ease-in-out;
   --animate-shimmer: shimmer 3s ease-out infinite alternate;
@@ -24,20 +22,24 @@
     0% {
       opacity: 0;
     }
+
     100% {
       opacity: 1;
     }
   }
-  @keyframes appearFromRight {
+
+  @keyframes appearfromright {
     0% {
       opacity: 0.3;
-      transform: translate(15%, 0px);
+      transform: translate(15%, 0pi);
     }
+
     100% {
       opacity: 1;
       transform: translate(0);
     }
   }
+
   @keyframes wiggle {
     0%,
     20%,
@@ -45,42 +47,52 @@
     100% {
       transform: rotate(0deg);
     }
+
     30%,
     60% {
       transform: rotate(-2deg);
     }
+
     40%,
     70% {
       transform: rotate(2deg);
     }
+
     45% {
       transform: rotate(-4deg);
     }
+
     55% {
       transform: rotate(4deg);
     }
   }
+
   @keyframes popup {
     0% {
       transform: scale(0.8);
       opacity: 0.8;
     }
+
     50% {
       transform: scale(1.1);
       opacity: 1;
     }
+
     100% {
       transform: scale(1);
       opacity: 1;
     }
   }
+
   @keyframes shimmer {
     0% {
       background-position: 0 50%;
     }
+
     50% {
       background-position: 100% 50%;
     }
+
     100% {
       background-position: 0% 50%;
     }
@@ -105,11 +117,13 @@
   }
 }
 
-@utility clickable-card {
-  @apply cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+@layer {
+  .clickable-card {
+    @apply cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
 
-  &:hover {
-    @apply ring-2 ring-blue-200;
+    &:hover {
+      @apply ring-2 ring-blue-200;
+    }
   }
 }
 
@@ -127,7 +141,7 @@
 
   html,
   body,
-  #__next {
+  #next {
     height: 100%;
   }
 
@@ -151,14 +165,13 @@
   /* Message spacing improvements */
   .message-bubble {
     max-width: 85%;
-    word-wrap: break-word;
     overflow-wrap: break-word;
-    word-break: break-word;
+    word-break: break-all;
     hyphens: auto;
   }
 
   /* Mobile-specific message constraints */
-  @media (max-width: 640px) {
+  @media (width <= 640px) {
     .message-bubble {
       max-width: 90%;
       min-width: 0;
@@ -179,7 +192,7 @@
 
     /* Handle long words and URLs in messages */
     .message-bubble p {
-      word-break: break-word;
+      word-break: break-all;
       overflow-wrap: break-word;
       hyphens: auto;
       max-width: 100%;
@@ -198,8 +211,9 @@
     }
 
     .message-input textarea {
-      word-break: break-word;
+      word-break: break-all;
       overflow-wrap: break-word;
+
       /* Ensure textarea doesn't get covered by mobile keyboard */
       transition: height 0.1s ease-out;
     }
@@ -223,26 +237,27 @@
     @supports (-webkit-touch-callout: none) {
       /* iOS Safari specific */
       .message-input textarea {
-        -webkit-appearance: none;
+        appearance: none;
         border-radius: 12px;
       }
     }
 
     /* Android Chrome specific */
-    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    /* stylelint-disable media-feature-name-no-vendor-prefix, media-feature-name-no-unknown */
+    @media screen and (min-device-pixel-ratio: 0) {
       .message-input textarea {
         border-radius: 12px;
       }
     }
   }
 
-  @media (min-width: 640px) {
+  @media (width >= 640px) {
     .message-bubble {
       max-width: 75%;
     }
   }
 
-  @media (min-width: 1024px) {
+  @media (width >= 1024px) {
     .message-bubble {
       max-width: 65%;
     }
@@ -264,6 +279,10 @@
 }
 
 @layer base {
+  .btn-gradient {
+    @apply bg-gradient! bg-size-[300%_300%]! hover:saturate-[1.2] shadow-sm duration-100 border-0! border-transparent! bg-transparent! animate-shimmer disabled:bg-none! disabled:bg-gray-500/30!  text-white!;
+  }
+
   .btn {
     @apply capitalize!;
   }
@@ -317,6 +336,7 @@
   /* Ensure checkboxes have white backgrounds with specific styling */
   input[type='checkbox'] {
     @apply bg-white border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 focus:ring-offset-0;
+
     background-color: white !important;
     border-color: #d1d5db !important;
   }
@@ -324,6 +344,7 @@
   /* Override any browser default checkbox styling */
   input[type='checkbox']:checked {
     @apply bg-blue-600 border-blue-600;
+
     background-color: #2563eb !important;
     border-color: #2563eb !important;
   }
@@ -355,12 +376,6 @@
     border-color: #3b82f6 !important;
   }
 
-  /* Override any hover states */
-  input[type='checkbox']:hover:not(:checked) {
-    background-color: white !important;
-    border-color: #9ca3af !important;
-  }
-
   /* Override DaisyUI checkbox styling */
   input[type='checkbox'].checkbox,
   .checkbox input[type='checkbox'] {
@@ -386,19 +401,10 @@
     border-color: #d1d5db !important;
   }
 
-  /* Override browser default appearance */
-  input[type='checkbox'] {
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    display: inline-block !important;
-    width: 1rem !important;
-    height: 1rem !important;
-    border: 2px solid #d1d5db !important;
-    border-radius: 0.25rem !important;
+  /* Override any hover states */
+  input[type='checkbox']:hover:not(:checked) {
     background-color: white !important;
-    position: relative !important;
-    cursor: pointer !important;
+    border-color: #9ca3af !important;
   }
 
   /* Custom checkbox checked state */
@@ -412,10 +418,5 @@
     font-size: 0.75rem !important;
     font-weight: bold !important;
     line-height: 1 !important;
-  }
-
-  input[type='checkbox']:checked {
-    background-color: #2563eb !important;
-    border-color: #2563eb !important;
   }
 }

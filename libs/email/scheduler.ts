@@ -1,12 +1,13 @@
 import { createServiceClient } from '@/libs/supabase/server';
 import { sendEmail } from './sendEmail';
+import { EmailPayload } from './templates';
 
 export interface ScheduledEmail {
   id: number;
   user_id: string;
   email_type: string;
   run_after: string;
-  payload: any;
+  payload: EmailPayload;
   picked_at: string | null;
   created_at: string;
 }
@@ -85,24 +86,24 @@ export async function processScheduledEmails(): Promise<{
         await sendEmail({
           userId: scheduledEmail.user_id,
           to: user.email,
-          emailType: scheduledEmail.email_type as any,
-          payload: scheduledEmail.payload
+          emailType: scheduledEmail.email_type,
+          payload: scheduledEmail.payload,
         });
 
         processed++;
-        console.log(`Successfully processed scheduled email ${scheduledEmail.id} (${scheduledEmail.email_type})`);
-
+        console.log(
+          `Successfully processed scheduled email ${scheduledEmail.id} (${scheduledEmail.email_type})`
+        );
       } catch (error) {
         console.error(`Error processing scheduled email ${scheduledEmail.id}:`, error);
-        errors.push({ 
-          id: scheduledEmail.id, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
+        errors.push({
+          id: scheduledEmail.id,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
 
     return { processed, errors };
-
   } catch (error) {
     console.error('Error in processScheduledEmails:', error);
     throw error;
@@ -117,31 +118,29 @@ export async function scheduleMeetingReminder({
   meetingId,
   meetingTitle,
   startsAt,
-  payload = {}
+  payload = {},
 }: {
   userId: string;
   meetingId: string;
   meetingTitle: string;
   startsAt: Date;
-  payload?: any;
+  payload?: EmailPayload;
 }): Promise<void> {
   const reminderTime = new Date(startsAt);
   reminderTime.setDate(reminderTime.getDate() - 1); // 1 day before
 
   const supabase = createServiceClient();
-  const { error } = await supabase
-    .from('scheduled_emails')
-    .insert({
-      user_id: userId,
-      email_type: 'meeting_reminder',
-      run_after: reminderTime.toISOString(),
-      payload: {
-        meetingId,
-        meetingTitle,
-        startsAt: startsAt.toISOString(),
-        ...payload
-      }
-    });
+  const { error } = await supabase.from('scheduled_emails').insert({
+    user_id: userId,
+    email_type: 'meeting_reminder',
+    run_after: reminderTime.toISOString(),
+    payload: {
+      meetingId,
+      meetingTitle,
+      startsAt: startsAt.toISOString(),
+      ...payload,
+    },
+  });
 
   if (error) {
     throw new Error(`Failed to schedule meeting reminder: ${error.message}`);
@@ -158,14 +157,12 @@ export async function scheduleNurtureEmail(userId: string): Promise<void> {
   nurtureTime.setDate(nurtureTime.getDate() + 3);
 
   const supabase = createServiceClient();
-  const { error } = await supabase
-    .from('scheduled_emails')
-    .insert({
-      user_id: userId,
-      email_type: 'nurture_day3',
-      run_after: nurtureTime.toISOString(),
-      payload: {}
-    });
+  const { error } = await supabase.from('scheduled_emails').insert({
+    user_id: userId,
+    email_type: 'nurture_day3',
+    run_after: nurtureTime.toISOString(),
+    payload: {},
+  });
 
   if (error) {
     throw new Error(`Failed to schedule nurture email: ${error.message}`);
@@ -197,11 +194,8 @@ export async function getUserScheduledEmails(userId: string): Promise<ScheduledE
  */
 export async function cancelUserScheduledEmails(userId: string, emailType?: string): Promise<void> {
   const supabase = createServiceClient();
-  
-  let query = supabase
-    .from('scheduled_emails')
-    .delete()
-    .eq('user_id', userId);
+
+  let query = supabase.from('scheduled_emails').delete().eq('user_id', userId);
 
   if (emailType) {
     query = query.eq('email_type', emailType);
