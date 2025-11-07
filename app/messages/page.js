@@ -72,39 +72,47 @@ export default function MessagesPage() {
       try {
         const { participant1_id, participant2_id } = selectedConversation;
 
-        // First try to fetch by conversation_id (new approach)
-        let query = supabase
+        // Try to fetch by conversation_id first (if it exists)
+        let data = null;
+        let error = null;
+        
+        // Check if conversation_id exists on messages for this conversation
+        const { data: checkConv } = await supabase
           .from('messages')
-          .select(
-            `
-            *,
-            read_at,
-            sender:profiles!messages_sender_id_fkey (
-              id,
-              first_name,
-              last_name,
-              profile_photo_url
-            )
-            `
-          )
+          .select('conversation_id')
           .eq('conversation_id', conversationId)
-          .order('created_at', { ascending: true });
+          .limit(1)
+          .single();
 
-        const { data, error } = await query;
-
-        if (error) {
-          console.error('[fetchMessages] supabase error', error);
-          throw error;
-        }
-
-        // If no messages found with conversation_id, fallback to participant-based query (legacy)
-        if (!data || data.length === 0) {
-          const { data: legacyData, error: legacyError } = await supabase
+        if (checkConv) {
+          // Use conversation_id query
+          const result = await supabase
             .from('messages')
             .select(
               `
               *,
-              read_at,
+              sender:profiles!messages_sender_id_fkey (
+                id,
+                first_name,
+                last_name,
+                profile_photo_url
+              )
+              `
+            )
+            .eq('conversation_id', conversationId)
+            .order('created_at', { ascending: true });
+          
+          data = result.data;
+          error = result.error;
+        }
+
+        // If no data with conversation_id, use participant-based query (works for all cases)
+        if (!data || data.length === 0 || error) {
+          const result = await supabase
+            .from('messages')
+            .select(
+              `
+              *,
               sender:profiles!messages_sender_id_fkey (
                 id,
                 first_name,
@@ -116,15 +124,14 @@ export default function MessagesPage() {
             .or(
               `and(sender_id.eq.${participant1_id},recipient_id.eq.${participant2_id}),and(sender_id.eq.${participant2_id},recipient_id.eq.${participant1_id})`
             )
-            .is('conversation_id', null)
             .order('created_at', { ascending: true });
 
-          if (legacyError) {
-            console.error('[fetchMessages] legacy query error', legacyError);
+          if (result.error) {
+            console.error('[fetchMessages] error', result.error);
             return [];
           }
 
-          return legacyData || [];
+          return result.data || [];
         }
 
         return data || [];
@@ -184,7 +191,7 @@ export default function MessagesPage() {
               setMessages((prevMessages) =>
                 prevMessages.map((msg) =>
                   msg.recipient_id === user.id && !msg.is_read
-                    ? { ...msg, is_read: true, read_at: new Date().toISOString() }
+                    ? { ...msg, is_read: true }
                     : msg
                 )
               );
@@ -498,7 +505,6 @@ export default function MessagesPage() {
       content: messageContent,
       created_at: new Date().toISOString(),
       is_read: false,
-      read_at: null,
       sender: {
         id: user.id,
         first_name: user.user_metadata?.first_name || '',
@@ -969,6 +975,7 @@ export default function MessagesPage() {
                           >
                             {formatTimestamp(message.created_at)}
                           </p>
+                          {/* Read receipt checkmarks - only show if read_at exists */}
                           {message.sender_id === user.id && message.read_at && (
                             <span className="text-xs text-blue-100">
                               ✓✓
@@ -976,7 +983,7 @@ export default function MessagesPage() {
                           )}
                         </div>
                       </div>
-                      {/* Read Receipt */}
+                      {/* Read Receipt - only show if read_at column exists */}
                       {message.sender_id === user.id && message.read_at && (
                         <p className="text-xs text-gray-400 mt-1 px-1">
                           Seen at {formatTimestamp(message.read_at)}
