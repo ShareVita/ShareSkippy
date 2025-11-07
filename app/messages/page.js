@@ -168,11 +168,28 @@ export default function MessagesPage() {
             });
             
             if (markReadResponse.ok) {
+              // Update local messages state to mark them as read immediately
+              setMessages((prevMessages) =>
+                prevMessages.map((msg) =>
+                  msg.recipient_id === user.id && !msg.is_read
+                    ? { ...msg, is_read: true, read_at: new Date().toISOString() }
+                    : msg
+                )
+              );
+
+              // Update selected conversation's unread count immediately
+              setSelectedConversation((prev) => {
+                if (prev && prev.id === selectedConversation.id) {
+                  return { ...prev, unreadCount: 0 };
+                }
+                return prev;
+              });
+
               // Refresh conversations to update unread counts after a short delay
               // This allows the database update to propagate
               setTimeout(() => {
                 fetchConversations();
-              }, 200);
+              }, 500);
             }
           } catch (markReadError) {
             console.error('Error marking messages as read:', markReadError);
@@ -345,13 +362,21 @@ export default function MessagesPage() {
       setConversations(processedConversations);
       
       // Update selected conversation's unread count if it exists
-      // Only update if the conversation still exists and has changed unread count
+      // Preserve the selected conversation if it was just marked as read (unreadCount = 0)
       if (selectedConversation) {
         const updatedSelected = processedConversations.find(
           (c) => c.id === selectedConversation.id
         );
-        if (updatedSelected && updatedSelected.unreadCount !== selectedConversation.unreadCount) {
-          setSelectedConversation(updatedSelected);
+        if (updatedSelected) {
+          // If we just marked messages as read (unreadCount is 0 in state), keep it at 0
+          // Otherwise, update with the fetched count
+          const shouldPreserveZero = selectedConversation.unreadCount === 0 && updatedSelected.unreadCount > 0;
+          if (!shouldPreserveZero && updatedSelected.unreadCount !== selectedConversation.unreadCount) {
+            setSelectedConversation(updatedSelected);
+          } else if (shouldPreserveZero) {
+            // Keep the zero count but update other fields
+            setSelectedConversation({ ...updatedSelected, unreadCount: 0 });
+          }
         }
       }
 
