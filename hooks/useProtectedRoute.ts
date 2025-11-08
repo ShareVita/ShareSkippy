@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react"; // Removed useState
 import { useRouter } from "next/navigation";
 import { useUser } from "@/components/providers/SupabaseUserProvider";
 import config from "@/config";
@@ -19,7 +19,7 @@ interface ProtectedRouteResult {
 }
 
 /**
- * A custom hook to protect a client-side route.
+ * @description A custom hook to protect a client-side route.
  *
  * It uses the `useUser` context to check the auth state.
  * 1. Shows a loading state while auth is resolving.
@@ -32,26 +32,30 @@ export const useProtectedRoute = (): ProtectedRouteResult => {
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
 
-  // Local loading state to manage the "initial" load vs. the userLoading state
-  const [isLoading, setIsLoading] = useState(true);
+  // Use a memoized value for the final loading state
+  const isLoading: boolean = useMemo(() => {
+    // We are loading if the user context is still resolving
+    if (userLoading) {
+      return true;
+    }
+    // We are considered loading if the context is resolved but we have no user,
+    // as we are waiting for the redirect to complete.
+    if (!user) {
+      return true;
+    }
+    // Auth is complete, and a user is present.
+    return false;
+  }, [user, userLoading]);
 
   useEffect(() => {
-    if (userLoading) {
-      // Still waiting for the user context to resolve
-      setIsLoading(true);
-      return;
-    }
-
-    if (!user) {
-      // Auth is resolved, but no user. Redirect.
+    // Only run redirection logic when userLoading is false and no user is present.
+    // userLoading being false means the auth state is resolved.
+    if (!userLoading && !user) {
       router.push(config.auth.loginUrl);
-      // We don't need to setIsLoading(false) because we're redirecting
-      return;
     }
-
-    // Auth is resolved, and we have a user.
-    setIsLoading(false);
+    // This effect handles only the side-effect (redirection) and avoids setting state.
   }, [user, userLoading, router]);
 
+  // The caller needs to handle the `isLoading` state before rendering protected content.
   return { user, isLoading };
 };

@@ -94,7 +94,6 @@ export const useMeetings = (): UseQueryResult<MeetingsResponse, Error> => {
       if (!user) return { meetings: [] };
 
       // First, update any meetings that should be marked as completed
-      // NOTE: This is original logic. This POST call will run on every refetch.
       await fetch("/api/meetings/update-status", { method: "POST" });
 
       // Then fetch the updated meetings
@@ -113,9 +112,113 @@ export const useMeetings = (): UseQueryResult<MeetingsResponse, Error> => {
 };
 // #endregion
 
+// #region Helper Functions (External)
+
+/**
+ * @description Checks if an error message indicates a non-retriable, fatal error.
+ * @param {string} message - The error message.
+ * @returns {boolean} True if the error should not be retried.
+ */
+function isFatalError(message: string): boolean {
+  // Complexity Cost: 1 (Fn) + 2 (||) = 3
+  return (
+    message.includes("Unauthorized") ||
+    message.includes("Invalid") ||
+    message.includes("Cannot cancel")
+  );
+}
+
+/**
+ * @description Handles the direct API call for updating a meeting.
+ * Throws an Error on a failed response or network issue.
+ * @param {UpdateMeetingPayload} payload - The update parameters.
+ * @returns {Promise<UpdateMeetingResponse>} The successful update response.
+ */
+async function callUpdateMeetingAPI(
+  { meetingId, status, message }: UpdateMeetingPayload,
+): Promise<UpdateMeetingResponse> {
+  // CC = 1 (Fn) + 1 (if) = 2
+  try {
+    const response = await fetch(`/api/meetings/${meetingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, message }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to update meeting status");
+    }
+
+    return data as UpdateMeetingResponse;
+  } catch (error: unknown) {
+    const currentError = error instanceof Error
+      ? error
+      : new Error(String(error));
+
+    // Specific network error check logic
+    if (
+      currentError.name === "TypeError" &&
+      currentError.message.includes("fetch")
+    ) {
+      throw new Error(
+        "Network error: Unable to connect to server. Please check your internet connection and try again.",
+      );
+    }
+
+    throw currentError;
+  }
+}
+
+/**
+ * @description Handles the API call and retry logic for updating a meeting status.
+ * @param {UpdateMeetingPayload} payload - The update parameters.
+ * @param {number} maxRetries - Maximum number of retries.
+ * @returns {Promise<UpdateMeetingResponse>} The successful update response.
+ */
+async function retryMeetingUpdate(
+  payload: UpdateMeetingPayload,
+  maxRetries: number = 3,
+): Promise<UpdateMeetingResponse> {
+  let lastError: Error = new Error(
+    "Meeting update failed due to unexpected error.",
+  );
+
+  // Cognitive Complexity: 4
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await callUpdateMeetingAPI(payload);
+    } catch (error: unknown) {
+      const currentError = error instanceof Error
+        ? error
+        : new Error(String(error));
+      lastError = currentError;
+
+      // 1. FATAL/NON-RETRIABLE CHECK
+      if (isFatalError(currentError.message)) {
+        throw currentError;
+      }
+
+      // 2. LAST ATTEMPT CHECK - Throws the standard error
+      if (attempt === maxRetries) {
+        throw currentError;
+      }
+
+      // 3. RETRY WAIT (Exponential backoff)
+      const delay = Math.pow(2, attempt - 1) * 1000;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+// #endregion
+
 // #region useUpdateMeetingStatus
 /**
  * @description Provides a mutation to update a meeting's status with retry logic.
+ * The mutation logic is delegated to the external `retryMeetingUpdate` function
+ * to adhere to the Cognitive Complexity limit.
  */
 export const useUpdateMeetingStatus = (): UseMutationResult<
   UpdateMeetingResponse,
@@ -126,87 +229,17 @@ export const useUpdateMeetingStatus = (): UseMutationResult<
   const { user } = useUser() as { user: User | null };
 
   return useMutation<UpdateMeetingResponse, Error, UpdateMeetingPayload>({
-    mutationFn: async ({
-      meetingId,
-      status,
-      message,
-    }: UpdateMeetingPayload): Promise<UpdateMeetingResponse> => {
-      const maxRetries = 3;
-      let lastError: Error = new Error(
-        "Meeting update failed after 3 attempts",
-      );
+    mutationFn: async (
+      payload: UpdateMeetingPayload,
+    ): Promise<UpdateMeetingResponse> => {
+      // Logging for transparency (can be removed if performance is critical)
+      console.log(`Starting meeting update for ${payload.meetingId}.`);
 
-      for (let attempt = 1; attempt <= maxRetries; attempt++) {
-        try {
-          console.log(
-            `Attempting to update meeting (attempt ${attempt}/${maxRetries}):`,
-            {
-              meetingId,
-              status,
-              message,
-            },
-          );
+      // ✅ Proper usage of the helper function:
+      // Delegation to the helper function flattens the mutationFn complexity.
+      const result = await retryMeetingUpdate(payload);
 
-          const response = await fetch(`/api/meetings/${meetingId}`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status, message }),
-          });
-
-          console.log("Response status:", response.status);
-          console.log("Response headers:", [...response.headers.entries()]);
-
-          const data = await response.json();
-          console.log("Response data:", data);
-
-          if (!response.ok) {
-            console.error("Meeting update failed:", data);
-            throw new Error(data.error || "Failed to update meeting status");
-          }
-
-          return data as UpdateMeetingResponse; // Success!
-        } catch (error: any) {
-          console.error(
-            `Network error during meeting update (attempt ${attempt}):`,
-            error,
-          );
-          console.error("Error type:", error?.constructor?.name);
-          console.error("Error message:", error?.message);
-          console.error("Error stack:", error?.stack);
-
-          lastError = error instanceof Error ? error : new Error(String(error));
-
-          // Don't retry for authentication or validation errors
-          if (
-            error.message.includes("Unauthorized") ||
-            error.message.includes("Invalid") ||
-            error.message.includes("Cannot cancel")
-          ) {
-            throw lastError; // Non-retriable error
-          }
-
-          // If this is the last attempt, throw the error
-          if (attempt === maxRetries) {
-            // Provide more specific error messages
-            if (error.name === "TypeError" && error.message.includes("fetch")) {
-              throw new Error(
-                "Network error: Unable to connect to server. Please check your internet connection and try again.",
-              );
-            }
-            throw lastError; // Throw the last captured error
-          }
-
-          // Wait before retrying (exponential backoff)
-          const delay = Math.pow(2, attempt - 1) * 1000;
-          console.log(`Retrying in ${delay}ms...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-      }
-
-      // This should be unreachable, but it satisfies TypeScript's compiler
-      throw lastError;
+      return result;
     },
     onSuccess: () => {
       // Invalidate and refetch meetings
