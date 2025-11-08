@@ -162,7 +162,7 @@ const OptimizedImageComponent: FC<OptimizedImageProps> = ({
         sizes={sizes}
         onLoad={handleLoad}
         onError={handleError}
-        {...(props as Record<string, any>)} // Spread props safely
+        {...(props as Record<string, unknown>)} // Spread props safely
       />
     </div>
   );

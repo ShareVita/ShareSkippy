@@ -1,9 +1,8 @@
-// #region Imports
 'use client';
+
 import React, { useState, useRef, useCallback } from 'react';
 import { createClient } from '@/libs/supabase/client';
 import OptimizedImage from './OptimizedImage';
-// #endregion Imports
 
 // #region Types
 /**
@@ -11,6 +10,7 @@ import OptimizedImage from './OptimizedImage';
  * @description Props required for the PhotoUpload component.
  */
 interface PhotoUploadProps {
+  // eslint-disable-next-line no-unused-vars
   onPhotoUploaded: (url: string) => void;
   initialPhotoUrl: string;
   disabled?: boolean;
@@ -171,7 +171,7 @@ const PhotoUpload = React.memo(
 
           if (uploadError) {
             console.error('Upload error details:', uploadError);
-            throw uploadError;
+            throw uploadError; // Throw the raw Supabase error object
           }
 
           // Get public URL
@@ -180,10 +180,21 @@ const PhotoUpload = React.memo(
           } = supabase.storage.from(bucketName).getPublicUrl(fileName);
 
           return publicUrl;
-        } catch (error: any) {
-          // Catch block explicitly typed for error handling
+        } catch (error: unknown) {
+          // FIX: Use instanceof Error to safely extract the message property.
           console.error('Error uploading to storage:', error);
-          throw new Error(`Upload failed: ${error.message || 'Unknown storage error'}`);
+
+          let message: string;
+          if (error instanceof Error) {
+            message = error.message;
+          } else {
+            // This covers Supabase AuthError/StorageError objects which may not inherit from Error
+            // but often have a message property, or cases where a string/object was thrown.
+            message = (error as { message?: string })?.message || 'Unknown storage error';
+          }
+
+          // Throw a new, standard Error object to ensure the outer handler receives a safe type.
+          throw new Error(`Upload failed: ${message}`);
         }
       },
       [bucketName, supabase]
@@ -225,25 +236,18 @@ const PhotoUpload = React.memo(
           setPhotoUrl(uploadedUrl);
           onPhotoUploaded(uploadedUrl);
         } catch (err: unknown) {
+          // This outer catch now receives a standard Error object (from uploadToStorage)
+          // or a native browser error (from fetch/compression).
           console.error('Error saving profile:', err);
 
-          let errorMessage;
+          let errorMessage: string;
 
-          // Type Narrowing Check: Ensure the error is a standard Error object
           if (err instanceof Error) {
+            // Narrow the type to access properties safely
             errorMessage = err.message;
-
-            // You can add further checks based on content, now that 'err' is typed as 'Error'
-            if (err.message.includes('Database error:')) {
-              errorMessage = err.message; // Use full message if it contains specific prefixes
-            } else if (err.message.includes('JWT')) {
-              errorMessage = 'Authentication error. Please try logging in again.';
-            } else if (err.message.includes('network')) {
-              errorMessage = 'Network error. Please check your connection and try again.';
-            }
           } else {
-            // Handle cases where the thrown item is a string, number, or object without a 'message' property
-            errorMessage = `An unexpected error occurred: ${String(err)}`;
+            // Final fallback for completely unexpected errors
+            errorMessage = `An unknown error occurred: ${String(err)}`;
           }
 
           setError(errorMessage);
@@ -278,7 +282,7 @@ const PhotoUpload = React.memo(
             const filePath = urlParts.slice(bucketIndex + 1).join('/');
             await supabase.storage.from(bucketName).remove([filePath]);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Error removing photo from storage:', error);
           // Note: State/UI update proceeds even if storage deletion fails
         }
