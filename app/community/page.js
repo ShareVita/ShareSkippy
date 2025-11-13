@@ -766,7 +766,7 @@ export default function CommunityPage() {
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <Link
                         href={`/community/availability/${post.id}`}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base text-center"
+                        className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base text-center"
                       >
                         View Details
                       </Link>
@@ -774,7 +774,8 @@ export default function CommunityPage() {
                       {user && user.id !== post.owner_id ? (
                         <button
                           onClick={() => openMessageModal(post.owner, post)}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+                          className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+                          aria-label={`Send message to ${post.owner?.first_name} about ${post.title}`}
                         >
                           Send Message
                         </button>
@@ -934,14 +935,15 @@ export default function CommunityPage() {
                     <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <Link
                         href={`/community/availability/${post.id}`}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base text-center"
+                        className="bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base text-center"
                       >
                         View Details
                       </Link>
                       {user && user.id !== post.owner_id && (
                         <button
                           onClick={() => openMessageModal(post.owner, post)}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+                          className="bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
+                          aria-label={`Send message to ${post.owner?.first_name} about ${post.title}`}
                         >
                           Send Message
                         </button>
