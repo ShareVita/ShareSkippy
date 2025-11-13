@@ -538,7 +538,7 @@ export default function ProfileEditPage() {
               <PhotoUpload
                 id="photo_upload"
                 onPhotoUploaded={handlePhotoUpload}
-                initialPhotoUrl={profile.profile_photo_url}
+                initialPhotoUrl={profile.profile_photo_url ?? ''}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -602,7 +602,7 @@ export default function ProfileEditPage() {
                 type="tel"
                 name="phone_number"
                 id="phone_number"
-                value={profile.phone_number}
+                value={profile.phone_number ?? ''}
                 onChange={handleInputChange}
                 required
                 placeholder="Phone Number"
@@ -617,7 +617,7 @@ export default function ProfileEditPage() {
               <select
                 name="role"
                 id="role"
-                value={profile.role}
+                value={profile.role ?? ''}
                 onChange={handleInputChange}
                 required
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -636,7 +636,7 @@ export default function ProfileEditPage() {
               <textarea
                 name="bio"
                 id="bio"
-                value={profile.bio}
+                value={profile.bio ?? ''}
                 onChange={handleInputChange}
                 rows={4}
                 placeholder="Tell us about yourself..."
@@ -666,7 +666,7 @@ export default function ProfileEditPage() {
                 type="url"
                 name="facebook_url"
                 id="facebook_url"
-                value={profile.facebook_url}
+                value={profile.facebook_url ?? ''}
                 onChange={handleInputChange}
                 placeholder="https://facebook.com/yourprofile"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -684,7 +684,7 @@ export default function ProfileEditPage() {
                 type="url"
                 name="instagram_url"
                 id="instagram_url"
-                value={profile.instagram_url}
+                value={profile.instagram_url ?? ''}
                 onChange={handleInputChange}
                 placeholder="https://instagram.com/yourprofile"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -702,7 +702,7 @@ export default function ProfileEditPage() {
                 type="url"
                 name="linkedin_url"
                 id="linkedin_url"
-                value={profile.linkedin_url}
+                value={profile.linkedin_url ?? ''}
                 onChange={handleInputChange}
                 placeholder="https://linkedin.com/in/yourprofile"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -717,7 +717,7 @@ export default function ProfileEditPage() {
                 type="url"
                 name="airbnb_url"
                 id="airbnb_url"
-                value={profile.airbnb_url}
+                value={profile.airbnb_url ?? ''}
                 onChange={handleInputChange}
                 placeholder="https://airbnb.com/users/show/yourprofile"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -735,7 +735,7 @@ export default function ProfileEditPage() {
                 type="url"
                 name="other_social_url"
                 id="other_social_url"
-                value={profile.other_social_url}
+                value={profile.other_social_url ?? ''}
                 onChange={handleInputChange}
                 placeholder="https://your-other-profile.com"
                 className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -765,7 +765,7 @@ export default function ProfileEditPage() {
                   type="text"
                   name="street_address"
                   id="street_address"
-                  value={profile.street_address}
+                  value={profile.street_address ?? ''}
                   onChange={handleInputChange}
                   placeholder="123 Main Street"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
@@ -810,7 +810,7 @@ export default function ProfileEditPage() {
                   type="text"
                   name="zip_code"
                   id="zip_code"
-                  value={profile.zip_code}
+                  value={profile.zip_code ?? ''}
                   onChange={handleInputChange}
                   placeholder="94704"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
@@ -879,7 +879,7 @@ export default function ProfileEditPage() {
                   type="text"
                   name="emergency_contact_name"
                   id="emergency_contact_name"
-                  value={profile.emergency_contact_name}
+                  value={profile.emergency_contact_name ?? ''}
                   onChange={handleInputChange}
                   placeholder="Name"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
@@ -888,7 +888,7 @@ export default function ProfileEditPage() {
                   type="tel"
                   name="emergency_contact_number"
                   id="emergency_contact_number"
-                  value={profile.emergency_contact_number}
+                  value={profile.emergency_contact_number ?? ''}
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
@@ -897,7 +897,7 @@ export default function ProfileEditPage() {
                   type="email"
                   name="emergency_contact_email"
                   id="emergency_contact_email"
-                  value={profile.emergency_contact_email}
+                  value={profile.emergency_contact_email ?? ''}
                   onChange={handleInputChange}
                   placeholder="Email (optional)"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
