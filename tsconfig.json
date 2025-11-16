@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -40,9 +36,16 @@
     "pages/**/*.ts",
     "pages/**/*.tsx",
     "scripts/**/*.ts",
-    "scripts/**/*.tsx"
+    "scripts/**/*.tsx",
+    "components/Logo.jsx",
+    "components/Hero.jsx",
+    "components/Community.js",
+    "components/Testimonials.jsx",
+    "components/HeroSlider.jsx",
+    "components/MobileWhySkippy.jsx",
+    "components/WhySkippy.jsx",
+    "components/HowItWorks.jsx",
+    "components/Navbar.jsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
