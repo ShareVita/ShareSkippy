@@ -5,16 +5,13 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Determines the final redirect origin URL after successful authentication.
- * Overrides the request origin with VERCEL_URL in production environments
- * to ensure the final redirect goes to the public domain, not a preview URL.
+ * Always uses the request origin to ensure session cookies are preserved.
+ * Session cookies are domain-specific, so we must redirect to the same domain
+ * where the callback was processed.
  */
 function getFinalRedirectOrigin(requestUrl) {
-  const vercelUrl = process.env.VERCEL_URL;
-
-  if (vercelUrl) {
-    return `https://${vercelUrl}`;
-  }
-
+  // Always use the request origin to preserve session cookies
+  // The session was created on this domain, so we must redirect to the same domain
   return requestUrl.origin;
 }
 
