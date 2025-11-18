@@ -169,16 +169,52 @@ describe('Data Hooks', () => {
         owner_id: mockUser.id,
         name: 'Skippy',
         breed: 'Pug',
-        age: 3,
-        created_at: '2023-01-01',
+        birthday: '2020-01-01',
+        age_years: 3,
+        age_months: 36,
+        size: '0-10',
+        photo_url: null,
+        gender: 'male',
+        neutered: true,
+        temperament: ['friendly', 'playful'],
+        energy_level: 'moderate',
+        dog_friendly: true,
+        cat_friendly: false,
+        kid_friendly: true,
+        leash_trained: true,
+        crate_trained: false,
+        house_trained: true,
+        fully_vaccinated: true,
+        activities: ['fetch', 'walks'],
+        description: 'Loves to play fetch.',
+        created_at: '2023-01-01T00:00:00Z',
+        updated_at: '2023-01-01T00:00:00Z',
       },
       {
         id: 'd2',
         owner_id: mockUser.id,
         name: 'Spot',
         breed: 'Lab',
-        age: 5,
-        created_at: '2023-01-02',
+        birthday: '2018-01-01',
+        age_years: 5,
+        age_months: 60,
+        size: '41-70',
+        photo_url: null,
+        gender: 'female',
+        neutered: true,
+        temperament: ['gentle', 'active'],
+        energy_level: 'high',
+        dog_friendly: true,
+        cat_friendly: true,
+        kid_friendly: true,
+        leash_trained: true,
+        crate_trained: true,
+        house_trained: true,
+        fully_vaccinated: true,
+        activities: ['swimming', 'running'],
+        description: 'Enjoys swimming and running.',
+        created_at: '2023-01-02T00:00:00Z',
+        updated_at: '2023-01-02T00:00:00Z',
       },
     ];
 
@@ -191,9 +227,7 @@ describe('Data Hooks', () => {
 
       expect(mockFrom).toHaveBeenCalledWith('dogs');
 
-      const dogsChain = mockFrom.mock.results.find(
-        (r) => r.value.select && r.value.select().order
-      )?.value;
+      const dogsChain = mockFrom.mock.results.find((r) => r.value?.select().order)?.value;
       if (dogsChain) {
         expect(dogsChain.select().eq).toHaveBeenCalledWith('owner_id', mockUser.id);
       }
