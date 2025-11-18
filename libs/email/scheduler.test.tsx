@@ -25,10 +25,22 @@ jest.mock('./sendEmail', () => ({
 
 /**
  * Create a deep, chainable mock for the Supabase client.
- * Each method returns `this` (as `any`) to allow for chains like:
- * .from().select().eq()...
  */
-const mockSupabase: any = {
+type SupabaseMock = {
+  from: jest.Mock;
+  select: jest.Mock;
+  insert: jest.Mock;
+  update: jest.Mock;
+  delete: jest.Mock;
+  eq: jest.Mock;
+  lte: jest.Mock;
+  is: jest.Mock;
+  limit: jest.Mock;
+  order: jest.Mock;
+  single: jest.Mock;
+};
+
+const mockSupabase: SupabaseMock = {
   from: jest.fn(() => mockSupabase),
   select: jest.fn(() => mockSupabase),
   insert: jest.fn(() => mockSupabase),
