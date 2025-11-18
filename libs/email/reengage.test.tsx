@@ -25,6 +25,7 @@ const mockChain = {
 const mockFrom = jest.fn(() => mockChain);
 const mockSupabaseClient = { from: mockFrom };
 jest.mock('@/libs/supabase/server', () => ({
+  createClient: jest.fn(() => mockSupabaseClient),
   createServiceClient: jest.fn(() => mockSupabaseClient),
 }));
 
@@ -49,12 +50,12 @@ type MockData = {
 };
 
 type MockResult = {
-  data: MockData[];
-  error: { message: string };
+  data: MockData[] | null;
+  error: { message: string } | null;
 };
 
-const mockSuccess = (data: MockData[]) => ({ data, error: null }) as MockResult;
-const mockError = (message: string) => ({ data: null, error: { message } }) as MockResult;
+const mockSuccess = (data: MockData[] | null): MockResult => ({ data, error: null });
+const mockError = (message: string): MockResult => ({ data: null, error: { message } });
 const shouldSendReengageEmail = __testExports.shouldSendReengageEmail as (
   // eslint-disable-next-line no-unused-vars
   userId: string
@@ -67,9 +68,11 @@ beforeAll(() => {
 afterEach(() => {
   jest.clearAllMocks();
   for (const key in mockChain) {
-    if (typeof mockChain[key as keyof typeof mockChain] === 'function' && key !== 'single') {
-      (mockChain[key as keyof typeof mockChain] as jest.Mock).mockReturnThis();
+    if (key === 'single') {
+      continue;
     }
+    const mockFn = mockChain[key as keyof typeof mockChain];
+    mockFn.mockReturnThis();
   }
 });
 afterAll(() => {
