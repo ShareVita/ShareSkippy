@@ -102,7 +102,8 @@
     "supabase": "^2.70.5",
     "tailwindcss": "^4.1.16",
     "ts-node": "^10.9.2",
-    "@playwright/test": "^1.56.0"
+    "@playwright/test": "^1.56.0",
+    "web-streams-polyfill": "^4.2.0"
   },
   "babel": {
     "presets": [
