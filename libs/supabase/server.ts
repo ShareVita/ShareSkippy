@@ -18,7 +18,7 @@ export async function createClient(type: SupabaseKeyType = "anon") {
   // Determine which key to use based on the 'type' argument
   const supabaseKey = type === "service_role"
     ? process.env.SUPABASE_SERVICE_ROLE_KEY!
-    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
