@@ -21,7 +21,7 @@
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "analyze": "ANALYZE=true next build",
-    "prepare": "husky",
+    "prepare": "npx husky",
     "format": "prettier",
     "format:write": "prettier --write"
   },
