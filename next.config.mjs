@@ -1,11 +1,5 @@
 const nextConfig = {
-  allowedDevOrigins: [
-    'local-origin.dev',
-    '*.local-origin.dev',
-    'localhost',
-    '127.0.0.1',
-    'http://10.5.0.2:3000',
-  ],
+  allowedDevOrigins: ['local-origin.dev', '*.local-origin.dev', 'localhost', '127.0.0.1'],
 
   reactStrictMode: true,
 
@@ -63,10 +57,6 @@ const nextConfig = {
         port: '54321',
         pathname: '/storage/v1/object/public/**',
         search: '',
-      },
-      {
-        protocol: 'https',
-        hostname: 'encrypted-tbn0.gstatic.com',
       },
     ],
     dangerouslyAllowLocalIP: process.env.NODE_ENV === 'development', // Enable for local development only. Returns to false for production.

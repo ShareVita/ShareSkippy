@@ -1,9 +1,8 @@
 import Link from 'next/link';
 import { LEGAL } from '@/lib/legal';
-import { FaFacebook } from 'react-icons/fa';
+import { FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { BsInstagram } from 'react-icons/bs';
 import { AiFillTikTok } from 'react-icons/ai';
-import { FaLinkedin } from 'react-icons/fa';
 
 // Footer component matching the ShareSkippy design - updated
 const Footer = () => {
@@ -22,20 +21,34 @@ const Footer = () => {
             <div className="flex gap-5 items-center justify-center md:justify-start">
               <a
                 href="https://www.facebook.com/profile.php?id=61582128129445&mibextid=wwXIfr"
-                target="blank"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Facebook page"
               >
                 <FaFacebook size={24} />
               </a>
-              <a href="https://www.instagram.com/share_skippy/" target="blank">
+              <a
+                href="https://www.instagram.com/share_skippy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Instagram page"
+              >
                 <BsInstagram size={24} />
               </a>
               <a
                 href="https://www.tiktok.com/@shareskippy?is_from_webapp=1&sender_device=pc"
-                target="blank"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Tik-tok page"
               >
                 <AiFillTikTok size={24} />
               </a>
-              <a href="https://www.linkedin.com/company/shareskippy/" target="blank">
+              <a
+                href="https://www.linkedin.com/company/shareskippy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit our Linkedin page"
+              >
                 <FaLinkedin size={24} />
               </a>
             </div>
