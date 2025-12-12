@@ -67,8 +67,11 @@ const originalEnv = {
  * Helper function to extract cookie methods from createServerClient mock call.
  */
 function getCookieMethodsFromMock() {
-  const createServerClientCall = (createServerClient as jest.Mock).mock.calls[0];
-  const options = createServerClientCall[2];
+  const calls = (createServerClient as jest.Mock).mock.calls;
+  if (calls.length === 0) {
+    throw new Error('createServerClient was not called');
+  }
+  const options = calls[0][2];
   return options.cookies;
 }
 
