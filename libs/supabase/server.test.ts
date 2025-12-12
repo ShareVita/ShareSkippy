@@ -54,6 +54,24 @@ const mockSupabaseClient = {
   },
 };
 
+/**
+ * Store original environment variables to restore after tests.
+ */
+const originalEnv = {
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+};
+
+/**
+ * Helper function to extract cookie methods from createServerClient mock call.
+ */
+function getCookieMethodsFromMock() {
+  const createServerClientCall = (createServerClient as jest.Mock).mock.calls[0];
+  const options = createServerClientCall[2];
+  return options.cookies;
+}
+
 beforeEach(() => {
   // Clear all mock call history before each test
   jest.clearAllMocks();
@@ -71,6 +89,13 @@ beforeEach(() => {
   // Reset cookie store mocks
   mockCookieStore.getAll.mockReturnValue([{ name: 'sb-test-auth-token', value: 'mock-token' }]);
   mockCookieStore.set.mockClear();
+});
+
+afterEach(() => {
+  // Restore original environment variables
+  process.env.NEXT_PUBLIC_SUPABASE_URL = originalEnv.NEXT_PUBLIC_SUPABASE_URL;
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = originalEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  process.env.SUPABASE_SERVICE_ROLE_KEY = originalEnv.SUPABASE_SERVICE_ROLE_KEY;
 });
 
 // #endregion Mocks and Setup
@@ -166,8 +191,7 @@ describe('createClient', () => {
     await createClient();
 
     // Get the cookies object that was passed to createServerClient
-    const createServerClientCall = (createServerClient as jest.Mock).mock.calls[0];
-    const cookieMethods = createServerClientCall[2].cookies;
+    const cookieMethods = getCookieMethodsFromMock();
 
     // Test the getAll method
     const result = cookieMethods.getAll();
@@ -182,8 +206,7 @@ describe('createClient', () => {
     await createClient();
 
     // Get the cookies object that was passed to createServerClient
-    const createServerClientCall = (createServerClient as jest.Mock).mock.calls[0];
-    const cookieMethods = createServerClientCall[2].cookies;
+    const cookieMethods = getCookieMethodsFromMock();
 
     // Test the setAll method
     const cookiesToSet = [
@@ -224,8 +247,7 @@ describe('createClient', () => {
     await createClient();
 
     // Get the cookies object that was passed to createServerClient
-    const createServerClientCall = (createServerClient as jest.Mock).mock.calls[0];
-    const cookieMethods = createServerClientCall[2].cookies;
+    const cookieMethods = getCookieMethodsFromMock();
 
     // Test the setAll method with an error - it should not throw
     const cookiesToSet = [
