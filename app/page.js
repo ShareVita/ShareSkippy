@@ -4,7 +4,10 @@ import { createClient } from '@/libs/supabase/client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { renderSchemaTags } from '@/libs/seo';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+
+import { TfiArrowCircleRight, TfiArrowCircleLeft } from 'react-icons/tfi';
+import { HiStar } from 'react-icons/hi2';
+
 import demoimg from './demoimg.png';
 
 // Carousel messages for the hero section
@@ -527,7 +530,7 @@ export default function Home() {
                     className="hidden md:block absolute left-0 top-1/2 transform -translate-y-1/2 z-20 bg-blue-400 rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors"
                     aria-label="Previous testimonial"
                   >
-                    <ChevronLeft size={24} className="text-blue-300" />
+                    <TfiArrowCircleLeft size={24} className="text-blue-300" />
                   </button>
 
                   <button
@@ -535,7 +538,7 @@ export default function Home() {
                     className="hidden md:block absolute right-0 top-1/2 transform -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-md hover:bg-blue-400 transition-colors"
                     aria-label="Next testimonial"
                   >
-                    <ChevronRight size={24} className="text-blue-300" />
+                    <TfiArrowCircleRight size={24} className="text-blue-300" />
                   </button>
 
                   {/* Cards */}
@@ -587,7 +590,7 @@ export default function Home() {
 
                                 <div className="flex items-center mt-1">
                                   {[...Array(5)].map((_, i) => (
-                                    <Star
+                                    <HiStar
                                       key={i}
                                       size={16}
                                       className={
