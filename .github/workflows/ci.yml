@@ -6,6 +6,9 @@ permissions:
 on:
   push:
     branches: ['main']
+    paths:
+      - 'supabase/migrations/**'
+      - '.github/workflows/ci.yml'
 
 jobs:
   migrate:
