@@ -530,7 +530,7 @@ CREATE POLICY "Users can update their own profile" ON "public"."profiles"
     ((SELECT auth.uid()) = "id")
     AND (
       -- Only allow changing role if the user is a privileged actor (e.g., service role)
-      "role" = old."role"
+      "role" = OLD."role"
       OR (current_user = 'service_role' OR current_user = 'postgres')
     )
   );
