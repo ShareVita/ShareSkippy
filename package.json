@@ -61,7 +61,7 @@
     "react-tooltip": "^5.26.3",
     "resend": "^4.0.1",
     "stripe": "^13.11.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
