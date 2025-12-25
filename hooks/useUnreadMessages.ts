@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/libs/supabase';
+import { createClient } from '@/libs/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
 interface NotificationState {
@@ -26,6 +26,11 @@ interface RealtimePayload {
   };
 }
 
+/** Minimal shape for message rows used in this hook */
+interface MessageRow {
+  conversation_id?: string | null;
+}
+
 export function useUnreadMessages(user: User | null) {
   const [notificationState, setNotificationState] = useState<NotificationState>({
     totalUnread: 0,
@@ -36,6 +41,29 @@ export function useUnreadMessages(user: User | null) {
 
   const [isLoading, setIsLoading] = useState(true);
   const isMountedRef = useRef(true);
+
+  // Use ReturnType<typeof createClient> so we don't explicitly annotate `any`
+  const clientRef = useRef<ReturnType<typeof createClient> | null>(null);
+
+  useEffect(() => {
+    // create client only at runtime (so importing this hook doesn't cause module-side effects)
+    try {
+      clientRef.current = createClient();
+    } catch (err) {
+      // createClient may throw in non-browser/test env; swallow and leave clientRef.current null
+      // tests can mock createClient or rely on the hook guard below
+
+      console.warn(
+        '[useUnreadMessages] createClient failed or unavailable in this environment',
+        err
+      );
+      clientRef.current = null;
+    }
+
+    return () => {
+      clientRef.current = null;
+    };
+  }, []);
 
   /**
    * Fetch unread message counts
@@ -48,6 +76,19 @@ export function useUnreadMessages(user: User | null) {
         hasNewMessages: false,
         lastChecked: null,
       });
+      setIsLoading(false);
+      return;
+    }
+
+    const supabase = clientRef.current;
+    if (!supabase) {
+      // If client not initialized (e.g. during tests), return safe defaults
+
+      console.warn('[fetchUnreadCounts] supabase client not initialized');
+      setNotificationState((prev) => ({
+        ...prev,
+        lastChecked: new Date(),
+      }));
       setIsLoading(false);
       return;
     }
@@ -76,8 +117,8 @@ export function useUnreadMessages(user: User | null) {
       // Group by conversation_id
       const conversationMap = new Map<string, number>();
 
-      data?.forEach((msg) => {
-        if (msg.conversation_id) {
+      (data as MessageRow[] | undefined)?.forEach((msg) => {
+        if (msg?.conversation_id) {
           const current = conversationMap.get(msg.conversation_id) || 0;
           conversationMap.set(msg.conversation_id, current + 1);
         }
@@ -117,6 +158,13 @@ export function useUnreadMessages(user: User | null) {
         return;
       }
 
+      const supabase = clientRef.current;
+      if (!supabase) {
+        console.warn('[markConversationAsRead] supabase client not initialized');
+        await fetchUnreadCounts();
+        return;
+      }
+
       console.log('[markConversationAsRead] 🔄 Starting for conversation:', conversationId);
       console.log('[markConversationAsRead] 📋 Params:', {
         conversationId,
@@ -148,19 +196,9 @@ export function useUnreadMessages(user: User | null) {
             method1Data?.length || 0,
             'messages'
           );
-          if (method1Data && method1Data.length > 0) {
-            console.log(
-              '[markConversationAsRead] 📝 Message IDs:',
-              method1Data.map((m) => m.id)
-            );
-          }
         }
 
         // METHOD 2: Mark by participants (backup method)
-        // Only mark messages where:
-        // - You are the recipient
-        // - The sender is the other participant
-        // - Message is unread
         console.log('[markConversationAsRead] 🔄 Method 2: Marking by participants...');
 
         const otherParticipantId = participant1Id === user.id ? participant2Id : participant1Id;
@@ -184,23 +222,10 @@ export function useUnreadMessages(user: User | null) {
             method2Data?.length || 0,
             'messages'
           );
-          if (method2Data && method2Data.length > 0) {
-            console.log(
-              '[markConversationAsRead] 📝 Message IDs:',
-              method2Data.map((m) => m.id)
-            );
-          }
         }
 
         const totalMarked = (method1Data?.length || 0) + (method2Data?.length || 0);
         console.log('[markConversationAsRead] 📊 Total messages marked:', totalMarked);
-
-        if (totalMarked === 0) {
-          console.log('[markConversationAsRead] ⚠️ No messages were marked. Possible reasons:');
-          console.log('  - All messages already marked as read');
-          console.log('  - conversation_id mismatch');
-          console.log('  - No unread messages in this conversation');
-        }
 
         // Wait for database to propagate
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -223,6 +248,12 @@ export function useUnreadMessages(user: User | null) {
 
   const markAllAsRead = useCallback(async (): Promise<void> => {
     if (!user) return;
+
+    const supabase = clientRef.current;
+    if (!supabase) {
+      console.warn('[markAllAsRead] supabase client not initialized');
+      return;
+    }
 
     try {
       const { error } = await supabase
@@ -263,6 +294,12 @@ export function useUnreadMessages(user: User | null) {
   // Real-time subscription for message changes
   useEffect(() => {
     if (!user) return;
+
+    const supabase = clientRef.current;
+    if (!supabase) {
+      console.warn('[useUnreadMessages] realtime supabase client not initialized');
+      return;
+    }
 
     console.log('[useUnreadMessages] Setting up real-time subscription');
 
@@ -333,13 +370,17 @@ export function useUnreadMessages(user: User | null) {
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: unknown) => {
         console.log('[Real-time HOOK] Subscription status:', status);
       });
 
     return () => {
       console.log('[useUnreadMessages] Cleaning up real-time subscription');
-      supabase.removeChannel(channel);
+      try {
+        supabase.removeChannel(channel);
+      } catch {
+        // intentionally ignore errors during cleanup in test/env scenarios
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -352,26 +393,3 @@ export function useUnreadMessages(user: User | null) {
     markAllAsRead,
   };
 }
-
-/**
- * DEBUGGING TIPS:
- *
- * 1. Open browser console and watch for these logs:
- *    - [fetchUnreadCounts] - shows how many unread messages found
- *    - [markConversationAsRead] - shows marking process
- *    - [Real-time HOOK] - shows real-time updates in the hook
- *
- * 2. Check your database:
- *    SELECT id, sender_id, recipient_id, conversation_id, is_read, created_at
- *    FROM messages
- *    WHERE recipient_id = 'YOUR_USER_ID'
- *    ORDER BY created_at DESC;
- *
- * 3. Verify conversation_id is set:
- *    - All messages should have a conversation_id
- *    - If null, the message won't be tracked properly
- *
- * 4. Check your /api/messages endpoint:
- *    - Make sure it sets conversation_id when creating messages
- *    - Make sure it sets is_read to false by default
- */

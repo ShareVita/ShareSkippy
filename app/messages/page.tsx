@@ -421,6 +421,7 @@ export default function MessagesPage(): ReactElement {
 
   // Real-time message subscription with notifications
   // Real-time message subscription with notifications
+  // Real-time message subscription with notifications
   useEffect(() => {
     if (!selectedConversation || !user) return;
 
@@ -447,7 +448,7 @@ export default function MessagesPage(): ReactElement {
               recipient: m.recipient_id === user.id ? 'YOU' : 'OTHER',
             });
 
-            // Add to UI
+            // Add to UI FIRST
             setMessages((prev: Message[]) => {
               if (prev.some((x) => x.id === m.id)) return prev;
               return [...prev, m].sort((a, b) => (a.created_at < b.created_at ? -1 : 1));
@@ -471,10 +472,8 @@ export default function MessagesPage(): ReactElement {
               } else {
                 console.log('[Real-time] ✅ Marked message as read:', m.id);
 
-                // Refresh unread counts after marking
-                setTimeout(() => {
-                  fetchUnreadCounts();
-                }, 500);
+                // Refresh unread counts IMMEDIATELY (no timeout)
+                fetchUnreadCounts();
               }
 
               // Show notifications
@@ -510,6 +509,78 @@ export default function MessagesPage(): ReactElement {
     };
   }, [selectedConversationKey, selectedConversation, user, fetchUnreadCounts]);
 
+  // Real-time subscription for ALL conversations (for sidebar updates)
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('[Real-time Sidebar] 🔌 Subscribing to ALL messages for sidebar updates');
+
+    const channel = supabase
+      .channel('all-messages-sidebar')
+      .on(
+        'postgres_changes' as never,
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        async (payload: { new: Message }) => {
+          const m = payload.new;
+
+          // Only care about messages involving the current user
+          const isRelevant = m.sender_id === user.id || m.recipient_id === user.id;
+
+          if (isRelevant) {
+            console.log('[Real-time Sidebar] 📬 New message detected:', {
+              id: m.id,
+              conversation: m.conversation_id,
+              isForMe: m.recipient_id === user.id,
+            });
+
+            // Refresh conversations to update sidebar
+            await fetchConversations();
+
+            // If message is for the current user and NOT in the selected conversation, refresh counts
+            if (
+              m.recipient_id === user.id &&
+              m.sender_id !== user.id &&
+              m.conversation_id !== selectedConversation?.id
+            ) {
+              console.log(
+                '[Real-time Sidebar] 🔔 New message in different conversation, refreshing counts'
+              );
+              fetchUnreadCounts();
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes' as never,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+        },
+        async (payload: { new: Message; old: { is_read: boolean } }) => {
+          const m = payload.new;
+
+          // If a message was marked as read, refresh counts
+          if (m.is_read === true && payload.old.is_read === false) {
+            console.log('[Real-time Sidebar] ✅ Message marked as read, refreshing');
+            fetchUnreadCounts();
+            await fetchConversations();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Real-time Sidebar] 📡 Subscription status:', status);
+      });
+
+    return () => {
+      console.log('[Real-time Sidebar] 🔌 Unsubscribing');
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedConversation, fetchConversations, fetchUnreadCounts]);
   // Update conversation unread counts when unreadByConversation changes
   useEffect(() => {
     setConversations((prev) =>
