@@ -719,6 +719,8 @@ export default function MessagesPage(): ReactElement {
                               city: selectedConversation.otherParticipant?.city,
                               state: selectedConversation.otherParticipant?.state,
                             });
+
+                            if (!loc) return null;
                             return [
                               loc.neighborhood ? loc.neighborhood : null,
                               loc.city ? loc.city : null,
