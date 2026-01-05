@@ -27,7 +27,7 @@ import { supabase } from '@/libs/supabase';
 import MessageModal from '@/components/MessageModal';
 import MeetingModal from '@/components/MeetingModal';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute'; // Assumed path
-import { formatLocation } from '@/libs/utils';
+import { formatLocation, getRoleLabel } from '@/libs/utils';
 
 // --- Supabase Types ---
 import { User } from '@supabase/supabase-js';
@@ -487,23 +487,6 @@ export default function MessagesPage(): ReactElement {
     }
   }, [messages]);
   // #endregion
-
-  // #region Helpers
-  /**
-   * @description Maps profile roles to readable label.
-   */
-  const getRoleLabel = (role?: string | null): string => {
-    switch (role) {
-      case 'dog_owner':
-        return 'Dog Owner';
-      case 'petpal':
-        return 'PetPal';
-      case 'both':
-        return 'Dog Owner & PetPal';
-      default:
-        return 'Community Member';
-    }
-  };
 
   /**
    * @description Formats a date string into a simple time (e.g., "10:30 AM").
