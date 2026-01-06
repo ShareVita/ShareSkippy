@@ -2,10 +2,6 @@ name: 'Dependency review'
 on:
   pull_request:
     branches: ['main']
-  push:
-    branches: ['main']
-  merge_group:
-    branches: ['main']
 
 permissions:
   contents: read
