@@ -3,6 +3,7 @@ import Image from "next/image";
 import config from "@/config";
 import logo from "@/app/icon.png";
 import { LEGAL } from "@/lib/legal";
+import { FOOTER_SOCIAL_LINKS } from "@/libs/constants";
 
 // Footer component matching the ShareSkippy design - updated
 const Footer = () => {
@@ -20,6 +21,20 @@ const Footer = () => {
             <p className="text-sm text-white">
               © 2025 ShareSkippy. All rights reserved.
             </p>
+            <div className="flex justify-center md:justify-start gap-4 mt-4">
+              {FOOTER_SOCIAL_LINKS.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.ariaLabel}
+                  className="text-white hover:text-gray-300 transition-colors"
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Middle Column - Quick Links */}
