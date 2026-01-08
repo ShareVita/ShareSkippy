@@ -47,7 +47,8 @@ CREATE POLICY "Users can view their own dogs or dogs in active posts" ON dogs
 
 
 -- 3. FIX AVAILABILITY
--- Ensure the main 'active' policy is clean
+-- Normalize the main 'active' availability policy by recreating it with an explicit `status = 'active'` condition
+-- so that all active posts are consistently visible across environments regardless of any previous definition.
 DROP POLICY IF EXISTS "Users can view all active availability posts" ON availability;
 CREATE POLICY "Users can view all active availability posts" ON availability
   FOR SELECT USING (status = 'active');
