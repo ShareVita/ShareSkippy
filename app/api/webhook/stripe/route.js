@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import configFile from '@/config';
-import { createClient } from '@/libs/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { findCheckoutSession } from '@/libs/stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/libs/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { createCustomerPortal } from '@/libs/stripe';
 
 export async function POST(req) {
