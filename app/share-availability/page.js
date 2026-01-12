@@ -48,7 +48,6 @@ export default function ShareAvailability() {
     '22:00',
 ];
 
-
   const [availability, setAvailability] = useState({});
   const draggingRef = useRef(false); // ref instead of state
 
