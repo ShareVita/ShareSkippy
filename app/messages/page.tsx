@@ -22,10 +22,15 @@ import {
   SyntheticEvent,
 } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { CgProfile } from 'react-icons/cg';
+import { MdPostAdd } from 'react-icons/md';
 import { supabase } from '@/libs/supabase';
 import MessageModal from '@/components/MessageModal';
 import MeetingModal from '@/components/MeetingModal';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute'; // Assumed path
+import { getRoleLabel, formatParticipantLocation, formatTime, formatDate } from '@/libs/utils';
 
 // --- Supabase Types ---
 import { User } from '@supabase/supabase-js';
@@ -40,6 +45,10 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   profile_photo_url: string | null;
+  role?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string | null;
 }
 
 /**
@@ -219,13 +228,21 @@ export default function MessagesPage(): ReactElement {
             id,
             first_name,
             last_name,
-            profile_photo_url
+            profile_photo_url,
+            role,
+            neighborhood,
+            city,
+            state
           ),
           participant2:profiles!conversations_participant2_id_fkey (
             id,
             first_name,
             last_name,
-            profile_photo_url
+            profile_photo_url,
+            role,
+            neighborhood,
+            city,
+            state
           ),
           availability:availability!conversations_availability_id_fkey (
             id,
@@ -474,43 +491,6 @@ export default function MessagesPage(): ReactElement {
   }, [messages]);
   // #endregion
 
-  // #region Helpers
-  /**
-   * @description Formats a date string into a simple time (e.g., "10:30 AM").
-   */
-  const formatTime = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
-
-  /**
-   * @description Formats a date string into a relative date (e.g., "Today", "Yesterday", "Tuesday").
-   */
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (messageDate.getTime() === today.getTime()) {
-      return 'Today';
-    } else if (messageDate.getTime() === yesterday.getTime()) {
-      return 'Yesterday';
-    } else if (now.getTime() - messageDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
-      return date.toLocaleDateString('en-US', { weekday: 'long' });
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-  };
-  // #endregion
-
   // #region Render Logic
   /**
    * @description Primary loading state while verifying authentication.
@@ -568,6 +548,7 @@ export default function MessagesPage(): ReactElement {
             <button
               onClick={() => setShowConversations(false)}
               className="lg:hidden text-gray-500 hover:text-gray-700"
+              aria-label="Close conversations list"
             >
               ✕
             </button>
@@ -648,6 +629,7 @@ export default function MessagesPage(): ReactElement {
                     <button
                       onClick={() => setShowConversations(true)}
                       className="lg:hidden text-gray-500 hover:text-gray-700 mr-2"
+                      aria-label="Back to conversations list"
                     >
                       ←
                     </button>
@@ -669,23 +651,49 @@ export default function MessagesPage(): ReactElement {
                       <h3 className="font-semibold text-gray-900 text-lg">
                         {selectedConversation.displayName}
                       </h3>
-                      <p className="text-sm text-gray-500">
-                        {selectedConversation.availability?.post_type === 'dog_available'
-                          ? 'Dog Owner'
-                          : 'PetPal'}
+                      <p className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                        {selectedConversation.otherParticipant?.role
+                          ? getRoleLabel(selectedConversation.otherParticipant.role)
+                          : selectedConversation.availability?.post_type === 'dog_available'
+                            ? 'Dog Owner'
+                            : 'PetPal'}
                       </p>
+                      {formatParticipantLocation(selectedConversation.otherParticipant) && (
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {formatParticipantLocation(selectedConversation.otherParticipant)}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                     <div className="text-sm text-gray-500 truncate">
                       {selectedConversation.availability?.title}
                     </div>
-                    <button
-                      onClick={openMeetingModal}
-                      className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap font-medium"
-                    >
-                      📅 Schedule Meeting
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/profile/${selectedConversation.otherParticipant?.id}`}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap font-medium"
+                      >
+                        <CgProfile className="text-lg" />
+                        View Profile
+                      </Link>
+                      {(selectedConversation.availability?.id ||
+                        selectedConversation.availability_id) && (
+                        <Link
+                          href={`/community/availability/${selectedConversation.availability?.id || selectedConversation.availability_id}`}
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-gray-900 text-sm rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap font-medium"
+                        >
+                          <MdPostAdd />
+                          View Post
+                        </Link>
+                      )}
+                      <button
+                        onClick={openMeetingModal}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap font-medium"
+                      >
+                        <FaCalendarAlt /> Schedule Meeting
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
