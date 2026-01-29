@@ -56,7 +56,7 @@ describe('DatePicker', () => {
     expect(screen.getByText('Oct 26, 2023')).toBeInTheDocument();
   });
 
-  it('navigates to the next and previous months', () => {
+  it('navigates to the next and previous months', async () => {
     render(<DatePicker selectedDate={''} onDateSelect={() => {}} />);
     fireEvent.click(screen.getByRole('button')); // Open calendar
 
@@ -64,29 +64,34 @@ describe('DatePicker', () => {
     const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
     expect(screen.getByText(new RegExp(currentMonthName))).toBeInTheDocument();
 
-    const navigationButtons = screen.getAllByRole('button');
-    const prevButton = navigationButtons[1];
-    const nextButton = navigationButtons[2];
+    const prevButton = screen.getByRole('button', { name: /Previous month/i });
+    const nextButton = screen.getByRole('button', { name: /Next month/i });
 
     // Go to next month
     fireEvent.click(nextButton);
-    const nextMonthName = new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleString(
+    const now = new Date();
+    const nextMonthName = new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleString(
       'default',
-      { month: 'long' }
+      {
+        month: 'long',
+      }
     );
-    expect(screen.getByText(new RegExp(nextMonthName))).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(nextMonthName))).toBeInTheDocument();
 
     // Go back to previous month (from next month)
     fireEvent.click(prevButton);
-    expect(screen.getByText(new RegExp(currentMonthName))).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(currentMonthName))).toBeInTheDocument();
 
     // Go to previous month (from current month)
     fireEvent.click(prevButton);
-    const prevMonthName = new Date(new Date().setMonth(new Date().getMonth() - 1)).toLocaleString(
+    const prevNow = new Date();
+    const prevMonthName = new Date(prevNow.getFullYear(), prevNow.getMonth() - 1, 1).toLocaleString(
       'default',
-      { month: 'long' }
+      {
+        month: 'long',
+      }
     );
-    expect(screen.getByText(new RegExp(prevMonthName))).toBeInTheDocument();
+    expect(await screen.findByText(new RegExp(prevMonthName))).toBeInTheDocument();
   });
 
   it('disables dates before minDate', () => {

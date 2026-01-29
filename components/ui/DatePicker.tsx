@@ -147,11 +147,15 @@ export default function DatePicker({
   };
 
   const goToPreviousMonth = (): void => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    // Debug: ensure navigation handler is being called during tests
+    console.debug('goToPreviousMonth called');
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const goToNextMonth = (): void => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    // Debug: ensure navigation handler is being called during tests
+    console.debug('goToNextMonth called');
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
   const isToday = (date: Date | null): boolean => {
@@ -186,6 +190,8 @@ export default function DatePicker({
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-white text-left flex items-center justify-between"
       >
@@ -212,6 +218,7 @@ export default function DatePicker({
           <div className="flex items-center justify-between mb-4">
             <button
               type="button"
+              aria-label="Previous month"
               onClick={goToPreviousMonth}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
@@ -225,12 +232,22 @@ export default function DatePicker({
               </svg>
             </button>
 
+            {/* Debug: show current render month in tests */}
+            {process.env.NODE_ENV === 'test'
+              ? (console.debug(
+                  'render month',
+                  monthNames[currentMonth.getMonth()],
+                  currentMonth.getFullYear()
+                ),
+                null)
+              : null}
             <h3 className="text-lg font-semibold text-gray-900">
               {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
             </h3>
 
             <button
               type="button"
+              aria-label="Next month"
               onClick={goToNextMonth}
               className="p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
