@@ -266,6 +266,24 @@
       @apply ring-2 ring-blue-200;
     }
   }
+
+  /* Search icon positioning */
+  .search-icon {
+    @apply absolute left-3 top-1/2 w-4 h-4 text-gray-400;
+  }
+
+  /* Clear button positioning */
+  .search-clear-btn {
+    @apply absolute right-3 top-1/2 text-gray-400 hover:text-gray-600 transition-colors;
+  }
+
+  /* Search input base styles */
+  .search-input {
+    @apply w-full px-4 py-2 pl-10 pr-10 
+           border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+           text-sm placeholder:text-gray-400;
+  }
 }
 
 @layer utilities {
