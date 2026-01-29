@@ -29,6 +29,8 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute'; // Assumed path
 
 // --- Supabase Types ---
 import { User } from '@supabase/supabase-js';
+// debounce hook
+import { useDebouncedValue } from '../messages/hooks/useDebounceValue';
 // #endregion
 
 // #region Types
@@ -143,6 +145,7 @@ export default function MessagesPage(): ReactElement {
   const [showConversations, setShowConversations] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
 
   /**
    * @description Ref to hold an AbortController for cancelling in-flight message fetches.
@@ -170,15 +173,15 @@ export default function MessagesPage(): ReactElement {
    * @description Dynamically filters conversations based on the search query.
    */
   const filteredConversations = useMemo(() => {
-    if (!searchQuery.trim()) return conversations;
+    if (!debouncedSearchQuery.trim()) return conversations;
 
-    const lowerQuery = searchQuery.toLowerCase();
+    const lowerQuery = debouncedSearchQuery.toLowerCase();
     return conversations.filter(
       (conv) =>
         conv.displayName.toLowerCase().includes(lowerQuery) ||
         (conv.availability?.title?.toLowerCase().includes(lowerQuery) ?? false)
     );
-  }, [searchQuery, conversations]);
+  }, [debouncedSearchQuery, conversations]);
   // #endregion
 
   // #region Handlers
