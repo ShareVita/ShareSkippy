@@ -31,9 +31,8 @@ import { useProtectedRoute } from '@/hooks/useProtectedRoute'; // Assumed path
 import { User } from '@supabase/supabase-js';
 // debounce hook
 import { useDebouncedValue } from '../messages/hooks/useDebounceValue';
-//search icon
-import SearchIcon from '@/components/icons/SearchIcon';
-import { X } from 'lucide-react';
+//search input
+import { SearchInput } from '../messages/components/SearchInput';
 // #endregion
 
 // #region Types
@@ -147,8 +146,24 @@ export default function MessagesPage(): ReactElement {
   });
   const [showConversations, setShowConversations] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // search state
   const [searchQuery, setSearchQuery] = useState<string>('');
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300);
+  /**
+   * @description Extract searchQuery logic into function.
+   */
+
+  const getEmptyStateMessage = () => {
+    if (searchQuery) {
+      return { title: 'No conversations found', subtitle: 'Try a different search term' };
+    }
+    return {
+      title: 'No conversations yet',
+      subtitle: 'Start messaging someone from the community!',
+    };
+  };
+
+  const { title, subtitle } = getEmptyStateMessage();
 
   /**
    * @description Ref to hold an AbortController for cancelling in-flight message fetches.
@@ -593,26 +608,12 @@ export default function MessagesPage(): ReactElement {
             </button>
           </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
-              className="search-input"
-              aria-label="Search conversations"
-            />
-            <SearchIcon className="search-icon" />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="search-clear-button"
-                aria-label="Clear search"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          {/* Conversation Search Input */}
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search conversations..."
+          />
 
           <div className="flex-1 min-h-0 overflow-y-auto ios-scroll">
             {loading && (
@@ -622,17 +623,10 @@ export default function MessagesPage(): ReactElement {
             )}
             {!loading && filteredConversations.length === 0 && (
               <div className="p-6 text-center text-gray-500">
-                {searchQuery ? (
-                  <>
-                    <p>No conversations found</p>
-                    <p className="text-sm mt-2">Try a different search term</p>
-                  </>
-                ) : (
-                  <>
-                    <p>No conversations yet</p>
-                    <p className="text-sm mt-2">Start messaging someone from the community!</p>
-                  </>
-                )}
+                <>
+                  <p>{title}</p>
+                  <p className="text-sm mt-2">{subtitle}</p>
+                </>
               </div>
             )}
             {!loading &&
