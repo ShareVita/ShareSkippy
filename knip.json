@@ -2,15 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": ["next-sitemap.config.js"],
   "project": ["**/*.{js,jsx,ts,tsx,css}"],
-  "ignore": [
-    "scripts/**",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/*.integration.ts",
-    "**/*.test.tsx",
-    "**/*.spec.tsx",
-    "**/*.integration.tsx"
-  ],
+  "ignore": ["scripts/**"],
   "ignoreBinaries": ["tsc"],
   "tags": ["lintignore"]
 }
