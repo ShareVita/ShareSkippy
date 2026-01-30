@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/libs/supabase/client';
@@ -10,6 +10,25 @@ import LocationFilter from '@/components/LocationFilter';
 import { calculateDistance } from '@/libs/distance';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { User } from '@supabase/supabase-js';
+
+// Constants moved outside component to avoid recreation on each render
+const DAY_NAMES: { [key: string]: string } = {
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday',
+};
+
+const TABS = [
+  { id: 'dog-availability', label: 'Dog Availability', icon: '🐕', shortLabel: 'Dogs' },
+  { id: 'petpal-availability', label: 'PetPal Availability', icon: '🤝', shortLabel: 'PetPals' },
+  { id: 'my-availability', label: 'My Availability', icon: '📅', shortLabel: 'My Posts' },
+];
+
+const REFRESH_COOLDOWN_MS = 5000; // 5 second cooldown between refreshes
 
 // #region: TYPESCRIPT INTERFACES
 /**
@@ -169,10 +188,93 @@ interface NavigatorWithConnection extends Navigator {
 // #endregion: NETWORK API TYPE EXTENSIONS
 // #endregion: TYPESCRIPT INTERFACES
 
+// #region: HELPER FUNCTIONS (outside component to avoid recreation)
+/**
+ * @function formatAvailabilitySchedule
+ * @description Converts the enabled days and schedules object into a readable string array.
+ */
+const formatAvailabilitySchedule = (
+  enabledDays: string[],
+  daySchedules: DaySchedules | null
+): string[] => {
+  if (!enabledDays || !daySchedules) return [];
+
+  const formattedSchedule: string[] = [];
+
+  enabledDays.forEach((day) => {
+    const schedule = daySchedules[day];
+    if (schedule?.enabled && schedule.timeSlots) {
+      const dayName = DAY_NAMES[day] || day.charAt(0).toUpperCase() + day.slice(1);
+
+      const timeSlots = schedule.timeSlots
+        .filter((slot: DayScheduleTimeSlot) => slot.start && slot.end)
+        .map((slot: DayScheduleTimeSlot) => {
+          const startTime = new Date(`2000-01-01T${slot.start}`).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          });
+          const endTime = new Date(`2000-01-01T${slot.end}`).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+          });
+          return `${startTime} - ${endTime}`;
+        });
+
+      if (timeSlots.length > 0) {
+        formattedSchedule.push(`${dayName} ${timeSlots.join(', ')}`);
+      }
+    }
+  });
+
+  return formattedSchedule;
+};
+
+/**
+ * @function formatDate
+ * @description Formats a date string into a localized, human-readable format.
+ */
+const formatDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+/**
+ * @function filterPostsByLocation
+ * @description Filters a list of availability posts based on a location filter radius.
+ */
+const filterPostsByLocation = (
+  posts: AvailabilityPostType[],
+  filter: LocationFilterType | null
+): AvailabilityPostType[] => {
+  if (!filter || !posts || posts.length === 0) {
+    return posts || [];
+  }
+
+  return posts.filter((post) => {
+    const postLat = post.display_lat;
+    const postLng = post.display_lng;
+    if (postLat === null || postLng === null) return false;
+
+    const distance = calculateDistance(filter.lat, filter.lng, postLat, postLng);
+    return distance <= filter.radius;
+  });
+};
+// #endregion: HELPER FUNCTIONS
+
 export default function CommunityPage() {
   // #region: STATE DECLARATIONS
   const { user, isLoading: authLoading } = useProtectedRoute();
   const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const lastRefreshRef = useRef<number>(0);
 
   // Explicitly typed availability post lists
   const [dogAvailabilityPosts, setDogAvailabilityPosts] = useState<AvailabilityPostType[]>([]);
@@ -200,209 +302,86 @@ export default function CommunityPage() {
   const [allPetpalPosts, setAllPetpalPosts] = useState<AvailabilityPostType[]>([]);
   // #endregion: STATE DECLARATIONS
 
-  // #region: HELPER FUNCTIONS
-  /**
-   * @function filterPostsByLocation
-   * @description Filters a list of availability posts based on a location filter radius.
-   * @param {AvailabilityPostType[]} posts - The list of posts to filter.
-   * @param {LocationFilterType | null} filter - The location filter (lat, lng, radius).
-   * @returns {AvailabilityPostType[]} The filtered list of posts.
-   */
-  const filterPostsByLocation = (
-    posts: AvailabilityPostType[],
-    filter: LocationFilterType | null
-  ): AvailabilityPostType[] => {
-    if (!filter || !posts || posts.length === 0) {
-      return posts || [];
-    }
-
-    const filteredPosts = posts.filter((post) => {
-      const postLat = post.display_lat;
-      const postLng = post.display_lng;
-      if (postLat === null || postLng === null) return false;
-
-      const distance = calculateDistance(filter.lat, filter.lng, postLat, postLng);
-      return distance <= filter.radius;
-    });
-
-    return filteredPosts;
-  };
-
-  /**
-   * @function formatAvailabilitySchedule
-   * @description Converts the enabled days and schedules object into a readable string array.
-   * @param {string[]} enabledDays - An array of enabled day keys (e.g., ['monday', 'tuesday']).
-   * @param {DaySchedules | null} daySchedules - The object containing schedule details for each day.
-   * @returns {string[]} An array of formatted schedule strings (e.g., "Monday 9:00 AM - 5:00 PM").
-   */
-  const formatAvailabilitySchedule = (
-    enabledDays: string[],
-    daySchedules: DaySchedules | null
-  ): string[] => {
-    if (!enabledDays || !daySchedules) return [];
-
-    const dayNames: { [key: string]: string } = {
-      monday: 'Monday',
-      tuesday: 'Tuesday',
-      wednesday: 'Wednesday',
-      thursday: 'Thursday',
-      friday: 'Friday',
-      saturday: 'Saturday',
-      sunday: 'Sunday',
-    };
-
-    const formattedSchedule: string[] = [];
-
-    enabledDays.forEach((day) => {
-      const schedule = daySchedules[day];
-      if (schedule?.enabled && schedule.timeSlots) {
-        const dayName = dayNames[day] || day.charAt(0).toUpperCase() + day.slice(1);
-
-        // Explicitly type the slot in the map function
-        const timeSlots = schedule.timeSlots
-          .filter((slot: DayScheduleTimeSlot) => slot.start && slot.end)
-          .map((slot: DayScheduleTimeSlot) => {
-            const startTime = new Date(`2000-01-01T${slot.start}`).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            });
-            const endTime = new Date(`2000-01-01T${slot.end}`).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            });
-            return `${startTime} - ${endTime}`;
-          });
-
-        if (timeSlots.length > 0) {
-          formattedSchedule.push(`${dayName} ${timeSlots.join(', ')}`);
-        }
-      }
-    });
-
-    return formattedSchedule;
-  };
-
-  /**
-   * @function formatDate
-   * @description Formats a date string into a localized, human-readable format.
-   * @param {string} dateString - The date string to format.
-   * @returns {string} The formatted date string.
-   */
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
+  // #region: CALLBACKS
   /**
    * @function openMessageModal
    * @description Opens the message modal with the specified recipient and post details.
-   * @param {ProfileType} recipient - The profile of the user to message.
-   * @param {AvailabilityPostType} availabilityPost - The post being messaged about.
-   * @returns {void}
    */
-  const openMessageModal = (
-    recipient: ProfileType,
-    availabilityPost: AvailabilityPostType
-  ): void => {
-    setMessageModal({ isOpen: true, recipient, availabilityPost });
-  };
+  const openMessageModal = useCallback(
+    (recipient: ProfileType, availabilityPost: AvailabilityPostType): void => {
+      setMessageModal({ isOpen: true, recipient, availabilityPost });
+    },
+    []
+  );
 
   /**
    * @function closeMessageModal
    * @description Closes the message modal and resets its state.
-   * @returns {void}
    */
-  const closeMessageModal = (): void => {
+  const closeMessageModal = useCallback((): void => {
     setMessageModal({ isOpen: false, recipient: null, availabilityPost: null });
-  };
+  }, []);
 
   /**
    * @function deletePost
    * @description Hides an availability post by setting its status to 'inactive'.
-   * @param {string} postId - The ID of the post to delete.
-   * @returns {Promise<void>}
    */
-  const deletePost = async (postId: string): Promise<void> => {
-    if (
-      !user ||
-      !confirm(
-        'Are you sure you want to hide this post? It will no longer be visible to other users, but existing conversations will be preserved.'
+  const deletePost = useCallback(
+    async (postId: string): Promise<void> => {
+      if (
+        !user ||
+        !confirm(
+          'Are you sure you want to hide this post? It will no longer be visible to other users, but existing conversations will be preserved.'
+        )
       )
-    )
-      return;
-
-    try {
-      setDeletingPost(postId);
-      const supabase = createClient();
-
-      // Post owner is implicitly checked by the security policies in Supabase,
-      // but explicitly checking owner_id here adds client-side safety.
-      const { error } = await supabase
-        .from('availability')
-        .update({ status: 'inactive' })
-        .eq('id', postId)
-        .eq('owner_id', user.id);
-
-      if (error) {
-        console.error('Error hiding post:', error);
-        alert(
-          'Failed to hide post: ' +
-            (typeof error === 'object' && error !== null && 'message' in error
-              ? (error as { message?: string }).message || 'Unknown error'
-              : 'Unknown error')
-        );
         return;
-      }
 
-      setMyAvailabilityPosts(myAvailabilityPosts.filter((post) => post.id !== postId));
-      alert('Post hidden successfully');
-    } catch (error) {
-      console.error('Error hiding post:', error);
-      alert('Failed to hide post: Unknown error');
-    } finally {
-      setDeletingPost(null);
-    }
-  };
-  // #endregion: HELPER FUNCTIONS
+      try {
+        setDeletingPost(postId);
+        const supabase = createClient();
+
+        const { error } = await supabase
+          .from('availability')
+          .update({ status: 'inactive' })
+          .eq('id', postId)
+          .eq('owner_id', user.id);
+
+        if (error) {
+          console.error('Error hiding post:', error);
+          alert(
+            'Failed to hide post: ' +
+              (typeof error === 'object' && error !== null && 'message' in error
+                ? (error as { message?: string }).message || 'Unknown error'
+                : 'Unknown error')
+          );
+          return;
+        }
+
+        setMyAvailabilityPosts((prev) => prev.filter((post) => post.id !== postId));
+        alert('Post hidden successfully');
+      } catch (error) {
+        console.error('Error hiding post:', error);
+        alert('Failed to hide post: Unknown error');
+      } finally {
+        setDeletingPost(null);
+      }
+    },
+    [user]
+  );
+  // #endregion: CALLBACKS
 
   // #region: DATA FETCHING LOGIC
   /**
    * @function fetchAvailabilityData
    * @description Fetches all community and user-specific availability posts.
+   * Uses batched queries to avoid N+1 problem.
    * @param {User | null} currentUser - The current Supabase user object.
    * @returns {Promise<void>}
    */
-  const fetchAvailabilityData = async (currentUser: User | null): Promise<void> => {
+  const fetchAvailabilityData = useCallback(async (currentUser: User | null): Promise<void> => {
     setDataLoading(true);
     try {
       const supabase = createClient();
-
-      // ... (cache-busting and connection test logic is unchanged)
-      const cacheBuster = Date.now();
-      if (typeof globalThis !== 'undefined' && globalThis.location) {
-        const url = new URL(globalThis.location.href);
-        url.searchParams.set('_t', cacheBuster.toString());
-        globalThis.history.replaceState({}, '', url);
-      }
-
-      // Simple query to test connection / initial data fetch
-      const { error: allPostsError } = await supabase
-        .from('availability')
-        .select('id, title, post_type, status, owner_id')
-        .limit(5);
-      if (allPostsError) {
-        console.error('Database connection error:', allPostsError);
-        throw new Error(`Database error: ${allPostsError.message}`);
-      }
 
       // 1. Fetch dog availability posts
       let dogQuery = supabase
@@ -419,43 +398,14 @@ export default function CommunityPage() {
       if (currentUser) {
         dogQuery = dogQuery.neq('owner_id', currentUser.id);
       }
-      // Cast the resulting data array to the expected type
       const { data: dogPosts, error: dogError } = (await dogQuery.order('created_at', {
         ascending: false,
       })) as { data: AvailabilityPostType[] | null; error: unknown };
 
-      // Fetch all dogs logic for multi-dog posts
-      if (dogPosts) {
-        for (const post of dogPosts) {
-          let dogIds: string[] = [];
-          if (post.dog_id) dogIds.push(post.dog_id);
-          // Assuming dog_ids column is an array of strings (text[] in Postgres)
-          if (post.dog_ids && post.dog_ids.length > 0) dogIds = [...dogIds, ...post.dog_ids];
-          dogIds = [...new Set(dogIds)]; // Deduplicate
-
-          if (dogIds.length > 0) {
-            const { data: allDogs, error: dogsError } = (await supabase
-              .from('dogs')
-              .select('id, name, breed, photo_url, size')
-              .in('id', dogIds)) as { data: DogType[] | null; error: unknown };
-
-            if (!dogsError && allDogs) (post as AvailabilityPostType).allDogs = allDogs;
-            else {
-              console.error('Error fetching dogs for post:', post.id, dogsError);
-              (post as AvailabilityPostType).allDogs = [];
-            }
-          } else {
-            (post as AvailabilityPostType).allDogs = [];
-          }
-        }
-      }
       if (dogError) {
         console.error('Error fetching dog posts:', dogError);
         throw dogError;
       }
-      const postsWithDogs: AvailabilityPostType[] = dogPosts || [];
-
-      setAllDogPosts(postsWithDogs);
 
       // 2. Fetch petpal availability posts
       let petpalQuery = supabase
@@ -479,13 +429,11 @@ export default function CommunityPage() {
         console.error('Error fetching petpal posts:', petpalError);
         throw petpalError;
       }
-      const postsWithData: AvailabilityPostType[] = petpalPosts || [];
-
-      setAllPetpalPosts(postsWithData);
 
       // 3. Fetch user's own availability posts
+      let myPosts: AvailabilityPostType[] | null = null;
       if (currentUser) {
-        const { data: myPosts, error: myError } = (await supabase
+        const { data, error: myError } = (await supabase
           .from('availability')
           .select(
             `
@@ -499,72 +447,89 @@ export default function CommunityPage() {
           error: unknown;
         };
 
-        // Fetch all dogs for my posts
-        if (myPosts) {
-          for (const post of myPosts) {
-            let dogIds: string[] = [];
-            if (post.dog_id) dogIds.push(post.dog_id);
-            if (post.dog_ids && post.dog_ids.length > 0) dogIds = [...dogIds, ...post.dog_ids];
-            dogIds = [...new Set(dogIds)];
-
-            if (dogIds.length > 0) {
-              const { data: allDogs, error: dogsError } = (await supabase
-                .from('dogs')
-                .select('id, name, breed, photo_url, size')
-                .in('id', dogIds)) as { data: DogType[] | null; error: unknown };
-
-              if (!dogsError && allDogs) (post as AvailabilityPostType).allDogs = allDogs;
-              else {
-                console.error('Error fetching dogs for my post:', post.id, dogsError);
-                post.allDogs = [];
-              }
-            } else {
-              (post as AvailabilityPostType).allDogs = [];
-            }
-          }
-        }
         if (myError) {
           console.error('Error fetching user posts:', myError);
           throw myError;
         }
-        setMyAvailabilityPosts(myPosts || []);
+        myPosts = data;
+      }
+
+      // 4. Batch fetch all dogs for posts with multiple dogs (fixes N+1 query problem)
+      const allPostsWithDogs = [...(dogPosts || []), ...(myPosts || [])];
+      const allDogIds = new Set<string>();
+
+      for (const post of allPostsWithDogs) {
+        if (post.dog_id) allDogIds.add(post.dog_id);
+        if (post.dog_ids) {
+          post.dog_ids.forEach((id: string) => allDogIds.add(id));
+        }
+      }
+
+      let dogsMap = new Map<string, DogType>();
+      if (allDogIds.size > 0) {
+        const { data: allDogs, error: dogsError } = (await supabase
+          .from('dogs')
+          .select('id, name, breed, photo_url, size')
+          .in('id', Array.from(allDogIds))) as { data: DogType[] | null; error: unknown };
+
+        if (dogsError) {
+          console.error('Error fetching dogs:', dogsError);
+        } else if (allDogs) {
+          dogsMap = new Map(allDogs.map((dog) => [dog.id, dog]));
+        }
+      }
+
+      // 5. Attach dogs to posts
+      const attachDogsToPost = (post: AvailabilityPostType) => {
+        const dogIds: string[] = [];
+        if (post.dog_id) dogIds.push(post.dog_id);
+        if (post.dog_ids) dogIds.push(...post.dog_ids);
+        const uniqueDogIds = [...new Set(dogIds)];
+        post.allDogs = uniqueDogIds
+          .map((id) => dogsMap.get(id))
+          .filter((dog): dog is DogType => dog !== undefined);
+      };
+
+      const postsWithDogs = dogPosts || [];
+      postsWithDogs.forEach(attachDogsToPost);
+      setAllDogPosts(postsWithDogs);
+
+      setAllPetpalPosts(petpalPosts || []);
+
+      if (myPosts) {
+        myPosts.forEach(attachDogsToPost);
+        setMyAvailabilityPosts(myPosts);
       }
     } catch (error) {
       console.error('Error fetching availability data:', error);
     } finally {
       setDataLoading(false);
     }
-  };
+  }, []);
 
   /**
    * @function refreshData
-   * @description Clears cache and re-fetches all availability data.
+   * @description Re-fetches all availability data with rate limiting.
    * @returns {Promise<void>}
    */
-  const refreshData = async (): Promise<void> => {
+  const refreshData = useCallback(async (): Promise<void> => {
+    // Rate limiting: prevent refresh spam
+    const now = Date.now();
+    if (now - lastRefreshRef.current < REFRESH_COOLDOWN_MS) {
+      console.log('Refresh rate limited, please wait');
+      return;
+    }
+    lastRefreshRef.current = now;
+
     setRefreshing(true);
     try {
-      // Cache clearing logic
-      if (typeof globalThis !== 'undefined') {
-        if ('caches' in globalThis) {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map((name) => caches.delete(name)));
-        }
-        localStorage.clear();
-        sessionStorage.clear();
-        if ('serviceWorker' in navigator) {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          await Promise.all(registrations.map((reg) => reg.unregister()));
-        }
-      }
-
       await fetchAvailabilityData(user);
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
       setRefreshing(false);
     }
-  };
+  }, [user, fetchAvailabilityData]);
   // #endregion: DATA FETCHING LOGIC
 
   /**
@@ -631,7 +596,30 @@ export default function CommunityPage() {
   // #endregion: EFFECTS
 
   // #region: RENDER LOGIC
-  if (authLoading || dataLoading) {
+  // Skeleton loading component
+  const SkeletonCard = () => (
+    <div className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200 animate-pulse">
+      <div className="h-5 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="flex items-center space-x-3 mb-4">
+        <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+        <div className="flex-1">
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+        </div>
+      </div>
+      <div className="space-y-2 mb-4">
+        <div className="h-3 bg-gray-200 rounded w-full"></div>
+        <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+        <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+      </div>
+      <div className="pt-4 border-t border-gray-100 flex gap-3">
+        <div className="flex-1 h-12 bg-gray-200 rounded-lg"></div>
+        <div className="flex-1 h-12 bg-gray-200 rounded-lg"></div>
+      </div>
+    </div>
+  );
+
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -687,21 +675,7 @@ export default function CommunityPage() {
         {/* Tabs */}
         <div className="mb-6 sm:mb-8">
           <div className="grid grid-cols-1 sm:flex sm:space-x-1 bg-white rounded-xl p-2 sm:p-1 shadow-md border border-gray-200 gap-2 sm:gap-0">
-            {[
-              { id: 'dog-availability', label: 'Dog Availability', icon: '🐕', shortLabel: 'Dogs' },
-              {
-                id: 'petpal-availability',
-                label: 'PetPal Availability',
-                icon: '🤝',
-                shortLabel: 'PetPals',
-              },
-              {
-                id: 'my-availability',
-                label: 'My Availability',
-                icon: '📅',
-                shortLabel: 'My Posts',
-              },
-            ].map((tab) => (
+            {TABS.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -733,10 +707,16 @@ export default function CommunityPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {dogAvailabilityPosts.map((post: AvailabilityPostType) => (
+              {dataLoading ? (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : dogAvailabilityPosts.map((post: AvailabilityPostType) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
+                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200 flex flex-col h-full"
                 >
                   {/* Title */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
@@ -885,7 +865,7 @@ export default function CommunityPage() {
                     </div>
                   )}
 
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href={`/community/availability/${post.id}`}
@@ -912,7 +892,7 @@ export default function CommunityPage() {
                 </div>
               ))}
 
-              {dogAvailabilityPosts.length === 0 && (
+              {!dataLoading && dogAvailabilityPosts.length === 0 && (
                 <div className="col-span-full text-center py-12">
                   <div className="text-6xl mb-4">🐕</div>
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
@@ -961,10 +941,16 @@ export default function CommunityPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {petpalAvailabilityPosts.map((post: AvailabilityPostType) => (
+              {dataLoading ? (
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : petpalAvailabilityPosts.map((post: AvailabilityPostType) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
+                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200 flex flex-col h-full"
                 >
                   {/* Title */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
@@ -1054,7 +1040,7 @@ export default function CommunityPage() {
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href={`/community/availability/${post.id}`}
@@ -1080,7 +1066,7 @@ export default function CommunityPage() {
                 </div>
               ))}
 
-              {petpalAvailabilityPosts.length === 0 && (
+              {!dataLoading && petpalAvailabilityPosts.length === 0 && (
                 <div className="col-span-full text-center py-12">
                   <div className="text-6xl mb-4">🤝</div>
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
@@ -1126,12 +1112,18 @@ export default function CommunityPage() {
               </Link>
             </div>
 
-            {myAvailabilityPosts.length > 0 ? (
+            {dataLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
+            ) : myAvailabilityPosts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {myAvailabilityPosts.map((post: AvailabilityPostType) => (
                   <div
                     key={post.id}
-                    className="bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
+                    className="bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200 flex flex-col h-full"
                   >
                     {/* Title and Status */}
                     <div className="flex justify-between items-start mb-4">
@@ -1268,7 +1260,7 @@ export default function CommunityPage() {
                       )}
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-auto pt-4 border-t border-gray-100">
                       <div className="flex flex-col gap-3">
                         <Link
                           href={`/community/availability/${post.id}`}
