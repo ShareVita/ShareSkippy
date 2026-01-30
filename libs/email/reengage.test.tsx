@@ -57,7 +57,6 @@ type MockResult = {
 const mockSuccess = (data: MockData[] | null): MockResult => ({ data, error: null });
 const mockError = (message: string): MockResult => ({ data: null, error: { message } });
 const shouldSendReengageEmail = __testExports.shouldSendReengageEmail as (
-  // eslint-disable-next-line no-unused-vars
   userId: string
 ) => Promise<boolean>;
 

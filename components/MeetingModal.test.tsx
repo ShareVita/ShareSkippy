@@ -30,7 +30,6 @@ interface PostgrestResponse {
 }
 
 interface MockUpdateBuilder {
-  // eslint-disable-next-line no-unused-vars
   eq: (column: string, value: string) => Promise<PostgrestResponse>;
 }
 
@@ -120,7 +119,6 @@ mockEq.mockImplementation(() => Promise.resolve({ error: null }));
 jest.mock('@/components/ui/DatePicker', () => ({
   __esModule: true,
   default: (props: {
-    // eslint-disable-next-line no-unused-vars
     onDateSelect: (date: string) => void;
     placeholder: string;
     selectedDate: string;

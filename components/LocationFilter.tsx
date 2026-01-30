@@ -54,7 +54,6 @@ type LocationFilterProps = {
    * @description Callback function to notify the parent component of a filter change.
    * Sends the new filter config or 'null' if the filter is cleared.
    */
-  // eslint-disable-next-line no-unused-vars
   readonly onFilterChange: (filter: LocationFilterConfig | null) => void;
 };
 

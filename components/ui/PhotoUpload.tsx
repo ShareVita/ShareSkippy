@@ -10,7 +10,6 @@ import OptimizedImage from './OptimizedImage';
  * @description Props required for the PhotoUpload component.
  */
 interface PhotoUploadProps {
-  // eslint-disable-next-line no-unused-vars
   onPhotoUploaded: (url: string) => void;
   initialPhotoUrl: string;
   disabled?: boolean;

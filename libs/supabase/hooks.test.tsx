@@ -44,7 +44,6 @@ jest.mock('./index', () => ({
   supabase: {
     auth: {
       getUser: () => mockGetUser(),
-      // eslint-disable-next-line no-unused-vars
       onAuthStateChange: (callback: (event: string, session: Session | null) => void) =>
         mockOnAuthStateChange(callback),
       signOut: () => mockSignOut(),
@@ -55,7 +54,6 @@ jest.mock('./index', () => ({
 /**
  * Type alias for the auth state change callback.
  */
-// eslint-disable-next-line no-unused-vars
 type AuthChangeCallback = (event: string, session: Session | null) => void;
 
 /**

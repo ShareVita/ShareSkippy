@@ -45,7 +45,6 @@ const createMockStorage = () => {
 let mockSessionStorage: ReturnType<typeof createMockStorage>;
 
 // --- Mock window.addEventListener for 'storage' event ---
-// eslint-disable-next-line no-unused-vars
 const storageEventListeners: Record<string, (event: StorageEvent) => void> = {};
 const mockAddEventListener = jest.fn((event, callback) => {
   if (event === 'storage') {
@@ -238,7 +237,7 @@ describe('useProfileDraft', () => {
   it('should handle QuotaExceededError by clearing storage and retrying', () => {
     // 1. Simulate the first setItem call failing
     const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
-    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mockSessionStorage.setItem.mockImplementationOnce((_key, _value) => {
       throw quotaError;
     });

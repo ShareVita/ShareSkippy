@@ -21,7 +21,6 @@ export default function DatePicker({
   maxDate,
 }: Readonly<{
   selectedDate: string;
-  // eslint-disable-next-line no-unused-vars
   onDateSelect: (date: string) => void;
   minDate?: string;
   placeholder?: string;

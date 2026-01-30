@@ -2,7 +2,6 @@ import { EmailQueue } from './emailQueue';
 
 // --- Local Mock Types (Replaceing imported types from './emailQueue') ---
 type EmailData = { [key: string]: unknown };
-// eslint-disable-next-line no-unused-vars
 type SendEmailFunction = (data: EmailData) => Promise<string>;
 type Priority = 'normal' | 'high';
 

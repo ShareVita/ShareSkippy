@@ -3,7 +3,6 @@
 type RequestTypeMock = {
   headers: {
     map: Map<string, string | undefined>;
-    // eslint-disable-next-line no-unused-vars
     get(key: string): string | undefined;
   };
 };
@@ -19,16 +18,13 @@ type ResponseTypeMock = {
 type RateLimitOptionsMock = {
   max: number;
   windowMs?: number;
-  // eslint-disable-next-line no-unused-vars
   keyGenerator?: (request: RequestTypeMock) => string;
 };
 
 // The core function type that processes the request and returns a response/result.
-// eslint-disable-next-line no-unused-vars
 type RequestHandler = (request: RequestTypeMock) => ResponseTypeMock;
 
 // The type for the main rateLimit factory function
-// eslint-disable-next-line no-unused-vars
 type RateLimitFactory = (options?: RateLimitOptionsMock) => RequestHandler;
 
 // The type for the entire module's exports

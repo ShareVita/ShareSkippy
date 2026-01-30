@@ -74,7 +74,6 @@ describe('SupabaseUserProvider', () => {
     text?: () => Promise<string>;
   };
 
-  // eslint-disable-next-line no-unused-vars
   const fetchMock = jest.fn<(..._args: Parameters<typeof fetch>) => Promise<FetchResponse>>();
 
   beforeEach(() => {
