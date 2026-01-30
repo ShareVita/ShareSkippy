@@ -15,7 +15,7 @@
  *   SUPABASE_SERVICE_ROLE_KEY - Service role key (not anon key)
  */
 
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
 const FEATURE_RELEASE_DATE = '2026-01-22T00:00:00Z';
 const EMAIL_TYPE = 'community_growth_day135';
@@ -149,7 +149,9 @@ async function backfillCommunityGrowthEmails() {
     }
   }
 
-  console.log(`  ${immediateEmails.length} emails will be sent immediately (135 days already passed)`);
+  console.log(
+    `  ${immediateEmails.length} emails will be sent immediately (135 days already passed)`
+  );
   console.log(`  ${futureEmails.length} emails will be sent in the future`);
   console.log('');
 

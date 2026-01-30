@@ -189,7 +189,10 @@ describe('Scheduled Email Functions', () => {
         userId: mockEmail.user_id,
         to: mockUser.email,
         emailType: mockEmail.email_type,
-        payload: mockEmail.payload,
+        payload: {
+          ...mockEmail.payload,
+          userName: mockUser.first_name,
+        },
       });
     });
 
