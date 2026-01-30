@@ -160,7 +160,7 @@ async function backfillCommunityGrowthEmails() {
       const signupDate = new Date(user.created_at);
       const daysSinceSignup = Math.floor((now - signupDate) / (1000 * 60 * 60 * 24));
       console.log(
-        `  - ${user.email || user.id}: signed up ${signupDate.toISOString().split('T')[0]}, ${daysSinceSignup} days ago`
+        `  - ${user.email || user.id}: signed up ${signupDate.toISOString().split('T')[0]}, ${daysSinceSignup} days ago (due ${runAfter.toISOString().split('T')[0]})`
       );
     }
     if (immediateEmails.length > 5) {
