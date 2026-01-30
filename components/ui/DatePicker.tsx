@@ -148,13 +148,13 @@ export default function DatePicker({
 
   const goToPreviousMonth = (): void => {
     // Debug: ensure navigation handler is being called during tests
-    console.debug('goToPreviousMonth called');
+    if (process.env.NODE_ENV === 'test') console.debug('goToPreviousMonth called');
     setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
   const goToNextMonth = (): void => {
     // Debug: ensure navigation handler is being called during tests
-    console.debug('goToNextMonth called');
+    if (process.env.NODE_ENV === 'test') console.debug('goToNextMonth called');
     setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
