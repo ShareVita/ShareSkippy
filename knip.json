@@ -4,5 +4,13 @@
   "project": ["**/*.{js,jsx,ts,tsx,css}"],
   "ignore": ["scripts/**"],
   "ignoreBinaries": ["tsc"],
+  "ignoreDependencies": [
+    "crisp-sdk-web",
+    "nextjs-toploader",
+    "react-icons",
+    "react-tooltip",
+    "resend",
+    "zod"
+  ],
   "tags": ["lintignore"]
 }
