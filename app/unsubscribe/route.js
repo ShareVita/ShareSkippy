@@ -1,5 +1,6 @@
 import { createClient } from '@/libs/supabase/server';
 import crypto from 'crypto';
+import { NextResponse } from 'next/server';
 
 // Helper to decode base64url
 const base64UrlDecode = (s) => {
@@ -14,6 +15,10 @@ export async function GET(request) {
 
     const token = url.searchParams.get('t');
     let email = url.searchParams.get('email');
+
+    if (!token) {
+      return NextResponse.json({ error: 'Invalid or missing unsubscribe token' }, { status: 400 });
+    }
 
     // If token provided, validate it and extract the email
     if (token) {
