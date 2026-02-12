@@ -7,19 +7,68 @@ import { createClient } from '@/libs/supabase/client';
 import { formatLocation, getRoleLabel } from '@/libs/utils';
 import UserReviews from '@/components/UserReviews';
 import MessageModal from '@/components/MessageModal';
+import { User } from '@supabase/supabase-js';
+import type { AvailabilityPostType } from '@/app/community/page';
+
+type SupportPref =
+  | 'elderly_dog_owners'
+  | 'sick_recovering'
+  | 'low_income_families'
+  | 'people_disabilities'
+  | 'single_parents'
+  | 'other';
+
+interface Profile {
+  id: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  profile_photo_url?: string | null;
+  role?: string | null;
+  support_preferences?: SupportPref[] | null;
+  support_story?: string | null;
+  bio?: string | null;
+  facebook_url?: string | null;
+  instagram_url?: string | null;
+  linkedin_url?: string | null;
+  airbnb_url?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  state?: string;
+}
+
+interface Dog {
+  id: string;
+  name: string;
+  breed?: string;
+  photo_url?: string;
+  owner_id: string;
+  age?: number;
+  size?: string;
+  bio?: string;
+}
+
+interface MessageModalState {
+  isOpen: boolean;
+  recipient: Profile | null;
+  availabilityPost: AvailabilityPostType | null;
+}
 
 export default function PublicProfilePage() {
   const params = useParams();
   const profileId = params.id;
 
-  const [profile, setProfile] = useState(null);
-  const [dogs, setDogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [messageModal, setMessageModal] = useState({ isOpen: false, recipient: null });
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [messageModal, setMessageModal] = useState<MessageModalState>({
+    isOpen: false,
+    recipient: null,
+    availabilityPost: null,
+  });
 
-  const loadCurrentUser = useCallback(async () => {
+  const loadCurrentUser = useCallback(async (): Promise<void> => {
     try {
       const supabase = createClient();
       const {
@@ -31,7 +80,7 @@ export default function PublicProfilePage() {
     }
   }, [setCurrentUser]);
 
-  const loadProfile = useCallback(async () => {
+  const loadProfile = useCallback(async (): Promise<void> => {
     try {
       const supabase = createClient();
 
@@ -49,7 +98,7 @@ export default function PublicProfilePage() {
         return;
       }
 
-      setProfile(profileData);
+      setProfile(profileData as Profile);
 
       const { data: dogsData, error: dogsError } = await supabase
         .from('dogs')
@@ -57,7 +106,7 @@ export default function PublicProfilePage() {
         .eq('owner_id', profileId);
 
       if (!dogsError && dogsData) {
-        setDogs(dogsData);
+        setDogs(dogsData as Dog[]);
       }
     } catch (err) {
       console.error('Error loading profile:', err);
@@ -72,12 +121,12 @@ export default function PublicProfilePage() {
     loadCurrentUser();
   }, [loadProfile, loadCurrentUser]);
 
-  const openMessageModal = () => {
-    setMessageModal({ isOpen: true, recipient: profile });
+  const openMessageModal = (): void => {
+    setMessageModal({ isOpen: true, recipient: profile, availabilityPost: null });
   };
 
-  const closeMessageModal = () => {
-    setMessageModal({ isOpen: false, recipient: null });
+  const closeMessageModal = (): void => {
+    setMessageModal({ isOpen: false, recipient: null, availabilityPost: null });
   };
 
   if (loading) {
@@ -135,7 +184,7 @@ export default function PublicProfilePage() {
     );
   }
 
-  const getRoleIcon = (role) => {
+  const getRoleIcon = (role: Profile['role']): string => {
     switch (role) {
       case 'dog_owner':
         return '🐕';
@@ -203,6 +252,9 @@ export default function PublicProfilePage() {
                         city: profile.city,
                         state: profile.state,
                       });
+                      if (!formattedLocation) {
+                        return null;
+                      }
                       return (
                         <>
                           {formattedLocation.neighborhood && `${formattedLocation.neighborhood}, `}
@@ -247,7 +299,7 @@ export default function PublicProfilePage() {
           )}
 
           {/* Community Support Preferences */}
-          {(profile.support_preferences?.length > 0 || profile.support_story) && (
+          {((profile.support_preferences?.length ?? 0) > 0 || profile.support_story) && (
             <div className="mb-6 p-4 bg-linear-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
               <h3 className="font-semibold text-gray-900 mb-3">Community Support Preferences</h3>
 
@@ -387,7 +439,7 @@ export default function PublicProfilePage() {
             <span className="mr-2">⭐</span>
             Reviews
           </h2>
-          <UserReviews userId={profile.id} showAll={true} />
+          <UserReviews profileId={profile.id} showAll={true} />
         </div>
       </div>
 
@@ -396,6 +448,7 @@ export default function PublicProfilePage() {
         isOpen={messageModal.isOpen}
         onClose={closeMessageModal}
         recipient={messageModal.recipient}
+        availabilityPost={messageModal.availabilityPost}
       />
     </div>
   );

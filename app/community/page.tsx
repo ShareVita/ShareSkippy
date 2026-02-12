@@ -99,7 +99,7 @@ interface DaySchedules {
  * @interface AvailabilityPostType
  * @description Main structure for an availability post record.
  */
-interface AvailabilityPostType {
+export interface AvailabilityPostType {
   id: string;
   title: string;
   post_type: 'dog_available' | 'petpal_available';
