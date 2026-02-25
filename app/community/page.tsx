@@ -447,9 +447,9 @@ export default function CommunityPage() {
         throw myResult.error;
       }
 
-      const dogPosts = (dogResult.data as AvailabilityPostType[]) ?? [];
-      const petpalPosts = (petpalResult.data as AvailabilityPostType[]) ?? [];
-      const myPosts = (myResult.data as AvailabilityPostType[]) ?? [];
+      const dogPosts = (dogResult.data as unknown as AvailabilityPostType[]) ?? [];
+      const petpalPosts = (petpalResult.data as unknown as AvailabilityPostType[]) ?? [];
+      const myPosts = (myResult.data as unknown as AvailabilityPostType[]) ?? [];
 
       // Batch fetch all dogs for multi-dog posts (replaces N+1 per-post queries)
       const allPostsNeedingDogs = [...dogPosts, ...myPosts];
