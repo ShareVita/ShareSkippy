@@ -386,149 +386,110 @@ export default function CommunityPage() {
     try {
       const supabase = createClient();
 
-      // ... (cache-busting and connection test logic is unchanged)
-      const cacheBuster = Date.now();
-      if (typeof globalThis !== 'undefined' && globalThis.location) {
-        const url = new URL(globalThis.location.href);
-        url.searchParams.set('_t', cacheBuster.toString());
-        globalThis.history.replaceState({}, '', url);
-      }
+      const AVAILABILITY_COLUMNS = `
+        id, title, post_type, status, owner_id, dog_id, dog_ids,
+        display_lat, display_lng, use_profile_location,
+        custom_location_neighborhood, custom_location_city,
+        enabled_days, day_schedules, need_extra_help, description,
+        is_urgent, can_pick_up, can_drop_off, can_pick_up_drop_off, created_at
+      `;
 
-      // Simple query to test connection / initial data fetch
-      const { error: allPostsError } = await supabase
-        .from('availability')
-        .select('id, title, post_type, status, owner_id')
-        .limit(5);
-      if (allPostsError) {
-        console.error('Database connection error:', allPostsError);
-        throw new Error(`Database error: ${allPostsError.message}`);
-      }
-
-      // 1. Fetch dog availability posts
+      // Build queries for all three post types
       let dogQuery = supabase
         .from('availability')
         .select(
-          `
-          *,
+          `${AVAILABILITY_COLUMNS},
           owner:profiles!availability_owner_id_fkey ( id, first_name, last_name, profile_photo_url, neighborhood, city ),
-          dog:dogs!availability_dog_id_fkey ( id, name, breed, photo_url, size )
-          `
+          dog:dogs!availability_dog_id_fkey ( id, name, breed, photo_url, size )`
         )
         .eq('post_type', 'dog_available')
         .eq('status', 'active');
-      if (currentUser) {
-        dogQuery = dogQuery.neq('owner_id', currentUser.id);
-      }
-      // Cast the resulting data array to the expected type
-      const { data: dogPosts, error: dogError } = (await dogQuery.order('created_at', {
-        ascending: false,
-      })) as { data: AvailabilityPostType[] | null; error: unknown };
+      if (currentUser) dogQuery = dogQuery.neq('owner_id', currentUser.id);
 
-      // Fetch all dogs logic for multi-dog posts
-      if (dogPosts) {
-        for (const post of dogPosts) {
-          let dogIds: string[] = [];
-          if (post.dog_id) dogIds.push(post.dog_id);
-          // Assuming dog_ids column is an array of strings (text[] in Postgres)
-          if (post.dog_ids && post.dog_ids.length > 0) dogIds = [...dogIds, ...post.dog_ids];
-          dogIds = [...new Set(dogIds)]; // Deduplicate
-
-          if (dogIds.length > 0) {
-            const { data: allDogs, error: dogsError } = (await supabase
-              .from('dogs')
-              .select('id, name, breed, photo_url, size')
-              .in('id', dogIds)) as { data: DogType[] | null; error: unknown };
-
-            if (!dogsError && allDogs) (post as AvailabilityPostType).allDogs = allDogs;
-            else {
-              console.error('Error fetching dogs for post:', post.id, dogsError);
-              (post as AvailabilityPostType).allDogs = [];
-            }
-          } else {
-            (post as AvailabilityPostType).allDogs = [];
-          }
-        }
-      }
-      if (dogError) {
-        console.error('Error fetching dog posts:', dogError);
-        throw dogError;
-      }
-      const postsWithDogs: AvailabilityPostType[] = dogPosts || [];
-
-      setAllDogPosts(postsWithDogs);
-
-      // 2. Fetch petpal availability posts
       let petpalQuery = supabase
         .from('availability')
         .select(
-          `
-          *,
-          owner:profiles!availability_owner_id_fkey ( id, first_name, last_name, profile_photo_url, neighborhood, city )
-          `
+          `${AVAILABILITY_COLUMNS},
+          owner:profiles!availability_owner_id_fkey ( id, first_name, last_name, profile_photo_url, neighborhood, city )`
         )
         .eq('post_type', 'petpal_available')
         .eq('status', 'active');
-      if (currentUser) {
-        petpalQuery = petpalQuery.neq('owner_id', currentUser.id);
+      if (currentUser) petpalQuery = petpalQuery.neq('owner_id', currentUser.id);
+
+      const myPostsPromise = currentUser
+        ? supabase
+            .from('availability')
+            .select(
+              `${AVAILABILITY_COLUMNS},
+              dog:dogs!availability_dog_id_fkey ( id, name, breed, photo_url, size )`
+            )
+            .eq('owner_id', currentUser.id)
+            .order('created_at', { ascending: false })
+        : Promise.resolve({ data: null, error: null });
+
+      // Run all three fetches in parallel
+      const [dogResult, petpalResult, myResult] = await Promise.all([
+        dogQuery.order('created_at', { ascending: false }),
+        petpalQuery.order('created_at', { ascending: false }),
+        myPostsPromise,
+      ]);
+
+      if (dogResult.error) {
+        console.error('Error fetching dog posts:', dogResult.error);
+        throw dogResult.error;
       }
-      const { data: petpalPosts, error: petpalError } = (await petpalQuery.order('created_at', {
-        ascending: false,
-      })) as { data: AvailabilityPostType[] | null; error: unknown };
-
-      if (petpalError) {
-        console.error('Error fetching petpal posts:', petpalError);
-        throw petpalError;
+      if (petpalResult.error) {
+        console.error('Error fetching petpal posts:', petpalResult.error);
+        throw petpalResult.error;
       }
-      const postsWithData: AvailabilityPostType[] = petpalPosts || [];
+      if (myResult.error) {
+        console.error('Error fetching user posts:', myResult.error);
+        throw myResult.error;
+      }
 
-      setAllPetpalPosts(postsWithData);
+      const dogPosts = (dogResult.data as AvailabilityPostType[]) ?? [];
+      const petpalPosts = (petpalResult.data as AvailabilityPostType[]) ?? [];
+      const myPosts = (myResult.data as AvailabilityPostType[]) ?? [];
 
-      // 3. Fetch user's own availability posts
-      if (currentUser) {
-        const { data: myPosts, error: myError } = (await supabase
-          .from('availability')
-          .select(
-            `
-            *,
-            dog:dogs!availability_dog_id_fkey ( id, name, breed, photo_url, size )
-            `
-          )
-          .eq('owner_id', currentUser.id)
-          .order('created_at', { ascending: false })) as {
-          data: AvailabilityPostType[] | null;
-          error: unknown;
-        };
+      // Batch fetch all dogs for multi-dog posts (replaces N+1 per-post queries)
+      const allPostsNeedingDogs = [...dogPosts, ...myPosts];
+      const allDogIds = [
+        ...new Set(
+          allPostsNeedingDogs.flatMap((post) => {
+            const ids: string[] = [];
+            if (post.dog_id) ids.push(post.dog_id);
+            if (post.dog_ids?.length) ids.push(...post.dog_ids);
+            return ids;
+          })
+        ),
+      ];
 
-        // Fetch all dogs for my posts
-        if (myPosts) {
-          for (const post of myPosts) {
-            let dogIds: string[] = [];
-            if (post.dog_id) dogIds.push(post.dog_id);
-            if (post.dog_ids && post.dog_ids.length > 0) dogIds = [...dogIds, ...post.dog_ids];
-            dogIds = [...new Set(dogIds)];
+      if (allDogIds.length > 0) {
+        const { data: allDogsData, error: dogsError } = (await supabase
+          .from('dogs')
+          .select('id, name, breed, photo_url, size')
+          .in('id', allDogIds)) as { data: DogType[] | null; error: unknown };
 
-            if (dogIds.length > 0) {
-              const { data: allDogs, error: dogsError } = (await supabase
-                .from('dogs')
-                .select('id, name, breed, photo_url, size')
-                .in('id', dogIds)) as { data: DogType[] | null; error: unknown };
-
-              if (!dogsError && allDogs) (post as AvailabilityPostType).allDogs = allDogs;
-              else {
-                console.error('Error fetching dogs for my post:', post.id, dogsError);
-                post.allDogs = [];
-              }
-            } else {
-              (post as AvailabilityPostType).allDogs = [];
-            }
+        if (!dogsError && allDogsData) {
+          const dogMap = new Map(allDogsData.map((d) => [d.id, d]));
+          for (const post of allPostsNeedingDogs) {
+            const postDogIds = [...(post.dog_id ? [post.dog_id] : []), ...(post.dog_ids ?? [])];
+            post.allDogs = [...new Set(postDogIds)]
+              .map((id) => dogMap.get(id))
+              .filter((d): d is DogType => d !== undefined);
           }
+        } else {
+          console.error('Error fetching dogs batch:', dogsError);
+          for (const post of allPostsNeedingDogs) post.allDogs = [];
         }
-        if (myError) {
-          console.error('Error fetching user posts:', myError);
-          throw myError;
-        }
-        setMyAvailabilityPosts(myPosts || []);
+      } else {
+        for (const post of allPostsNeedingDogs) post.allDogs = [];
       }
+
+      setAllDogPosts(dogPosts);
+      setAllPetpalPosts(petpalPosts);
+      if (currentUser) setMyAvailabilityPosts(myPosts);
+      else setMyAvailabilityPosts([]);
     } catch (error) {
       console.error('Error fetching availability data:', error);
     } finally {
@@ -756,7 +717,7 @@ export default function CommunityPage() {
                               width={48}
                               height={48}
                               className="w-12 h-12 rounded-full object-cover"
-                              unoptimized
+                              sizes="48px"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
@@ -782,7 +743,7 @@ export default function CommunityPage() {
                                     width={32}
                                     height={32}
                                     className="w-8 h-8 rounded-full object-cover"
-                                    unoptimized
+                                    sizes="32px"
                                   />
                                 ) : (
                                   <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-xs">
