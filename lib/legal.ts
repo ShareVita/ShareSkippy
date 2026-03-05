@@ -11,8 +11,8 @@ export const LEGAL = {
   shortDisclosureGranted:
     'ShareSkippy is a community program of ShareVita, a California 501(c)(3) nonprofit organization.',
   longDisclosure:
-    'ShareSkippy ("we", "our", "us") is a community program of ShareVita, a California nonprofit public benefit corporation. ShareVita\'s IRS 501(c)(3) determination is pending. ShareSkippy remains the product/service brand; ShareVita is the legal entity responsible for governance and compliance.',
-  status: 'pending' as 'pending' | 'granted',
+    'ShareSkippy ("we", "our", "us") is a community program of ShareVita, a California nonprofit public benefit corporation and IRS-recognized 501(c)(3) organization. ShareSkippy remains the product/service brand; ShareVita is the legal entity responsible for governance and compliance.',
+  status: 'granted' as 'pending' | 'granted',
 
   // Contact information
   contact: {
@@ -26,7 +26,7 @@ export const LEGAL = {
 
   // Donations/payments disclaimer
   donationsDisclaimer:
-    'We do not process payments on this site. If donations become available, they will be receipted by ShareVita. Tax-deductibility applies only after IRS determination; consult your advisor.',
+    'We do not process payments on this site. If donations become available, they will be receipted by ShareVita, an IRS-recognized 501(c)(3) organization. Consult your tax advisor regarding deductibility.',
 
   // Terms definitions
   termsDefinitions:
@@ -34,7 +34,7 @@ export const LEGAL = {
 
   // FAQ disclosure
   faqDisclosure:
-    'ShareSkippy is a program of ShareVita, a California nonprofit public benefit corporation (IRS 501(c)(3) determination pending).',
+    'ShareSkippy is a program of ShareVita, a California nonprofit public benefit corporation (IRS 501(c)(3)).',
 
   // Get current disclosure based on status
   getCurrentDisclosure: () => {
