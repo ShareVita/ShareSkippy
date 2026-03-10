@@ -47,4 +47,4 @@ Browse Community: {{appUrl}}/community
 FAQ: {{appUrl}}/faq
 Unsubscribe: {{unsubscribeUrl}}
 
-ShareSkippy is a community program of ShareVita, a California nonprofit public benefit corporation (501(c)(3) determination pending).
+ShareSkippy is a community program of ShareVita, a California nonprofit public benefit corporation (501(c)(3)).
