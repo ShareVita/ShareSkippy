@@ -151,12 +151,12 @@ export default function OurStoryPage() {
               I write about building things — startups, communities, and sometimes myself — on my
               blog:{' '}
               <a
-                href="https://medium.com/@kcolban"
+                href="https://substack.com/@getmekaiac"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
               >
-                medium.com/@kcolban
+                substack.com/@getmekaiac
               </a>
             </p>
             <p>
