@@ -4,11 +4,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/libs/supabase/client';
 import toast from 'react-hot-toast';
+import config from '@/config';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-// This a login/singup page for Supabase Auth.
-// Successfull login redirects to /api/auth/callback where the Code Exchange is processed (see app/api/auth/callback/route.js).
-export default function Login() {
+export default function Signup() {
   const supabase = createClient();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,20 +33,20 @@ export default function Login() {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error) {
-      let errorMessage = 'Sign-in failed. Please try again.';
+      let errorMessage = 'Sign-up failed. Please try again.';
 
       switch (error) {
         case 'session_exchange_failed':
-          errorMessage = 'Failed to establish session. Please try signing in again.';
+          errorMessage = 'Failed to establish session. Please try signing up again.';
           break;
         case 'no_session':
-          errorMessage = 'Session not created. Please try signing in again.';
+          errorMessage = 'Session not created. Please try signing up again.';
           break;
         case 'unexpected_error':
           errorMessage = 'An unexpected error occurred. Please try again.';
           break;
         default:
-          errorMessage = `Sign-in error: ${error}`;
+          errorMessage = `Sign-up error: ${error}`;
       }
 
       toast.error(errorMessage);
@@ -64,7 +63,6 @@ export default function Login() {
       const redirectURL = window.location.origin + '/api/auth/callback';
 
       if (type === 'oauth') {
-        // Use Supabase's built-in OAuth but with custom branding
         const { error } = await supabase.auth.signInWithOAuth({
           provider,
           options: {
@@ -78,11 +76,10 @@ export default function Login() {
         });
 
         if (error) {
-          console.error('OAuth sign-in error:', error);
-          toast.error('Failed to sign in with Google. Please try again.');
+          console.error('OAuth sign-up error:', error);
+          toast.error('Failed to sign up with Google. Please try again.');
         }
       } else if (type === 'magic_link') {
-        console.log('Magic link redirect URL:', redirectURL);
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
@@ -99,7 +96,7 @@ export default function Login() {
         }
       }
     } catch (error) {
-      console.error('Unexpected sign-in error:', error);
+      console.error('Unexpected sign-up error:', error);
       toast.error('Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
@@ -140,32 +137,26 @@ export default function Login() {
         <div className="space-y-6">
           <div className="text-6xl">🐾</div>
           <h1 className="text-4xl font-extrabold leading-tight text-white">
-            The community where dogs bring neighbors together
+            Join thousands of dog lovers in your neighborhood
           </h1>
           <p className="text-white/80 text-lg leading-relaxed">
-            Love dogs but can&apos;t have one? Own a pup that needs more walks? ShareSkippy connects
-            dog lovers with local owners — so every tail wags more.
+            Whether you own a pup or just love dogs, ShareSkippy connects you with your community
+            for walks, playdates, and puppy therapy — completely free.
           </p>
 
-          {/* Social proof */}
+          {/* Benefits list */}
           <div className="space-y-3 pt-2">
             {[
-              {
-                quote: "I can't have a dog in my apartment, but now I hike with Max every week.",
-                author: 'Sarah, Dog Lover',
-              },
-              {
-                quote:
-                  'Recovering from surgery, my neighbors made sure Bella still got her daily walks.',
-                author: 'David, Dog Owner',
-              },
+              { icon: '🐶', text: 'Borrow a dog for the afternoon — 100% joy, 0% vet bills' },
+              { icon: '🏃', text: 'Owners get reliable walkers when life gets busy' },
+              { icon: '🏡', text: 'Build real connections with your neighbors' },
             ].map((item, i) => (
               <div
                 key={i}
-                className="bg-white/15 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                className="flex items-start gap-3 bg-white/15 backdrop-blur-sm rounded-xl p-3.5 border border-white/20"
               >
-                <p className="text-white/90 text-sm italic">&quot;{item.quote}&quot;</p>
-                <p className="text-white/60 text-xs mt-1 font-medium">— {item.author}</p>
+                <span className="text-xl">{item.icon}</span>
+                <p className="text-white/90 text-sm">{item.text}</p>
               </div>
             ))}
           </div>
@@ -205,8 +196,8 @@ export default function Login() {
           {/* Header */}
           <div className="mb-8">
             <div className="text-3xl mb-3 lg:hidden">🐾</div>
-            <h2 className="text-2xl font-bold text-gray-900">Sign Up or Log Back In</h2>
-            <p className="text-gray-500 mt-1">Connect with dogs and neighbors in your community</p>
+            <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
+            <p className="text-gray-500 mt-1">Join {config.appName} — it&apos;s free</p>
           </div>
 
           {/* Google OAuth */}
@@ -286,6 +277,14 @@ export default function Login() {
               {isDisabled ? 'Check your inbox ✓' : 'Send Magic Link'}
             </button>
           </form>
+
+          {/* Sign in link */}
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Already have an account?{' '}
+            <Link href="/signin" className="font-semibold text-gray-900 hover:underline">
+              Sign in
+            </Link>
+          </p>
 
           {/* Terms */}
           <p className="text-center text-xs text-gray-400 mt-4">
