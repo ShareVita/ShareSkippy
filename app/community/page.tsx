@@ -736,7 +736,7 @@ export default function CommunityPage() {
               {dogAvailabilityPosts.map((post: AvailabilityPostType) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
+                  className="flex flex-col bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
                 >
                   {/* Title */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
@@ -885,7 +885,7 @@ export default function CommunityPage() {
                     </div>
                   )}
 
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href={`/community/availability/${post.id}`}
@@ -964,7 +964,7 @@ export default function CommunityPage() {
               {petpalAvailabilityPosts.map((post: AvailabilityPostType) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
+                  className="flex flex-col bg-white rounded-xl p-4 sm:p-6 shadow-md border border-gray-200"
                 >
                   {/* Title */}
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
@@ -1054,7 +1054,7 @@ export default function CommunityPage() {
                     )}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-100">
+                  <div className="mt-auto pt-4 border-t border-gray-100">
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
                         href={`/community/availability/${post.id}`}
@@ -1131,7 +1131,7 @@ export default function CommunityPage() {
                 {myAvailabilityPosts.map((post: AvailabilityPostType) => (
                   <div
                     key={post.id}
-                    className="bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
+                    className="flex flex-col bg-white rounded-xl p-4 sm:p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200"
                   >
                     {/* Title and Status */}
                     <div className="flex justify-between items-start mb-4">
@@ -1268,7 +1268,7 @@ export default function CommunityPage() {
                       )}
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-gray-100">
+                    <div className="mt-auto pt-4 border-t border-gray-100">
                       <div className="flex flex-col gap-3">
                         <Link
                           href={`/community/availability/${post.id}`}

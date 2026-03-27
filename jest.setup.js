@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom';
 import { jest } from '@jest/globals';
 
+import { TextEncoder, TextDecoder } from 'util';
+
 // Mock the Next.js Image component
 // This prevents errors related to image source validation in the JSDOM environment.
 jest.mock('next/image', () => ({
@@ -24,3 +26,6 @@ globalThis.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
