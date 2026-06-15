@@ -134,7 +134,7 @@ export default function Home() {
   // Handle button clicks - redirect to signin page
   const handleButtonClick = (e) => {
     e.preventDefault();
-    window.location.href = '/signin';
+    window.location.href = '/signup';
   };
 
   // Show loading state while checking authentication
