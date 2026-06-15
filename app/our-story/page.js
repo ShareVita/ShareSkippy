@@ -151,12 +151,12 @@ export default function OurStoryPage() {
               I write about building things — startups, communities, and sometimes myself — on my
               blog:{' '}
               <a
-                href="https://medium.com/@kcolban"
+                href="https://substack.com/@getmekaiac"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
               >
-                medium.com/@kcolban
+                substack.com/@getmekaiac
               </a>
             </p>
             <p>
@@ -197,7 +197,7 @@ export default function OurStoryPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/signin"
+              href="/signup"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 rounded-xl text-xl font-bold transition-all transform hover:scale-105 shadow-lg"
             >
               Get Started

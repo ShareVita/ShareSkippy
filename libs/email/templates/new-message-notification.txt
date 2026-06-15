@@ -17,7 +17,7 @@ Happy chatting,
 The ShareSkippy Team 🐕
 
 ---
-ShareSkippy is a community program of ShareVita, a California nonprofit public benefit corporation (501(c)(3) determination pending).
+ShareSkippy is a community program of ShareVita, a California nonprofit public benefit corporation (501(c)(3)).
 
 You received this notification because you have a new message on ShareSkippy. 
 You can manage your notification preferences in your account settings or unsubscribe here: {{unsubscribeUrl}}
