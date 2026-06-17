@@ -69,11 +69,10 @@ describe('DatePicker', () => {
     const nextButton = navigationButtons[2];
 
     // Go to next month
+    // Use day 1 to avoid date rollover issues (e.g., Jan 30 + 1 month = Mar 2, not Feb)
     fireEvent.click(nextButton);
-    const nextMonthName = new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleString(
-      'default',
-      { month: 'long' }
-    );
+    const nextMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+    const nextMonthName = nextMonth.toLocaleString('default', { month: 'long' });
     expect(screen.getByText(new RegExp(nextMonthName))).toBeInTheDocument();
 
     // Go back to previous month (from next month)
@@ -82,10 +81,8 @@ describe('DatePicker', () => {
 
     // Go to previous month (from current month)
     fireEvent.click(prevButton);
-    const prevMonthName = new Date(new Date().setMonth(new Date().getMonth() - 1)).toLocaleString(
-      'default',
-      { month: 'long' }
-    );
+    const prevMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+    const prevMonthName = prevMonth.toLocaleString('default', { month: 'long' });
     expect(screen.getByText(new RegExp(prevMonthName))).toBeInTheDocument();
   });
 
