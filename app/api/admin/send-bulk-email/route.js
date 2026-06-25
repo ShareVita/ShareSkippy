@@ -3,6 +3,9 @@ import { createClient } from '@/libs/supabase/server';
 import { sendEmail } from '@/libs/resend';
 import { strictRateLimit } from '@/libs/rateLimit';
 
+const MAX_BATCH_SIZE = 100;
+const MAX_DELAY_MS = 5000;
+
 const updateResultsWithBatch = (results, batchResults) => {
   for (const result of batchResults) {
     if (result.success) {
@@ -46,16 +49,18 @@ export async function POST(request) {
     }
 
     // Validate batch size and delay
-    if (batchSize < 1 || batchSize > 100) {
-      return NextResponse.json({ error: 'Batch size must be between 1 and 100' }, { status: 400 });
+    if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > MAX_BATCH_SIZE) {
+      return NextResponse.json({ error: `Batch size must be an integer between 1 and ${MAX_BATCH_SIZE}` }, { status: 400 });
     }
 
-    if (delayMs < 0 || delayMs > 10000) {
+    if (!Number.isInteger(delayMs) || delayMs < 0 || delayMs > 10000) {
       return NextResponse.json(
-        { error: 'Delay must be between 0 and 10000 milliseconds' },
+        { error: 'Delay must be an integer between 0 and 10000 milliseconds' },
         { status: 400 }
       );
     }
+
+    const effectiveDelayMs = Math.min(delayMs, MAX_DELAY_MS);
 
     // Create Supabase client with service role key for admin access
     const supabase = await createClient();
@@ -147,7 +152,7 @@ export async function POST(request) {
 
       // Add delay between batches to respect rate limits
       if (i + batchSize < users.length) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        await new Promise((resolve) => setTimeout(resolve, effectiveDelayMs));
       }
     }
 
