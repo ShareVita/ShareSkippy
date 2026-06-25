@@ -143,7 +143,10 @@ async function processCodeExchangeAndProfileUpdate(
   // 5. Welcome Email
   if (isNewUser) {
     try {
-      await fetch(`${requestUrl.origin}/api/emails/send-welcome`, {
+      const trustedBaseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? 'http://localhost:3000';
+      const welcomeEmailUrl = new URL('/api/emails/send-welcome', trustedBaseUrl);
+
+      await fetch(welcomeEmailUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
