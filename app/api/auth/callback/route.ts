@@ -200,7 +200,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const safeError = sanitizeForLog(error);
     const safeErrorDescription = sanitizeForLog(errorDescription);
 
-    console.error('OAuth error:', safeError, safeErrorDescription);
+    // Avoid logging user-controlled OAuth values to prevent log injection.
+    console.error('OAuth error received during callback.');
     return NextResponse.redirect(
       new URL('/signin?error=' + encodeURIComponent(safeError), requestUrl.origin)
     );
