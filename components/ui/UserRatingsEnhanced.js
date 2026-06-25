@@ -8,11 +8,6 @@ export default function UserRatingsEnhanced({ userId, userRole }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!userId) return;
-    loadReviews();
-  }, [userId, loadReviews]);
-
   const loadReviews = useCallback(async () => {
     try {
       const supabase = createClient();
@@ -47,6 +42,11 @@ export default function UserRatingsEnhanced({ userId, userRole }) {
       setLoading(false);
     }
   }, [userId, userRole]);
+
+  useEffect(() => {
+    if (!userId) return;
+    loadReviews();
+  }, [userId, loadReviews]);
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (

@@ -266,7 +266,7 @@ export default function WelcomePage() {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap gap-3">
                       <button
-                        onClick={() => sendInterest(match.id, match.first_name)}
+                        onClick={() => sendInterest(match.id)}
                         disabled={sending[match.id] || sent[match.id]}
                         className={`px-5 py-2 rounded-lg font-medium transition-colors ${
                           sent[match.id]

@@ -772,7 +772,7 @@ export default function EditAvailability() {
               </div>
 
               {/* Error Message */}
-              {error && (
+              {typeof error === 'string' && error.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="text-red-600">{error}</p>
                 </div>

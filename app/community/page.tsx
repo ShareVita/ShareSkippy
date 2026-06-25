@@ -356,9 +356,7 @@ export default function CommunityPage() {
         console.error('Error hiding post:', error);
         alert(
           'Failed to hide post: ' +
-            (typeof error === 'object' && error !== null && 'message' in error
-              ? (error as { message?: string }).message || 'Unknown error'
-              : 'Unknown error')
+            ((error as { message?: string } | undefined)?.message || 'Unknown error')
         );
         return;
       }
