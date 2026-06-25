@@ -33,21 +33,18 @@ export default function Signup() {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error) {
-      let errorMessage = 'Sign-up failed. Please try again.';
-
-      switch (error) {
-        case 'session_exchange_failed':
-          errorMessage = 'Failed to establish session. Please try signing up again.';
-          break;
-        case 'no_session':
-          errorMessage = 'Session not created. Please try signing up again.';
-          break;
-        case 'unexpected_error':
-          errorMessage = 'An unexpected error occurred. Please try again.';
-          break;
-        default:
-          errorMessage = `Sign-up error: ${error}`;
-      }
+      const errorMessage = (() => {
+        switch (error) {
+          case 'session_exchange_failed':
+            return 'Failed to establish session. Please try signing up again.';
+          case 'no_session':
+            return 'Session not created. Please try signing up again.';
+          case 'unexpected_error':
+            return 'An unexpected error occurred. Please try again.';
+          default:
+            return `Sign-up error: ${error}`;
+        }
+      })();
 
       toast.error(errorMessage);
     }
