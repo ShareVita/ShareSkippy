@@ -101,9 +101,9 @@ export const sendEmail = async ({ to, subject, text, html, replyTo }) => {
 
   // Ensure we have both text and HTML versions for better deliverability
   if (!text && html) {
-    // Strip HTML tags for text version if not provided
+    // Strip HTML tag delimiters for text version if not provided
     text = html
-      .replaceAll(/<[^>]*>/g, '')
+      .replaceAll(/[<>]/g, '')
       .replaceAll(/\s+/g, ' ')
       .trim();
   }
