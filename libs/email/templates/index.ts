@@ -126,7 +126,7 @@ export async function loadEmailTemplate(
   } catch {
     // If text template doesn't exist, generate from HTML
     text = html
-      .replace(/<[^>]*>/g, '')
+      .replace(/[<>]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
   }
