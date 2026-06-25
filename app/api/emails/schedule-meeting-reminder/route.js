@@ -36,11 +36,11 @@ export async function POST(request) {
     await scheduleMeetingReminder({
       userId,
       meetingId,
-      meetingTitle: meetingTitle || meeting.title,
+      meetingTitle,
       startsAt: new Date(startsAt),
       payload: {
         meetingId,
-        title: meetingTitle || meeting.title,
+        title: meetingTitle,
         startsAt: new Date(startsAt).toISOString(),
       },
     });
