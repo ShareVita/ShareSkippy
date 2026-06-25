@@ -78,7 +78,16 @@ export async function PATCH(request, { params }) {
     let requestBody;
     try {
       requestBody = await request.json();
-      console.log('Request body:', requestBody);
+      const sanitizedRequestBodyForLog = (
+        (() => {
+          try {
+            return JSON.stringify(requestBody);
+          } catch {
+            return String(requestBody);
+          }
+        })()
+      ).replace(/[\r\n]/g, '');
+      console.log('Request body:', sanitizedRequestBodyForLog);
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
