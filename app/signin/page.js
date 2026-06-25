@@ -34,21 +34,14 @@ export default function Login() {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error) {
-      let errorMessage = 'Sign-in failed. Please try again.';
-
-      switch (error) {
-        case 'session_exchange_failed':
-          errorMessage = 'Failed to establish session. Please try signing in again.';
-          break;
-        case 'no_session':
-          errorMessage = 'Session not created. Please try signing in again.';
-          break;
-        case 'unexpected_error':
-          errorMessage = 'An unexpected error occurred. Please try again.';
-          break;
-        default:
-          errorMessage = `Sign-in error: ${error}`;
-      }
+      const errorMessage =
+        error === 'session_exchange_failed'
+          ? 'Failed to establish session. Please try signing in again.'
+          : error === 'no_session'
+          ? 'Session not created. Please try signing in again.'
+          : error === 'unexpected_error'
+          ? 'An unexpected error occurred. Please try again.'
+          : `Sign-in error: ${error}`;
 
       toast.error(errorMessage);
     }
