@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import config from '@/config';
 
 export interface EmailTemplate {
@@ -132,11 +133,53 @@ export async function loadEmailTemplate(
   }
 
   // Add default variables
-  const defaultVars = {
-    appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com',
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shareskippy.com';
+  const defaultVars: TemplateVariables = {
+    appUrl,
     supportEmail: config.resend.supportEmail,
     ...variables,
   };
+
+  // Generate unsubscribe URL.
+  // Set UNSUBSCRIBE_SECRET in .env.local to test signing tokens.
+  const normalizedAppUrl = String(appUrl).replace(/\/$/, '');
+  let unsubscribeUrl: string;
+
+  const secret = process.env.UNSUBSCRIBE_SECRET;
+  const userEmail = variables && variables.userEmail ? String(variables.userEmail) : undefined;
+
+  const base64Url = (buf: Buffer) =>
+    buf.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  if (secret && userEmail) {
+    // Token payload: { email, exp }
+    // Token lifetime, limits damage if leaked
+    const expiresInSeconds = 60 * 60 * 24 * 30; // 30 days
+    const payload = {
+      email: userEmail,
+      exp: Math.floor(Date.now() / 1000) + expiresInSeconds,
+    };
+
+    // Convert payload to JSON, then to Buffer, then to base64url
+    const payloadJson = JSON.stringify(payload);
+    const payloadB = Buffer.from(payloadJson, 'utf8');
+    const payloadB64 = base64Url(payloadB);
+
+    const hmac = crypto.createHmac('sha256', secret).update(payloadB64).digest();
+    const sigB64 = base64Url(hmac);
+
+    const token = `${payloadB64}.${sigB64}`;
+    unsubscribeUrl = `${normalizedAppUrl}/unsubscribe?t=${token}`;
+  } else if (userEmail) {
+    unsubscribeUrl = `${normalizedAppUrl}/unsubscribe?email=${encodeURIComponent(userEmail)}`;
+  } else {
+    unsubscribeUrl = `${normalizedAppUrl}/unsubscribe`;
+  }
+
+  // Only set if not explicitly provided by the caller
+  if (!('unsubscribeUrl' in defaultVars)) {
+    defaultVars.unsubscribeUrl = unsubscribeUrl;
+  }
 
   // Replace variables in templates
   const replaceVariables = (content: string, vars: TemplateVariables) => {
