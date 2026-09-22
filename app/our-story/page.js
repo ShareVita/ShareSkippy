@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LEGAL } from '@/lib/legal';
 import { getSEOTags } from '@/libs/seo';
 
 // Kaia Colban's canonical identity page. It carries the full Person entity with
@@ -259,9 +260,10 @@ export default function OurStoryPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Looking Forward</h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              We&apos;d like to grow and expand! To do so, I&apos;m looking for donations (501(c)(3)
-              pending) and more volunteers and interns to help out.
+              We&apos;d like to grow and expand! To do so, I&apos;m looking for donations and more
+              volunteers and interns to help out.
             </p>
+            <p>{LEGAL.getCurrentDisclosure()}</p>
             <p>
               If you&apos;d like to get involved, please email me at{' '}
               <a
