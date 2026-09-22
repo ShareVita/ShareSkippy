@@ -1,5 +1,13 @@
 import Link from 'next/link';
 import { LEGAL } from '@/lib/legal';
+import { getSEOTags } from '@/libs/seo';
+
+export const metadata = getSEOTags({
+  title: 'Community Guidelines | ShareSkippy',
+  description:
+    'The rules that keep ShareSkippy neighborly: how members treat each other, what is not allowed, and how the community is moderated.',
+  canonicalUrlRelative: '/community-guidelines',
+});
 
 export default function CommunityGuidelines() {
   return (

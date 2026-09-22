@@ -1,5 +1,13 @@
 import Link from 'next/link';
 import { LEGAL } from '@/lib/legal';
+import { getSEOTags } from '@/libs/seo';
+
+export const metadata = getSEOTags({
+  title: 'Safety Guidelines | ShareSkippy',
+  description:
+    'How ShareSkippy keeps dog owners and dog lovers safe: profile transparency, meeting in public first, and what to do if something feels off.',
+  canonicalUrlRelative: '/safety',
+});
 
 export default function SafetyGuidelines() {
   return (
