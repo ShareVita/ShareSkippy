@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { getSEOTags } from '@/libs/seo';
 
+// Kaia Colban's canonical identity page. It carries the full Person entity with
+// the complete profile set; linking to it from here, in both the visible copy
+// and sameAs, is what ties this mention back to that one entity rather than
+// leaving it as an unconnected reference to a name.
+const CANONICAL_SITE = 'https://kaiacolban.com/';
+
 // Profiles Kaia Colban maintains. This array is the single source for both the
 // visible links in the "About Me" section below and the Person schema's sameAs,
 // so the two can never drift apart.
@@ -34,6 +40,10 @@ function PersonJsonLd() {
           '@context': 'https://schema.org',
           '@type': 'Person',
           name: 'Kaia Colban',
+          // Points at the canonical entity on kaiacolban.com, which holds the
+          // authoritative version of these facts.
+          '@id': `${CANONICAL_SITE}#kaia-colban`,
+          url: CANONICAL_SITE,
           jobTitle: 'Founder',
           alumniOf: {
             '@type': 'CollegeOrUniversity',
@@ -45,7 +55,7 @@ function PersonJsonLd() {
             url: 'https://www.shareskippy.com/',
           },
           mainEntityOfPage: 'https://www.shareskippy.com/our-story',
-          sameAs: PROFILES.map((p) => p.url),
+          sameAs: [CANONICAL_SITE, ...PROFILES.map((p) => p.url)],
         }),
       }}
     ></script>
@@ -229,6 +239,16 @@ export default function OurStoryPage() {
                   </a>
                 </span>
               ))}
+              .
+            </p>
+            <p>
+              More about me and what else I&apos;m building is at{' '}
+              <a
+                href={CANONICAL_SITE}
+                className="text-blue-600 hover:text-blue-700 font-semibold underline"
+              >
+                kaiacolban.com
+              </a>
               .
             </p>
           </div>
