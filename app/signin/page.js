@@ -38,10 +38,10 @@ export default function Login() {
         error === 'session_exchange_failed'
           ? 'Failed to establish session. Please try signing in again.'
           : error === 'no_session'
-          ? 'Session not created. Please try signing in again.'
-          : error === 'unexpected_error'
-          ? 'An unexpected error occurred. Please try again.'
-          : `Sign-in error: ${error}`;
+            ? 'Session not created. Please try signing in again.'
+            : error === 'unexpected_error'
+              ? 'An unexpected error occurred. Please try again.'
+              : `Sign-in error: ${error}`;
 
       toast.error(errorMessage);
     }

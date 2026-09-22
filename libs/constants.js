@@ -42,31 +42,6 @@ export const SOCIAL_ICONS = {
   },
 };
 
-export const SAMPLE_TESTIMONIALS = [
-  {
-    username: 'marclou',
-    name: 'Marc Lou',
-    text: 'Really easy to use. The tutorials are really useful and explains how everything works. Hope to ship my next project really fast!',
-    type: 'twitter',
-    link: 'https://twitter.com/marc_louvion',
-    img: 'https://pbs.twimg.com/profile_images/1514863683574599681/9k7PqDTA_400x400.jpg',
-  },
-  {
-    username: 'the_mcnaveen',
-    name: 'Naveen',
-    text: 'Setting up everything from the ground up is a really hard, and time consuming process. What you pay for will save your time for sure.',
-    type: 'twitter',
-    link: 'https://twitter.com/the_mcnaveen',
-  },
-  {
-    username: 'wahab',
-    name: 'Wahab Shaikh',
-    text: 'Easily saves 15+ hrs for me setting up trivial stuff. Now, I can directly focus on shipping features rather than hours of setting up the same technologies from scratch. Feels like a super power! :D',
-    type: 'productHunt',
-    link: 'https://www.producthunt.com/products/shipfast-2/reviews?review=667971',
-  },
-];
-
 export const APP_CONFIG = {
   name: 'ShareSkippy',
   description: 'Connect dog owners with trusted dog sitters in your community',

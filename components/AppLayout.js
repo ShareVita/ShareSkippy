@@ -34,23 +34,19 @@ const AppLayout = ({ children }) => {
     setSelectedReview(null);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full bg-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen w-full bg-white flex flex-col">
-      {/* Show appropriate header based on authentication status */}
+      {/* Show appropriate header based on authentication status.
+          While auth is still resolving we render the logged-out Header rather
+          than blocking the whole tree: returning a "Loading..." placeholder here
+          stripped {children} out of the server-rendered HTML, so crawlers saw an
+          empty page on every route. Only the auth-dependent chrome waits. */}
       {!isAuthPage && (user ? <LoggedInNav /> : <Header />)}
 
       {/* Main content */}
       <main className="flex-1 w-full bg-white">
         {/* Show review banner for logged-in users */}
-        {user && !isAuthPage && (
+        {!loading && user && !isAuthPage && (
           <div className="container mx-auto px-4 pt-4">
             <ReviewBanner onReviewClick={handleReviewClick} />
           </div>

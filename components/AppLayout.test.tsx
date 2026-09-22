@@ -52,15 +52,32 @@ describe('AppLayout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the loading state', () => {
+  // Page content must never be withheld while auth resolves. This layout is
+  // server-rendered, so gating the whole tree on `loading` shipped an empty
+  // document to crawlers on every route. Only auth-dependent chrome may wait.
+  it('renders children while auth is still loading', () => {
     mockUseUser.mockReturnValue({ loading: true, user: null });
     mockUsePathname.mockReturnValue('/');
 
     render(<AppLayout>Test Children</AppLayout>);
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-header')).not.toBeInTheDocument();
-    expect(screen.queryByText('Test Children')).not.toBeInTheDocument();
+    expect(screen.getByText('Test Children')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-footer')).toBeInTheDocument();
+    // Logged-out header is the safe default until we know who the user is.
+    expect(screen.getByTestId('mock-header')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-logged-in-nav')).not.toBeInTheDocument();
+    // Auth-dependent chrome stays hidden until loading resolves.
+    expect(screen.queryByTestId('mock-review-banner')).not.toBeInTheDocument();
+  });
+
+  it('does not render the review banner while auth is loading even with a user', () => {
+    mockUseUser.mockReturnValue({ loading: true, user: mockUser });
+    mockUsePathname.mockReturnValue('/');
+
+    render(<AppLayout>Test Children</AppLayout>);
+
+    expect(screen.getByText('Test Children')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-review-banner')).not.toBeInTheDocument();
   });
 
   it('renders correctly for a logged-out user on a non-auth page', () => {
