@@ -5,7 +5,7 @@ import { LEGAL } from '@/lib/legal';
 // It prefills data with default title/description/OG, etc.. and you can cusotmize it for each page.
 // It's already added in the root layout.js so you don't have to add it to every pages
 // But I recommend to set the canonical URL for each page (export const metadata = getSEOTags({canonicalUrlRelative: "/"});)
-// See https://shipfa.st/docs/features/seo
+
 export const getSEOTags = ({
   title,
   description,
@@ -22,7 +22,7 @@ export const getSEOTags = ({
     // some keywords separated by commas. by default it will be your app name
     keywords: keywords || [config.appName],
     applicationName: config.appName,
-    // set a base URL prefix for other fields that require a fully qualified URL (.e.g og:image: og:image: 'https://yourdomain.com/share.png' => '/share.png')
+    // set a base URL prefix for other fields that require a fully qualified URL (.e.g og:image: og:image: 'https://www.shareskippy.com/share.png' => '/share.png')
     metadataBase: new URL(
       process.env.NODE_ENV === 'development'
         ? `http://localhost:3000/`
@@ -70,7 +70,7 @@ export const getSEOTags = ({
 // You don't have to use this component, but it increase your chances of having a rich snippet on Google.
 // I recommend this one below to your /page.js for software apps: It tells Google your AppName is a Software, and it has a rating of 4.8/5 from 12 reviews.
 // Fill the fields with your own data
-// See https://shipfa.st/docs/features/seo
+
 export const renderSchemaTags = () => {
   return (
     <script

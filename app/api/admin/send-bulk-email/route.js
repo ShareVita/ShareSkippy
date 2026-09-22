@@ -50,7 +50,10 @@ export async function POST(request) {
 
     // Validate batch size and delay
     if (!Number.isInteger(batchSize) || batchSize < 1 || batchSize > MAX_BATCH_SIZE) {
-      return NextResponse.json({ error: `Batch size must be an integer between 1 and ${MAX_BATCH_SIZE}` }, { status: 400 });
+      return NextResponse.json(
+        { error: `Batch size must be an integer between 1 and ${MAX_BATCH_SIZE}` },
+        { status: 400 }
+      );
     }
 
     if (!Number.isInteger(delayMs) || delayMs < 0 || delayMs > 10000) {

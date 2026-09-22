@@ -7,6 +7,7 @@ import { getSEOTags } from '@/libs/seo';
 const PROFILES = [
   { label: 'substack.com/@getmekaiac', url: 'https://substack.com/@getmekaiac' },
   { label: 'LinkedIn', url: 'https://www.linkedin.com/in/kaia-colban-13a415a2/' },
+  { label: 'X', url: 'https://x.com/kaia_colban' },
   { label: 'Indie Hackers', url: 'https://www.indiehackers.com/KaiaColban' },
 ];
 
@@ -215,9 +216,9 @@ export default function OurStoryPage() {
             </p>
             <p>
               You can also find me on{' '}
-              {PROFILES.slice(1).map((profile, i) => (
+              {PROFILES.slice(1).map((profile, i, list) => (
                 <span key={profile.url}>
-                  {i > 0 && ' and '}
+                  {i > 0 && (i === list.length - 1 ? ', and ' : ', ')}
                   <a
                     href={profile.url}
                     target="_blank"
