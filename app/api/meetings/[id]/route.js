@@ -78,15 +78,13 @@ export async function PATCH(request, { params }) {
     let requestBody;
     try {
       requestBody = await request.json();
-      const sanitizedRequestBodyForLog = (
-        (() => {
-          try {
-            return JSON.stringify(requestBody);
-          } catch {
-            return String(requestBody);
-          }
-        })()
-      ).replace(/[\r\n]/g, '');
+      const sanitizedRequestBodyForLog = (() => {
+        try {
+          return JSON.stringify(requestBody);
+        } catch {
+          return String(requestBody);
+        }
+      })().replace(/[\r\n]/g, '');
       console.log('Request body:', sanitizedRequestBodyForLog);
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);

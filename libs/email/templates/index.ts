@@ -125,10 +125,7 @@ export async function loadEmailTemplate(
     text = fs.readFileSync(textPath, 'utf8');
   } catch {
     // If text template doesn't exist, generate from HTML
-    text = html
-      .replace(/[<>]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+    text = html.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim();
   }
 
   // Add default variables

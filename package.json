@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "next-sitemap",
     "start": "next start",
     "lint:js": "eslint .",
     "lint:css": "stylelint \"**/*.css\" --ignore-path .gitignore",
@@ -87,7 +86,6 @@
     "jiti": "^2.7.0",
     "knip": "^5.82.1",
     "lint-staged": "^16.2.6",
-    "next-sitemap": "^4.2.3",
     "postcss": "^8.5.15",
     "prettier": "^3.8.4",
     "stylelint": "^16.26.1",

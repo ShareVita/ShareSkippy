@@ -1,6 +1,20 @@
-'use client';
-
 import Link from 'next/link';
+import { getSEOTags } from '@/libs/seo';
+
+// This page is entirely static copy: no hooks, no event handlers. It was marked
+// 'use client' for no reason, which also made a `metadata` export impossible.
+export const metadata = getSEOTags({
+  title: 'Our Story: How Kaia Colban Built ShareSkippy',
+  description:
+    'How a friend in need and 40 strangers on a local Facebook group turned into ShareSkippy, a free community for dog owners and dog lovers.',
+  keywords: ['ShareSkippy', 'our story', 'Kaia Colban', 'dog sharing', 'dog walking community'],
+  canonicalUrlRelative: '/our-story',
+  openGraph: {
+    title: 'Our Story: How Kaia Colban Built ShareSkippy',
+    description:
+      'How a simple act of kindness in Oakland became a free, community-driven way to connect dog owners with dog lovers.',
+  },
+});
 
 export default function OurStoryPage() {
   return (

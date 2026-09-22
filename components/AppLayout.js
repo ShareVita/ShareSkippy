@@ -10,7 +10,11 @@ import ReviewBanner from './ReviewBanner';
 import ReviewModal from './ReviewModal';
 
 const AppLayout = ({ children }) => {
-  const { user, loading } = useUser();
+  // NOTE: intentionally not gating this subtree on `loading`. Doing so made the
+  // server response for every route render only "Loading...", so crawlers saw no
+  // page content. `user` is null until auth resolves, which renders the same
+  // logged-out chrome the server would render anyway.
+  const { user } = useUser();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
   const pathname = usePathname();
@@ -33,14 +37,6 @@ const AppLayout = ({ children }) => {
     setIsReviewModalOpen(false);
     setSelectedReview(null);
   }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen w-full bg-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen w-full bg-white flex flex-col">
