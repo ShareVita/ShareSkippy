@@ -1,10 +1,60 @@
-'use client';
-
 import Link from 'next/link';
+import { getSEOTags } from '@/libs/seo';
+
+// Profiles Kaia Colban maintains. This array is the single source for both the
+// visible links in the "About Me" section below and the Person schema's sameAs,
+// so the two can never drift apart.
+const PROFILES = [
+  { label: 'substack.com/@getmekaiac', url: 'https://substack.com/@getmekaiac' },
+  { label: 'LinkedIn', url: 'https://www.linkedin.com/in/kaia-colban-13a415a2/' },
+  { label: 'Indie Hackers', url: 'https://www.indiehackers.com/KaiaColban' },
+];
+
+export const metadata = getSEOTags({
+  title: 'Our Story: How Kaia Colban Built ShareSkippy',
+  description:
+    'Kaia Colban founded ShareSkippy, a free community-driven way to connect dog owners with dog lovers. How it began, why it stayed free, and how she taught herself to build it.',
+  keywords: ['Kaia Colban', 'ShareSkippy', 'ShareVita', 'community dog sharing'],
+  openGraph: {
+    title: 'Our Story: How Kaia Colban Built ShareSkippy',
+    description:
+      'Kaia Colban founded ShareSkippy, a free community-driven way to connect dog owners with dog lovers.',
+    url: 'https://www.shareskippy.com/our-story',
+  },
+  canonicalUrlRelative: '/our-story',
+});
+
+function PersonJsonLd() {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: 'Kaia Colban',
+          jobTitle: 'Founder',
+          alumniOf: {
+            '@type': 'CollegeOrUniversity',
+            name: 'Cornell University',
+          },
+          founder: {
+            '@type': 'Organization',
+            name: 'ShareSkippy',
+            url: 'https://www.shareskippy.com/',
+          },
+          mainEntityOfPage: 'https://www.shareskippy.com/our-story',
+          sameAs: PROFILES.map((p) => p.url),
+        }),
+      }}
+    ></script>
+  );
+}
 
 export default function OurStoryPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
+      <PersonJsonLd />
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -26,7 +76,7 @@ export default function OurStoryPage() {
           </h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              Hi, I&apos;m Kaia, the founder of ShareSkippy — a free, community-driven way to
+              Hi, I&apos;m Kaia Colban, the founder of ShareSkippy — a free, community-driven way to
               connect dog owners with dog lovers for walks, hikes, cuddles, and adventures.
             </p>
             <p>
@@ -142,26 +192,43 @@ export default function OurStoryPage() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">About Me</h2>
           <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
             <p>
-              I was born in Norway, grew up in San Diego, studied at Cornell, and now live in
-              Oakland, California — a city that feels like home in every sense. I spend most of my
-              free time walking in circles around the city, camping in the summer, and skiing in the
-              winter.
+              My name is Kaia Colban. I was born in Norway, grew up in San Diego, studied at
+              Cornell, and now live in Oakland, California — a city that feels like home in every
+              sense. I spend most of my free time walking in circles around the city and camping in
+              the summer.
             </p>
             <p>
               I write about building things — startups, communities, and sometimes myself — on my
               blog:{' '}
               <a
-                href="https://substack.com/@getmekaiac"
+                href={PROFILES[0].url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-700 font-semibold underline"
               >
-                substack.com/@getmekaiac
+                {PROFILES[0].label}
               </a>
             </p>
             <p>
               If you want to follow the journey of ShareSkippy, or just read honest thoughts on
               creating, failing, and figuring it out, that&apos;s where I share it all.
+            </p>
+            <p>
+              You can also find me on{' '}
+              {PROFILES.slice(1).map((profile, i) => (
+                <span key={profile.url}>
+                  {i > 0 && ' and '}
+                  <a
+                    href={profile.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-700 font-semibold underline"
+                  >
+                    {profile.label}
+                  </a>
+                </span>
+              ))}
+              .
             </p>
           </div>
         </section>
